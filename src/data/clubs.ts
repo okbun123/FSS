@@ -61,7 +61,7 @@ export const CLUBS: Club[] = [
   },
 ];
 
-export const STARTER_CLUBS = CLUBS;
+export const STARTER_CLUBS = CLUBS.filter((club) => club.reputation <= 58);
 
 export const DEFAULT_LEAGUE: League = {
   id: "fictional-premier-league",

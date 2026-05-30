@@ -1,7 +1,7 @@
-import type { PlayerProfile } from "../domain/player";
+import type { CareerState } from "../domain/types";
 
 export type AppScreen = "start" | "playerCreation" | "dashboard";
 
-export function getInitialScreen(player: PlayerProfile | null): AppScreen {
-  return player ? "dashboard" : "start";
+export function getInitialScreen(career: CareerState | null): AppScreen {
+  return career ? "dashboard" : "start";
 }

@@ -1,4 +1,29 @@
-export type Position = "goalkeeper" | "defender" | "midfielder" | "striker";
+export type Position = "ST" | "LW" | "RW" | "AM" | "CM" | "DM" | "FB" | "CB";
+
+export type PreferredFoot = "right" | "left" | "both";
+
+export type PlayStyle =
+  | "poacher"
+  | "targetForward"
+  | "insideForward"
+  | "wideCreator"
+  | "playmaker"
+  | "shadowStriker"
+  | "boxToBox"
+  | "deepPlaymaker"
+  | "ballWinner"
+  | "holdingMidfielder"
+  | "overlapper"
+  | "invertedFullback"
+  | "stopper"
+  | "ballPlayingDefender";
+
+export type Personality =
+  | "diligent"
+  | "ambitious"
+  | "star"
+  | "teamPlayer"
+  | "maverick";
 
 export interface TechnicalAttributes {
   finishing: number;
@@ -39,8 +64,12 @@ export interface Attributes {
 export interface Player {
   id: string;
   name: string;
+  nationality: string;
   age: number;
+  preferredFoot: PreferredFoot;
   position: Position;
+  playStyle: PlayStyle;
+  personality: Personality;
   clubId: string;
   attributes: Attributes;
 }

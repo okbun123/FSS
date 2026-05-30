@@ -1,18 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { CLUBS, DEFAULT_LEAGUE } from "../data/clubs";
+import { CLUBS, DEFAULT_LEAGUE, STARTER_CLUBS } from "../data/clubs";
 import { advanceWeek, createNewCareer, getCurrentWeek } from "../game/career";
+import type { CreateCareerInput } from "../game/career";
+
+const VALID_CAREER_INPUT: CreateCareerInput = {
+  name: "강민재",
+  nationality: "대한민국",
+  age: 18,
+  preferredFoot: "right",
+  position: "ST",
+  playStyle: "poacher",
+  personality: "diligent",
+  clubId: STARTER_CLUBS[0].id,
+};
 
 describe("createNewCareer", () => {
   it("creates an initial career state with a player, league, and season", () => {
-    const career = createNewCareer({
-      playerName: "강민재",
-      position: "striker",
-      clubId: CLUBS[0].id,
-    });
+    const career = createNewCareer(VALID_CAREER_INPUT);
 
     expect(career.saveVersion).toBe(1);
     expect(career.player.name).toBe("강민재");
-    expect(career.player.position).toBe("striker");
+    expect(career.player.position).toBe("ST");
+    expect(career.player.nationality).toBe("대한민국");
     expect(career.league.clubs).toHaveLength(8);
     expect(career.league.id).toBe(DEFAULT_LEAGUE.id);
     expect(career.season.matches).toHaveLength(56);
@@ -21,8 +30,10 @@ describe("createNewCareer", () => {
 
   it("exposes the current week and the player's scheduled match", () => {
     const career = createNewCareer({
-      playerName: "테스트 선수",
-      position: "midfielder",
+      ...VALID_CAREER_INPUT,
+      name: "테스트 선수",
+      position: "CM",
+      playStyle: "boxToBox",
       clubId: CLUBS[2].id,
     });
     const currentWeek = getCurrentWeek(career);
@@ -41,8 +52,9 @@ describe("createNewCareer", () => {
 describe("advanceWeek", () => {
   it("returns a new career state advanced by one week", () => {
     const career = createNewCareer({
-      playerName: "테스트 선수",
-      position: "defender",
+      ...VALID_CAREER_INPUT,
+      position: "CB",
+      playStyle: "stopper",
       clubId: CLUBS[1].id,
     });
     const advancedCareer = advanceWeek(career);
@@ -55,8 +67,9 @@ describe("advanceWeek", () => {
 
   it("marks the season complete after the final week", () => {
     const career = createNewCareer({
-      playerName: "테스트 선수",
-      position: "goalkeeper",
+      ...VALID_CAREER_INPUT,
+      position: "DM",
+      playStyle: "holdingMidfielder",
       clubId: CLUBS[3].id,
     });
     const finalWeekCareer = {

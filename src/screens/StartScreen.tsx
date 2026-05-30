@@ -34,7 +34,7 @@ export function StartScreen({
       <div className="start-grid" aria-label="게임 상태">
         <div>
           <strong>현재 단계</strong>
-          <span>선수 등록</span>
+          <span>선수 생성</span>
         </div>
         <div>
           <strong>진행 방식</strong>

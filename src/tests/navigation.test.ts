@@ -1,16 +1,25 @@
 import { describe, expect, it } from "vitest";
-import type { PlayerProfile } from "../domain/player";
-import { createPlayerProfile } from "../domain/player";
+import { STARTER_CLUBS } from "../data/clubs";
+import { createNewCareer } from "../game/career";
 import { getInitialScreen } from "../game/navigation";
 
 describe("getInitialScreen", () => {
-  it("starts on the start screen without a saved player", () => {
+  it("starts on the start screen without a saved career", () => {
     expect(getInitialScreen(null)).toBe("start");
   });
 
-  it("opens the dashboard when a saved player exists", () => {
-    const player: PlayerProfile = createPlayerProfile("테스트", "striker", "han-river-fc");
+  it("opens the dashboard when a saved career exists", () => {
+    const career = createNewCareer({
+      name: "테스트",
+      nationality: "대한민국",
+      age: 18,
+      preferredFoot: "right",
+      position: "ST",
+      playStyle: "poacher",
+      personality: "diligent",
+      clubId: STARTER_CLUBS[0].id,
+    });
 
-    expect(getInitialScreen(player)).toBe("dashboard");
+    expect(getInitialScreen(career)).toBe("dashboard");
   });
 });

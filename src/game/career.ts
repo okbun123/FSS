@@ -1,14 +1,10 @@
 import { DEFAULT_LEAGUE } from "../data/clubs";
 import { WEEKLY_ACTIONS } from "../data/weeklyActions";
-import { createPlayerProfile, type PlayerPosition } from "../domain/player";
+import { createPlayerProfile, type PlayerCreationInput } from "../domain/player";
 import type { CareerState, CareerWeek, Season, SeasonStats } from "../domain/types";
 import { generateSeasonSchedule } from "./schedule";
 
-export interface CreateCareerInput {
-  playerName: string;
-  position: PlayerPosition;
-  clubId: string;
-}
+export type CreateCareerInput = PlayerCreationInput;
 
 function createInitialSeasonStats(): SeasonStats {
   return {
@@ -41,7 +37,7 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
 
   return {
     saveVersion: 1,
-    player: createPlayerProfile(input.playerName, input.position, input.clubId),
+    player: createPlayerProfile(input),
     league: DEFAULT_LEAGUE,
     season,
     currentWeek: 1,

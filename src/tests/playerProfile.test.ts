@@ -1,19 +1,61 @@
 import { describe, expect, it } from "vitest";
-import { createPlayerProfile } from "../domain/player";
+import {
+  createPlayerProfile,
+  getPlayStylesForPosition,
+  isPlayStyleValidForPosition,
+  validatePlayerCreationInput,
+  type PlayerCreationInput,
+} from "../domain/player";
+
+const VALID_INPUT: PlayerCreationInput = {
+  name: "강민재",
+  nationality: "대한민국",
+  age: 18,
+  preferredFoot: "right",
+  position: "ST",
+  playStyle: "poacher",
+  personality: "diligent",
+  clubId: "greenhill-fc",
+};
 
 describe("createPlayerProfile", () => {
-  it("normalizes empty player names", () => {
-    const player = createPlayerProfile("   ", "midfielder", "lumina-city");
+  it("creates a player with creation choices and generated attributes", () => {
+    const player = createPlayerProfile(VALID_INPUT);
 
-    expect(player.name).toBe("이름 없는 선수");
+    expect(player.name).toBe("강민재");
+    expect(player.nationality).toBe("대한민국");
     expect(player.age).toBe(18);
-    expect(player.attributes.technical.passing).toBeGreaterThan(0);
+    expect(player.position).toBe("ST");
+    expect(player.playStyle).toBe("poacher");
+    expect(player.personality).toBe("diligent");
+    expect(player.attributes.technical.finishing).toBeGreaterThan(60);
   });
 
-  it("keeps the selected position and club", () => {
-    const player = createPlayerProfile("강민재", "defender", "coral-harbor");
+  it("keeps play style options tied to the selected position", () => {
+    expect(getPlayStylesForPosition("CB").map((option) => option.id)).toEqual([
+      "stopper",
+      "ballPlayingDefender",
+    ]);
+    expect(isPlayStyleValidForPosition("CB", "stopper")).toBe(true);
+    expect(isPlayStyleValidForPosition("CB", "poacher")).toBe(false);
+  });
+});
 
-    expect(player.position).toBe("defender");
-    expect(player.clubId).toBe("coral-harbor");
+describe("validatePlayerCreationInput", () => {
+  it("returns validation errors for invalid player creation input", () => {
+    const errors = validatePlayerCreationInput(
+      {
+        ...VALID_INPUT,
+        name: "A",
+        nationality: "",
+        age: 20,
+        position: "CB",
+        playStyle: "poacher",
+        clubId: "unknown-club",
+      },
+      ["greenhill-fc"],
+    );
+
+    expect(errors).toHaveLength(5);
   });
 });

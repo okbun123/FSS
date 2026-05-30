@@ -2,38 +2,38 @@ import { useMemo, useState } from "react";
 import { StartScreen } from "./screens/StartScreen";
 import { PlayerCreationScreen } from "./screens/PlayerCreationScreen";
 import { CareerDashboardScreen } from "./screens/CareerDashboardScreen";
-import type { PlayerProfile } from "./domain/player";
+import type { CareerState } from "./domain/types";
 import { type AppScreen, getInitialScreen } from "./game/navigation";
 import {
-  clearSavedPlayerProfile,
-  loadPlayerProfile,
-  savePlayerProfile,
-} from "./storage/playerProfileStorage";
+  clearSavedCareerState,
+  loadCareerState,
+  saveCareerState,
+} from "./storage/careerStorage";
 
 export function App() {
-  const initialPlayer = useMemo(() => loadPlayerProfile(), []);
-  const [player, setPlayer] = useState<PlayerProfile | null>(initialPlayer);
-  const [screen, setScreen] = useState<AppScreen>(getInitialScreen(initialPlayer));
+  const initialCareer = useMemo(() => loadCareerState(), []);
+  const [career, setCareer] = useState<CareerState | null>(initialCareer);
+  const [screen, setScreen] = useState<AppScreen>(getInitialScreen(initialCareer));
 
   const startNewCareer = () => {
     setScreen("playerCreation");
   };
 
   const continueCareer = () => {
-    if (player) {
+    if (career) {
       setScreen("dashboard");
     }
   };
 
-  const createPlayer = (createdPlayer: PlayerProfile) => {
-    savePlayerProfile(createdPlayer);
-    setPlayer(createdPlayer);
+  const createCareer = (createdCareer: CareerState) => {
+    saveCareerState(createdCareer);
+    setCareer(createdCareer);
     setScreen("dashboard");
   };
 
   const resetCareer = () => {
-    clearSavedPlayerProfile();
-    setPlayer(null);
+    clearSavedCareerState();
+    setCareer(null);
     setScreen("start");
   };
 
@@ -41,18 +41,18 @@ export function App() {
     return (
       <PlayerCreationScreen
         onBack={() => setScreen("start")}
-        onCreatePlayer={createPlayer}
+        onCreateCareer={createCareer}
       />
     );
   }
 
-  if (screen === "dashboard" && player) {
-    return <CareerDashboardScreen player={player} onResetCareer={resetCareer} />;
+  if (screen === "dashboard" && career) {
+    return <CareerDashboardScreen career={career} onResetCareer={resetCareer} />;
   }
 
   return (
     <StartScreen
-      hasSavedCareer={Boolean(player)}
+      hasSavedCareer={Boolean(career)}
       onContinueCareer={continueCareer}
       onStartNewCareer={startNewCareer}
     />
