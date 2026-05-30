@@ -82,7 +82,7 @@ h1 {
 
 .screen-body {
   display: grid;
-  gap: 24px;
+  gap: 28px;
 }
 
 .screen-actions,
@@ -133,6 +133,329 @@ h1 {
   border-radius: 8px;
   background: #fffaf0;
   padding: 16px;
+}
+
+.dashboard-section,
+.weekly-action-panel,
+.match-panel,
+.development-panel,
+.season-summary-panel,
+.career-history,
+.event-log {
+  display: grid;
+  gap: 16px;
+}
+
+.section-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: #17211c;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.weekly-action-panel,
+.match-panel,
+.development-panel,
+.season-summary-panel,
+.career-history {
+  border: 1px solid rgba(23, 33, 28, 0.11);
+  border-radius: 8px;
+  background: #fffaf0;
+  padding: 18px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-grid div {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 12px;
+}
+
+.summary-grid span {
+  color: #647267;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.summary-grid strong {
+  color: #17211c;
+  font-size: 1.18rem;
+  font-weight: 900;
+}
+
+.season-summary-panel h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.weekly-action-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.weekly-action-controls label {
+  display: grid;
+  gap: 8px;
+  color: #48554d;
+  font-weight: 800;
+}
+
+.weekly-action-controls select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(23, 33, 28, 0.18);
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #17211c;
+  padding: 0 14px;
+}
+
+.match-rating-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border-radius: 8px;
+  background: #17211c;
+  color: #fffdf8;
+  padding: 16px;
+}
+
+.match-rating-card span {
+  font-weight: 800;
+}
+
+.match-rating-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.match-stats,
+.rating-modifiers {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.match-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.match-stats div,
+.rating-modifiers div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 12px;
+}
+
+.match-stats dt,
+.match-stats dd,
+.rating-modifiers dt,
+.rating-modifiers dd {
+  margin: 0;
+}
+
+.match-stats dt,
+.rating-modifiers dt {
+  color: #647267;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.match-stats dd,
+.rating-modifiers dd {
+  color: #17211c;
+  font-weight: 900;
+}
+
+.modifier-positive dd {
+  color: #236a52;
+}
+
+.modifier-negative dd {
+  color: #a43d2c;
+}
+
+.development-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.development-grid article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 14px;
+}
+
+.development-grid h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.growth-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.growth-list div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.growth-list dt,
+.growth-list dd {
+  margin: 0;
+}
+
+.growth-list dt {
+  color: #647267;
+  font-weight: 800;
+}
+
+.growth-list dd {
+  color: #236a52;
+  font-weight: 900;
+}
+
+.empty-note {
+  margin: 0;
+  color: #647267;
+  font-weight: 700;
+}
+
+.match-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+}
+
+.match-detail-grid h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.moment-choice-list,
+.moment-result-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moment-choice-list li,
+.moment-result-list li {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 14px;
+}
+
+.moment-choice-list span,
+.moment-result-list span,
+.moment-result-list small {
+  color: #647267;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.moment-choice-list p,
+.moment-result-list p {
+  margin: 0;
+}
+
+.moment-choice-list select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(23, 33, 28, 0.18);
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #17211c;
+  padding: 0 12px;
+}
+
+.event-log ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-list li {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 14px;
+}
+
+.history-list span {
+  color: #647267;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.history-list strong {
+  color: #17211c;
+}
+
+.event-log li {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(23, 33, 28, 0.11);
+  border-radius: 8px;
+  background: #fffaf0;
+  padding: 14px;
+}
+
+.event-log span {
+  color: #647267;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.event-log strong {
+  color: #17211c;
+}
+
+.event-log p {
+  margin: 0;
+  color: #48554d;
 }
 
 .start-grid strong,
@@ -202,6 +525,34 @@ h1 {
 .error-list p {
   margin: 0;
   font-weight: 700;
+}
+
+.save-alert,
+.save-status {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-weight: 700;
+}
+
+.save-alert {
+  border: 1px solid rgba(164, 61, 44, 0.28);
+  background: #fff0ec;
+  color: #7d2d20;
+}
+
+.save-alert strong,
+.save-alert p {
+  margin: 0;
+}
+
+.save-alert p {
+  margin-top: 6px;
+}
+
+.save-status {
+  border: 1px solid rgba(35, 106, 82, 0.22);
+  background: #edf7f1;
+  color: #236a52;
 }
 
 .attribute-preview {
@@ -285,7 +636,12 @@ h1 {
   .start-grid,
   .dashboard-grid,
   .creation-layout,
-  .form-grid {
+  .form-grid,
+    .weekly-action-controls,
+    .match-stats,
+    .match-detail-grid,
+    .development-grid,
+    .summary-grid {
     grid-template-columns: 1fr;
   }
 

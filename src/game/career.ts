@@ -1,20 +1,11 @@
 import { DEFAULT_LEAGUE } from "../data/clubs";
 import { WEEKLY_ACTIONS } from "../data/weeklyActions";
 import { createPlayerProfile, type PlayerCreationInput } from "../domain/player";
-import type { CareerState, CareerWeek, Season, SeasonStats } from "../domain/types";
+import type { CareerState, CareerWeek, Season } from "../domain/types";
 import { generateSeasonSchedule } from "./schedule";
+import { createEmptySeasonStats, createSeasonBaseline } from "./season";
 
 export type CreateCareerInput = PlayerCreationInput;
-
-function createInitialSeasonStats(): SeasonStats {
-  return {
-    appearances: 0,
-    goals: 0,
-    assists: 0,
-    averageRating: 0,
-    keyMomentsWon: 0,
-  };
-}
 
 export function createNewCareer(input: CreateCareerInput): CareerState {
   const clubExists = DEFAULT_LEAGUE.clubs.some((club) => club.id === input.clubId);
@@ -34,10 +25,18 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
     matches,
     isComplete: false,
   };
+  const player = createPlayerProfile(input);
+  const initialCareerBase = {
+    season,
+    player,
+    coachTrust: 45,
+    fanSupport: 35,
+    reputation: 30,
+  };
 
   return {
     saveVersion: 1,
-    player: createPlayerProfile(input),
+    player,
     league: DEFAULT_LEAGUE,
     season,
     currentWeek: 1,
@@ -47,8 +46,22 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
     coachTrust: 45,
     fanSupport: 35,
     reputation: 30,
-    seasonStats: createInitialSeasonStats(),
+    tacticalFit: 42,
+    weeklyActionCompleted: false,
+    seasonStats: createEmptySeasonStats(),
     availableWeeklyActions: WEEKLY_ACTIONS,
+    eventLog: [
+      {
+        id: `season-${seasonNumber}-week-1-created`,
+        week: 1,
+        title: "커리어 시작",
+        description: "첫 프로 시즌이 시작되었습니다.",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    developmentLog: [],
+    seasonBaseline: createSeasonBaseline(initialCareerBase),
+    careerHistory: [],
   };
 }
 
@@ -82,5 +95,6 @@ export function advanceWeek(career: CareerState): CareerState {
       currentWeek: nextWeek,
       isComplete,
     },
+    weeklyActionCompleted: false,
   };
 }

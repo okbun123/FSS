@@ -71,6 +71,7 @@ export interface Player {
   playStyle: PlayStyle;
   personality: Personality;
   clubId: string;
+  potential: number;
   attributes: Attributes;
 }
 
@@ -96,6 +97,10 @@ export interface MatchResult {
   homeGoals: number;
   awayGoals: number;
   playerRating?: number;
+  playerMinutes?: number;
+  playerStats?: PlayerMatchStats;
+  ratingModifiers?: RatingModifier[];
+  keyMoments?: KeyMoment[];
 }
 
 export type MatchEventType =
@@ -133,6 +138,47 @@ export interface Match {
   result?: MatchResult;
 }
 
+export interface PlayerMatchStats {
+  minutesPlayed: number;
+  goals: number;
+  assists: number;
+  shots: number;
+  keyPasses: number;
+  tackles: number;
+  turnovers: number;
+}
+
+export interface RatingModifier {
+  label: string;
+  value: number;
+  kind: "positive" | "negative" | "neutral";
+}
+
+export interface KeyMomentChoice {
+  id: string;
+  label: string;
+  attributeFocus: AttributeFocus;
+  risk: "low" | "medium" | "high";
+}
+
+export interface KeyMomentOutcome {
+  successful: boolean;
+  chance: number;
+  roll: number;
+  description: string;
+  ratingModifier: number;
+  stats: Partial<Omit<PlayerMatchStats, "minutesPlayed">>;
+}
+
+export interface KeyMoment {
+  id: string;
+  minute: number;
+  situation: string;
+  choices: KeyMomentChoice[];
+  selectedChoiceId?: string;
+  outcome?: KeyMomentOutcome;
+}
+
 export type WeeklyActionType =
   | "teamTraining"
   | "individualTraining"
@@ -148,6 +194,76 @@ export interface WeeklyAction {
   conditionChange: number;
 }
 
+export type AttributeFocus =
+  | "technical.finishing"
+  | "technical.passing"
+  | "technical.dribbling"
+  | "technical.defending"
+  | "technical.firstTouch"
+  | "physical.pace"
+  | "physical.stamina"
+  | "physical.strength"
+  | "physical.agility"
+  | "mental.decisions"
+  | "mental.composure"
+  | "mental.workRate"
+  | "mental.teamwork";
+
+export interface CareerEventLogEntry {
+  id: string;
+  week: number;
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
+export type DevelopmentSource = "weeklyTraining" | "match";
+
+export interface AttributeGrowthEntry {
+  attribute: AttributeFocus;
+  label: string;
+  before: number;
+  after: number;
+  amount: number;
+}
+
+export interface DevelopmentReport {
+  id: string;
+  week: number;
+  source: DevelopmentSource;
+  title: string;
+  entries: AttributeGrowthEntry[];
+  createdAt: string;
+}
+
+export interface SeasonBaseline {
+  seasonNumber: number;
+  coachTrust: number;
+  fanSupport: number;
+  reputation: number;
+  attributes: Attributes;
+}
+
+export interface SeasonSummary {
+  seasonNumber: number;
+  clubId: string;
+  clubName: string;
+  leaguePosition: number;
+  appearances: number;
+  goals: number;
+  assists: number;
+  averageRating: number;
+  coachTrustChange: number;
+  fanSupportChange: number;
+  reputationChange: number;
+  attributeGrowthSummary: AttributeGrowthEntry[];
+}
+
+export interface CareerHistoryEntry extends SeasonSummary {
+  id: string;
+  completedAt: string;
+}
+
 export interface Season {
   id: string;
   number: number;
@@ -160,8 +276,13 @@ export interface Season {
 
 export interface SeasonStats {
   appearances: number;
+  minutesPlayed: number;
   goals: number;
   assists: number;
+  shots: number;
+  keyPasses: number;
+  tackles: number;
+  turnovers: number;
   averageRating: number;
   keyMomentsWon: number;
 }
@@ -178,8 +299,14 @@ export interface CareerState {
   coachTrust: number;
   fanSupport: number;
   reputation: number;
+  tacticalFit: number;
+  weeklyActionCompleted: boolean;
   seasonStats: SeasonStats;
   availableWeeklyActions: WeeklyAction[];
+  eventLog: CareerEventLogEntry[];
+  developmentLog: DevelopmentReport[];
+  seasonBaseline: SeasonBaseline;
+  careerHistory: CareerHistoryEntry[];
 }
 
 export interface CareerWeek {

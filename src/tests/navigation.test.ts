@@ -8,7 +8,7 @@ describe("getInitialScreen", () => {
     expect(getInitialScreen(null)).toBe("start");
   });
 
-  it("opens the dashboard when a saved career exists", () => {
+  it("still starts on the menu when a saved career exists", () => {
     const career = createNewCareer({
       name: "테스트",
       nationality: "대한민국",
@@ -20,6 +20,6 @@ describe("getInitialScreen", () => {
       clubId: STARTER_CLUBS[0].id,
     });
 
-    expect(getInitialScreen(career)).toBe("dashboard");
+    expect(getInitialScreen(career)).toBe("start");
   });
 });

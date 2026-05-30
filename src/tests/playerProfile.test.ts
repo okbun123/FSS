@@ -28,6 +28,7 @@ describe("createPlayerProfile", () => {
     expect(player.position).toBe("ST");
     expect(player.playStyle).toBe("poacher");
     expect(player.personality).toBe("diligent");
+    expect(player.potential).toBeGreaterThanOrEqual(80);
     expect(player.attributes.technical.finishing).toBeGreaterThan(60);
   });
 

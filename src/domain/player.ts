@@ -309,6 +309,19 @@ function createStablePlayerId(input: PlayerCreationInput): string {
   return `player-${hash.toString().padStart(6, "0")}`;
 }
 
+function calculatePotential(input: PlayerCreationInput): number {
+  const ageBonus = input.age === 16 ? 8 : input.age === 17 ? 5 : input.age === 18 ? 3 : 1;
+  const personalityBonus: Record<Personality, number> = {
+    diligent: 4,
+    ambitious: 5,
+    star: 3,
+    teamPlayer: 3,
+    maverick: 2,
+  };
+
+  return Math.min(95, 78 + ageBonus + personalityBonus[input.personality]);
+}
+
 export function createPlayerProfile(input: PlayerCreationInput): PlayerProfile {
   const normalizedInput = {
     ...input,
@@ -326,6 +339,7 @@ export function createPlayerProfile(input: PlayerCreationInput): PlayerProfile {
     playStyle: normalizedInput.playStyle,
     personality: normalizedInput.personality,
     clubId: normalizedInput.clubId,
+    potential: calculatePotential(normalizedInput),
     attributes: generateStartingAttributes(normalizedInput),
   };
 }
