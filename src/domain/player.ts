@@ -46,16 +46,24 @@ export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
 
 export const ATTRIBUTE_LABELS: Record<AttributeFocus, string> = {
   "technical.finishing": "결정력",
+  "technical.shooting": "슈팅",
   "technical.passing": "패스",
   "technical.dribbling": "드리블",
   "technical.defending": "수비",
   "technical.firstTouch": "퍼스트 터치",
+  "technical.crossing": "크로스",
+  "technical.tackling": "태클",
+  "technical.marking": "마킹",
+  "technical.heading": "헤더",
   "physical.pace": "스피드",
+  "physical.speed": "속도",
+  "physical.acceleration": "가속",
   "physical.stamina": "체력",
   "physical.strength": "힘",
   "physical.agility": "민첩성",
   "mental.decisions": "판단력",
   "mental.composure": "침착성",
+  "mental.concentration": "집중력",
   "mental.workRate": "활동량",
   "mental.teamwork": "팀워크",
   "career.professionalism": "프로 의식",
@@ -72,9 +80,20 @@ export const ATTRIBUTE_GROUP_LABELS: Record<keyof Attributes, string> = {
 };
 
 export const ATTRIBUTE_GROUP_KEYS: Record<keyof Attributes, string[]> = {
-  technical: ["finishing", "passing", "dribbling", "defending", "firstTouch"],
-  physical: ["pace", "stamina", "strength", "agility"],
-  mental: ["decisions", "composure", "workRate", "teamwork"],
+  technical: [
+    "finishing",
+    "shooting",
+    "passing",
+    "dribbling",
+    "defending",
+    "firstTouch",
+    "crossing",
+    "tackling",
+    "marking",
+    "heading",
+  ],
+  physical: ["pace", "speed", "acceleration", "stamina", "strength", "agility"],
+  mental: ["decisions", "composure", "concentration", "workRate", "teamwork"],
   career: ["professionalism", "adaptability", "leadership", "marketability"],
 };
 

@@ -190,7 +190,12 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
         </section>
       </form>
 
-      <AttributeTable attributes={roll.attributes} />
+      <AttributeTable
+        attributes={roll.attributes}
+        leftFoot={roll.leftFoot}
+        rightFoot={roll.rightFoot}
+        selectedPosition={selectedRecommendation.position}
+      />
     </ScreenShell>
   );
 }

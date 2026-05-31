@@ -1,7 +1,20 @@
-import type { Club, ClubTrainingFacilities, League, LeagueTier } from "../domain/types";
+import type {
+  Club,
+  ClubTrainingFacilities,
+  Competition,
+  Fixture,
+  League,
+  LeagueTier,
+} from "../domain/types";
+import { getLeagueRuleSet } from "../domain/leagueRules";
 
 export const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
 export const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
+export const K1_COMPETITION_ID = "competition-k1-fictional";
+export const K2_COMPETITION_ID = "competition-k2-fictional";
+
+export const K1_RULE_SET = getLeagueRuleSet(K1_LEAGUE_ID, 2027);
+export const K2_RULE_SET = getLeagueRuleSet(K2_LEAGUE_ID, 2027);
 
 function facilities(
   technicalTraining: number,
@@ -52,6 +65,7 @@ function club(input: ClubInput): Club {
       depth: input.depth,
       style: input.playStyle,
     },
+    seasonRecords: [],
   };
 }
 
@@ -594,6 +608,11 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     name: "코리아 프리미어 1",
     country: "대한민국",
     tier: K1_LEAGUE_ID,
+    level: 1,
+    competitionId: K1_COMPETITION_ID,
+    ruleSet: K1_RULE_SET,
+    seasonStartMonth: 1,
+    seasonEndMonth: 12,
     clubs: K1_CLUBS,
   },
   [K2_LEAGUE_ID]: {
@@ -601,6 +620,11 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     name: "코리아 챌린지 2",
     country: "대한민국",
     tier: K2_LEAGUE_ID,
+    level: 2,
+    competitionId: K2_COMPETITION_ID,
+    ruleSet: K2_RULE_SET,
+    seasonStartMonth: 1,
+    seasonEndMonth: 12,
     clubs: K2_CLUBS,
   },
 };
@@ -612,6 +636,61 @@ export const STARTER_CLUBS = [
 
 export function getAllClubs(): Club[] {
   return [...K1_CLUBS, ...K2_CLUBS];
+}
+
+export function getClubsById(): Record<string, Club> {
+  return Object.fromEntries(getAllClubs().map((club) => [club.id, club]));
+}
+
+export function createFictionalCompetitions(
+  seasonNumber: number,
+  fixtures: readonly Fixture[] = [],
+): Record<string, Competition> {
+  const leagueCompetitions = Object.fromEntries(
+    Object.values(FICTIONAL_LEAGUES).map((league) => [
+      league.competitionId,
+      {
+        id: league.competitionId,
+        name: league.name,
+        type: "league" as const,
+        country: league.country,
+        seasonNumber,
+        leagueIds: [league.id],
+        fixtureIds: fixtures
+          .filter((fixture) => fixture.competitionId === league.competitionId)
+          .map((fixture) => fixture.id),
+      },
+    ]),
+  );
+  const playoffCompetitionIds = [...new Set(
+    fixtures
+      .filter((fixture) => fixture.playoff && !(fixture.competitionId in leagueCompetitions))
+      .map((fixture) => fixture.competitionId),
+  )];
+  const playoffCompetitions = Object.fromEntries(
+    playoffCompetitionIds.map((competitionId) => {
+      const competitionFixtures = fixtures.filter((fixture) => fixture.competitionId === competitionId);
+      const leagueIds = [...new Set(competitionFixtures.map((fixture) => fixture.leagueId))];
+
+      return [
+        competitionId,
+        {
+          id: competitionId,
+          name: "승강 플레이오프",
+          type: "playoff" as const,
+          country: FICTIONAL_LEAGUES[K1_LEAGUE_ID].country,
+          seasonNumber,
+          leagueIds,
+          fixtureIds: competitionFixtures.map((fixture) => fixture.id),
+        },
+      ];
+    }),
+  );
+
+  return {
+    ...leagueCompetitions,
+    ...playoffCompetitions,
+  };
 }
 
 export function getClubById(clubId: string): Club | undefined {

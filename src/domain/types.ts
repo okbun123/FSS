@@ -13,6 +13,392 @@ export type SquadRole = "prospect" | "rotation" | "regular" | "keyPlayer";
 
 export type LeagueTier = "k1_fictional" | "k2_fictional";
 
+export type IsoDateString = string;
+
+export type CompetitionType = "league" | "cup" | "playoff";
+
+export interface GameDate {
+  iso: IsoDateString;
+  seasonNumber: number;
+  year: number;
+  month: number;
+  day: number;
+  weekNumber: number;
+}
+
+export type WeekTurnStatus = "upcoming" | "active" | "completed";
+
+export interface WeekTurn {
+  id: string;
+  seasonNumber: number;
+  weekNumber: number;
+  startDate: IsoDateString;
+  endDate: IsoDateString;
+  fixtureIds: string[];
+  status: WeekTurnStatus;
+}
+
+export type MatchPhase =
+  | "PRE_MATCH"
+  | "FIRST_HALF"
+  | "HALF_TIME"
+  | "SECOND_HALF"
+  | "FULL_TIME"
+  | "EXTRA_TIME_FIRST_HALF"
+  | "EXTRA_TIME_HALF_TIME"
+  | "EXTRA_TIME_SECOND_HALF"
+  | "EXTRA_TIME_FULL_TIME"
+  | "PENALTY_SHOOTOUT"
+  | "FINISHED";
+
+export type MatchEventType =
+  | "kickoff"
+  | "goal"
+  | "ownGoal"
+  | "assist"
+  | "substitution"
+  | "substitutionIn"
+  | "substitutionOut"
+  | "yellowCard"
+  | "secondYellowRed"
+  | "straightRed"
+  | "redCard"
+  | "injury"
+  | "penaltyAwarded"
+  | "penaltyScored"
+  | "penaltyMissed"
+  | "halfTime"
+  | "extraTimeStart"
+  | "extraTimeEnd"
+  | "shootoutKick"
+  | "fullTime";
+
+export type MatchPlayerStatus =
+  | "available"
+  | "onPitch"
+  | "substituted"
+  | "sentOff"
+  | "injured";
+
+export interface MatchPlayer {
+  playerId: string;
+  name: string;
+  position: Position;
+  squadNumber?: number;
+  isUserPlayer?: boolean;
+  condition: number;
+  rating?: number;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCard: boolean;
+  injured?: boolean;
+  status?: MatchPlayerStatus;
+  minutesPlayed: number;
+}
+
+export interface MatchLineup {
+  clubId: string;
+  formation: string;
+  starters: MatchPlayer[];
+  substitutes: MatchPlayer[];
+}
+
+export interface MatchEvent {
+  id: string;
+  matchId: string;
+  minute: number;
+  stoppageMinute?: number;
+  phase: MatchPhase;
+  type: MatchEventType;
+  clubId?: string;
+  playerId?: string;
+  relatedPlayerId?: string;
+  playerName?: string;
+  relatedPlayerName?: string;
+  teamName?: string;
+  scoreAfter?: {
+    homeGoals: number;
+    awayGoals: number;
+  };
+  shootoutScoreAfter?: {
+    homeGoals: number;
+    awayGoals: number;
+  };
+  shootoutKickResult?: "scored" | "missed";
+  description: string;
+  pausesSimulation: boolean;
+}
+
+export type MatchStateStatus = "notStarted" | "inProgress" | "paused" | "completed";
+
+export interface MatchState {
+  status: MatchStateStatus;
+  phase: MatchPhase;
+  minute: number;
+  homeGoals: number;
+  awayGoals: number;
+  isPaused: boolean;
+  pauseReason?: MatchEventType;
+  lastEventId?: string;
+  nextEventIndex: number;
+  requiresExtraTime?: boolean;
+  requiresPenaltyShootout?: boolean;
+  winnerClubId?: string;
+  aggregateHomeGoalsBeforeMatch?: number;
+  aggregateAwayGoalsBeforeMatch?: number;
+  shootout?: PenaltyShootoutState;
+}
+
+export interface PenaltyShootoutKick {
+  id: string;
+  round: number;
+  kickIndex: number;
+  team: "home" | "away";
+  clubId: string;
+  playerId?: string;
+  playerName?: string;
+  outcome: "scored" | "missed";
+  scoreAfter: {
+    homeGoals: number;
+    awayGoals: number;
+  };
+  decisive?: boolean;
+}
+
+export interface PenaltyShootoutState {
+  status: "notStarted" | "inProgress" | "completed";
+  currentKickIndex: number;
+  homeGoals: number;
+  awayGoals: number;
+  kicks: PenaltyShootoutKick[];
+  winnerClubId?: string;
+}
+
+export interface Match {
+  id: string;
+  fixtureId: string;
+  competitionId: string;
+  date: IsoDateString;
+  homeClubId: string;
+  awayClubId: string;
+  isKnockout?: boolean;
+  state: MatchState;
+  lineups: {
+    home: MatchLineup;
+    away: MatchLineup;
+  };
+  events: MatchEvent[];
+  scriptedEvents?: MatchEvent[];
+}
+
+export interface Competition {
+  id: string;
+  name: string;
+  type: CompetitionType;
+  country: string;
+  seasonNumber: number;
+  leagueIds: LeagueTier[];
+  fixtureIds: string[];
+}
+
+export type PlayoffRoundStatus = "pending" | "scheduled" | "completed";
+export type PlayoffTieFormat = "singleLeg" | "twoLegged";
+export type PlayoffStage =
+  | "promotionPlayoffSemifinals"
+  | "promotionPlayoffFinal"
+  | "promotionRelegationPlayoff";
+
+export interface PlayoffFixtureMetadata {
+  bracketId: string;
+  roundId: string;
+  tieId: string;
+  stage: PlayoffStage;
+  tieFormat: PlayoffTieFormat;
+  leg: number;
+  totalLegs: number;
+  higherSeedClubId?: string;
+  drawAdvantageClubId?: string;
+}
+
+export interface PlayoffTie {
+  id: string;
+  roundId: string;
+  name: string;
+  stage: PlayoffStage;
+  fixtureIds: string[];
+  clubIds: string[];
+  tieFormat: PlayoffTieFormat;
+  higherSeedClubId?: string;
+  drawAdvantageClubId?: string;
+  winnerClubId?: string;
+  loserClubId?: string;
+  status: PlayoffRoundStatus;
+}
+
+export interface PlayoffBracket {
+  id: string;
+  competitionId: string;
+  seasonNumber: number;
+  name: string;
+  entrantClubIds: string[];
+  rounds: Array<{
+    id: string;
+    name: string;
+    fixtureIds: string[];
+    winnerClubId?: string;
+    status: PlayoffRoundStatus;
+  }>;
+  ties?: PlayoffTie[];
+  winnerClubId?: string;
+}
+
+export interface LeaguePlayoffConfig {
+  id: string;
+  stage: PlayoffStage;
+  entrantPositionStart?: number;
+  entrantPositionEnd?: number;
+  entrantPositionsFromBottom?: number[];
+  bracketType?: "seededSemifinals" | "finalOnly";
+  tieFormat: PlayoffTieFormat;
+  higherSeedHosts?: boolean;
+  drawAdvantage?: "higherSeed" | "none";
+}
+
+export interface LeagueTransitionSpecialCase {
+  id: "militaryCivicTransition";
+  clubIds: string[];
+  ifBottomSkipsRelegationPlayoff: boolean;
+  bottomClubDirectRelegation: boolean;
+}
+
+export interface LeagueRuleSet {
+  id: string;
+  seasonStartYear: number;
+  leagueId: LeagueTier;
+  pointsForWin: number;
+  pointsForDraw: number;
+  pointsForLoss: number;
+  tableTiebreakers: Array<"points" | "goalDifference" | "goalsFor" | "wins" | "headToHead" | "clubName">;
+  roundRobinCycles: number;
+  directPromotionSlots: number;
+  directRelegationSlots: number;
+  promotionPlayoffConfig?: LeaguePlayoffConfig;
+  relegationPlayoffConfig?: LeaguePlayoffConfig;
+  transitionSpecialCase?: LeagueTransitionSpecialCase;
+  teamCountTargetByLeague: Partial<Record<LeagueTier, number>>;
+}
+
+export interface PromotionRelegationResult {
+  seasonNumber: number;
+  fromLeagueId: LeagueTier;
+  toLeagueId: LeagueTier;
+  promotedClubIds: string[];
+  relegatedClubIds: string[];
+  playoffBracket?: PlayoffBracket;
+  notes: string[];
+}
+
+export interface PromotionRelegationPlayoffResult {
+  id: string;
+  stage: PlayoffStage;
+  name: string;
+  fixtureIds: string[];
+  clubIds: string[];
+  winnerClubId?: string;
+  loserClubId?: string;
+  decidedBy?: FixtureResult["decidedBy"] | "higherSeed";
+}
+
+export interface ClubSeasonRecord {
+  seasonNumber: number;
+  leagueId: LeagueTier;
+  leaguePosition: number;
+  predictedFinish?: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  reputation: number;
+  budgetLevel: number;
+  youthOpportunity: number;
+  squadStrength: number;
+  leagueMovement?: "promoted" | "relegated" | "stayed";
+  cupResult?: string;
+  continentalResult?: string;
+}
+
+export type ClubEvolutionMetric =
+  | "reputation"
+  | "budgetLevel"
+  | "youthOpportunity"
+  | "squadStrength";
+
+export type ClubEvolutionValues = Pick<Club, ClubEvolutionMetric>;
+
+export interface ClubEvolutionCappedChange {
+  metric: ClubEvolutionMetric;
+  requestedDelta: number;
+  appliedDelta: number;
+  oldValue: number;
+  newValue: number;
+  min: number;
+  max: number;
+  maxIncrease: number;
+  maxDecrease: number;
+}
+
+export interface ClubEvolutionResult {
+  clubId: string;
+  seasonNumber: number;
+  oldValues: ClubEvolutionValues;
+  newValues: ClubEvolutionValues;
+  reasons: string[];
+  cappedChanges: ClubEvolutionCappedChange[];
+}
+
+export interface TeamPopupData {
+  club: Club;
+  league: League;
+  recentResults: RecentResult[];
+  seasonRecord?: ClubSeasonRecord;
+  nextFixture?: Fixture;
+}
+
+export type UnifiedFeedItemType =
+  | "urgent"
+  | "log"
+  | "transfer_offer"
+  | "contract_offer"
+  | "injury"
+  | "match"
+  | "development"
+  | "league"
+  | "system";
+
+export type UnifiedFeedPriority = "low" | "normal" | "high" | "critical";
+
+export type UnifiedFeedActionType =
+  | "open_transfer_offer"
+  | "review_contract"
+  | "view_match"
+  | "view_development";
+
+export interface UnifiedFeedAction {
+  type: UnifiedFeedActionType;
+  label: string;
+}
+
+export interface UnifiedFeedItem {
+  id: string;
+  type: UnifiedFeedItemType;
+  date: IsoDateString;
+  title: string;
+  body: string;
+  priority: UnifiedFeedPriority;
+  relatedEntityId?: string;
+  action?: UnifiedFeedAction;
+}
+
 export interface TechnicalAttributes {
   finishing: number;
   shooting?: number;
@@ -59,16 +445,24 @@ export interface Attributes {
 
 export type AttributeFocus =
   | "technical.finishing"
+  | "technical.shooting"
   | "technical.passing"
   | "technical.dribbling"
   | "technical.defending"
   | "technical.firstTouch"
+  | "technical.crossing"
+  | "technical.tackling"
+  | "technical.marking"
+  | "technical.heading"
   | "physical.pace"
+  | "physical.speed"
+  | "physical.acceleration"
   | "physical.stamina"
   | "physical.strength"
   | "physical.agility"
   | "mental.decisions"
   | "mental.composure"
+  | "mental.concentration"
   | "mental.workRate"
   | "mental.teamwork"
   | "career.professionalism"
@@ -156,6 +550,8 @@ export interface Club {
   /** @deprecated Use primaryColor for display text. */
   secondaryColor: string;
   squadSummary: SquadSummary;
+  seasonRecords: ClubSeasonRecord[];
+  lastEvolution?: ClubEvolutionResult;
 }
 
 export interface League {
@@ -163,14 +559,23 @@ export interface League {
   name: string;
   country: string;
   tier: LeagueTier;
+  level: number;
+  competitionId: string;
+  ruleSet: LeagueRuleSet;
+  seasonStartMonth: number;
+  seasonEndMonth: number;
   clubs: Club[];
 }
 
-export type FixtureStatus = "scheduled" | "played";
+export type FixtureStatus = "scheduled" | "inProgress" | "played" | "postponed";
 
 export interface FixtureResult {
   homeGoals: number;
   awayGoals: number;
+  winnerClubId?: string;
+  decidedBy?: "normalTime" | "extraTime" | "penalties";
+  homePenaltyGoals?: number;
+  awayPenaltyGoals?: number;
   playerAppeared?: boolean;
   playerMinutes?: number;
   playerRating?: number;
@@ -181,13 +586,18 @@ export interface FixtureResult {
 export interface Fixture {
   id: string;
   leagueId: LeagueTier;
+  competitionId: string;
   seasonNumber: number;
   round: number;
   month: number;
+  date: IsoDateString;
+  weekNumber: number;
   homeClubId: string;
   awayClubId: string;
   status: FixtureStatus;
+  matchId?: string;
   result?: FixtureResult;
+  playoff?: PlayoffFixtureMetadata;
 }
 
 export interface SeasonMonth {
@@ -211,6 +621,20 @@ export interface LeagueTableRow {
 }
 
 export interface PromotionRelegationStatus {
+  seasonNumber?: number;
+  seasonStartYear?: number;
+  ruleSetIds?: Partial<Record<LeagueTier, string>>;
+  stage?: PlayoffStage | "resolved";
+  isResolved?: boolean;
+  directPromotionClubIds?: string[];
+  directRelegationClubIds?: string[];
+  promotionPlayoffClubIds?: string[];
+  relegationPlayoffClubIds?: string[];
+  promotedClubIds?: string[];
+  relegatedClubIds?: string[];
+  playoffFixtureIds?: string[];
+  playoffResults?: PromotionRelegationPlayoffResult[];
+  playoffBracket?: PlayoffBracket;
   automaticRelegationClubId?: string;
   playoffClubId?: string;
   automaticPromotionClubId?: string;
@@ -285,8 +709,12 @@ export type CareerEventLogType =
   | MonthlyEventType
   | "career_start"
   | "monthly_summary"
+  | "weekly_summary"
   | "season_complete"
-  | "season_start";
+  | "season_start"
+  | "transfer_offer"
+  | "transfer_negotiation"
+  | "transfer_completed";
 
 export interface CareerEventLogEntry {
   id: string;
@@ -333,6 +761,29 @@ export interface SeasonStats {
   averageRating: number;
 }
 
+export interface ContractTerms {
+  salary: number;
+  contractYears: number;
+  signingBonus: number;
+  squadRole: SquadRole;
+  promisedPosition?: Position;
+  releaseClause?: number;
+  appearanceBonus?: number;
+  goalBonus?: number;
+}
+
+export type NegotiationStatus = "open" | "countered" | "accepted" | "rejected" | "expired" | "withdrawn";
+
+export interface NegotiationState {
+  status: NegotiationStatus;
+  round: number;
+  maxRounds: number;
+  currentTerms: ContractTerms;
+  playerCounterTerms?: ContractTerms;
+  lastResponse?: "waiting" | "accepted" | "rejected" | "improved" | "final";
+  updatedAt: IsoDateString;
+}
+
 export interface TransferOffer {
   id: string;
   month: number;
@@ -341,7 +792,46 @@ export interface TransferOffer {
   leagueId: LeagueTier;
   squadRole: SquadRole;
   salary: number;
+  transferFee?: number;
+  createdAt: IsoDateString;
+  expiresAt: IsoDateString;
+  contractTerms: ContractTerms;
+  negotiation: NegotiationState;
   description: string;
+}
+
+export type MatchOutcome = "win" | "draw" | "loss";
+
+export interface PlayerAppearanceLog {
+  id: string;
+  fixtureId: string;
+  matchId?: string;
+  date: IsoDateString;
+  seasonNumber: number;
+  competitionId: string;
+  clubId: string;
+  opponentClubId: string;
+  wasHome: boolean;
+  position: Position;
+  minutes: number;
+  goals: number;
+  assists: number;
+  rating: number;
+  outcome: MatchOutcome;
+}
+
+export interface RecentResult {
+  id: string;
+  fixtureId: string;
+  matchId?: string;
+  date: IsoDateString;
+  competitionId: string;
+  homeClubId: string;
+  awayClubId: string;
+  homeGoals: number;
+  awayGoals: number;
+  playerClubId?: string;
+  outcome?: MatchOutcome;
 }
 
 export interface CareerHistoryEntry {
@@ -361,13 +851,22 @@ export interface CareerHistoryEntry {
 
 export interface CareerState {
   saveVersion: number;
+  currentDate: IsoDateString;
+  currentWeekStartDate: IsoDateString;
+  activeMatchId?: string;
   player: Player;
   leagues: Record<LeagueTier, League>;
+  competitions: Record<string, Competition>;
+  clubs: Record<string, Club>;
+  fixtures: Fixture[];
+  weekTurns: WeekTurn[];
+  matches: Record<string, Match>;
   season: Season;
   condition: number;
   fatigue: number;
   form: number;
   reputation: number;
+  fanSupport: number;
   coachTrust: number;
   salary: number;
   contractYearsLeft: number;
@@ -375,7 +874,10 @@ export interface CareerState {
   injury: InjuryStatus;
   seasonStats: SeasonStats;
   careerHistory: CareerHistoryEntry[];
+  unifiedFeed: UnifiedFeedItem[];
   transferOffers: TransferOffer[];
+  playerAppearanceLogs: PlayerAppearanceLog[];
+  recentResults: RecentResult[];
   notices: MonthlyNotice[];
   currentEvent?: MonthlyEvent;
   eventLog: CareerEventLogEntry[];

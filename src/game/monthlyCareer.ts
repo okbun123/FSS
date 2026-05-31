@@ -2,7 +2,8 @@ import {
   FICTIONAL_LEAGUES,
   K1_LEAGUE_ID,
   K2_LEAGUE_ID,
-  getAllClubs,
+  createFictionalCompetitions,
+  getClubsById,
   getClubById,
   getLeagueName,
 } from "../data/fictionalLeagues";
@@ -15,22 +16,44 @@ import type {
   FixtureResult,
   League,
   LeagueTier,
+  Match,
   MonthlyNotice,
+  PlayerAppearanceLog,
+  RecentResult,
   Season,
   SeasonStats,
-  TransferOffer,
 } from "../domain/types";
+import {
+  advanceMatch,
+  createMatchForFixture,
+  fastForwardMatchToFinish,
+  isMatchReadyToFinalize,
+  type MatchAction,
+} from "../domain/matchStateMachine";
 import { createPlayerFromRoll, type PlayerRoll } from "./playerGeneration";
 import { calculateMarketValue, calculateOverall } from "./overall";
 import { generateMonthlyEvent, applyMonthlyEventChoice, getEventInjuryRisk } from "./monthlyEvents";
-import { generateLeagueFixtures, createSeasonMonths } from "./leagueSchedule";
+import {
+  generateLeagueFixtures,
+  createSeasonMonths,
+  createWeekTurns,
+  getDefaultLeagueSeasonStartDate,
+} from "./leagueSchedule";
 import {
   calculateLeagueTable,
-  calculatePromotionRelegationStatus,
   getClubLeaguePosition,
 } from "./leagueTable";
 import { applyMonthlyGrowth } from "./monthlyGrowth";
 import { createSeededRandom, type RandomSource } from "./random";
+import { createUnifiedFeedForCareer } from "../domain/feed";
+import { createTransferOfferForCareer } from "../domain/transfers";
+import {
+  getAggregateScoreBeforeFixture,
+  shouldUseKnockoutMatchState,
+} from "../domain/playoffs";
+import { progressPromotionRelegation } from "../domain/promotionRelegation";
+import { applySeasonRollover } from "../domain/seasonRollover";
+import { applyClubSeasonEvolution } from "../domain/clubEvolution";
 
 export interface CreateMonthlyCareerInput {
   name: string;
@@ -45,15 +68,24 @@ export interface AdvanceMonthInput {
   createdAt?: string;
 }
 
+export interface AdvanceWeekInput {
+  selectedChoiceId?: string;
+  createdAt?: string;
+}
+
 interface MonthSimulationResult {
   fixtures: Fixture[];
   statsDelta: SeasonStats;
   averageRatingFromMonth: number;
   playingTimeShare: number;
   notices: MonthlyNotice[];
+  appearanceLogs: PlayerAppearanceLog[];
+  recentResults: RecentResult[];
 }
 
 const EVENT_LOG_LIMIT = 80;
+const APPEARANCE_LOG_LIMIT = 160;
+const RECENT_RESULT_LIMIT = 16;
 
 type PlayerAppearanceResult = Required<
   Pick<
@@ -69,6 +101,41 @@ function clamp(value: number, min = 0, max = 100): number {
 function round(value: number, precision = 2): number {
   const scale = 10 ** precision;
   return Math.round(value * scale) / scale;
+}
+
+function formatSignedDelta(value: number): string {
+  return `${value >= 0 ? "+" : ""}${value}`;
+}
+
+function isoDate(year: number, month: number, day: number): string {
+  return new Date(Date.UTC(year, month - 1, day)).toISOString();
+}
+
+function addDays(dateIso: string, days: number): string {
+  const date = new Date(dateIso);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString();
+}
+
+function getSeasonStartDate(year: number): string {
+  return getDefaultLeagueSeasonStartDate(year);
+}
+
+function getMonthStartDate(year: number, month: number): string {
+  return isoDate(year, Math.min(Math.max(month, 1), 12), 1);
+}
+
+function getWeekStartDate(dateIso: string): string {
+  const date = new Date(dateIso);
+  const daysFromMonday = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - daysFromMonday);
+  return date.toISOString();
+}
+
+function isSameMonth(leftIso: string, rightIso: string): boolean {
+  const left = new Date(leftIso);
+  const right = new Date(rightIso);
+  return left.getUTCFullYear() === right.getUTCFullYear() && left.getUTCMonth() === right.getUTCMonth();
 }
 
 function emptySeasonStats(): SeasonStats {
@@ -112,6 +179,13 @@ function appendEventLog(career: CareerState, entry: CareerEventLogEntry): Career
   };
 }
 
+function withUnifiedFeed(career: CareerState): CareerState {
+  return {
+    ...career,
+    unifiedFeed: createUnifiedFeedForCareer(career),
+  };
+}
+
 function withSyncedPlayerMetrics(career: CareerState): CareerState {
   const selectedPosition = career.player.selectedPosition ?? career.player.position;
   const playerBase = {
@@ -143,21 +217,165 @@ function createTables(leagues: Record<LeagueTier, League>, fixtures: readonly Fi
   };
 }
 
+function sortFixturesByDate(fixtures: readonly Fixture[]): Fixture[] {
+  return [...fixtures].sort(
+    (left, right) =>
+      left.date.localeCompare(right.date) ||
+      left.round - right.round ||
+      left.id.localeCompare(right.id),
+  );
+}
+
+function replaceFixture(fixtures: readonly Fixture[], updatedFixture: Fixture): Fixture[] {
+  return fixtures.map((fixture) => (fixture.id === updatedFixture.id ? updatedFixture : fixture));
+}
+
+function withFixtures(career: CareerState, fixtures: Fixture[]): CareerState {
+  return {
+    ...career,
+    fixtures,
+    season: {
+      ...career.season,
+      fixtures,
+      tables: createTables(career.leagues, fixtures),
+    },
+    competitions: createFictionalCompetitions(career.season.number, fixtures),
+  };
+}
+
+function updateWeekTurnStatuses(weekTurns: readonly CareerState["weekTurns"][number][], currentDate: string) {
+  const currentWeekStart = getWeekStartDate(currentDate);
+
+  return weekTurns.map((weekTurn) => ({
+    ...weekTurn,
+    status:
+      weekTurn.startDate < currentWeekStart
+        ? "completed" as const
+        : weekTurn.startDate === currentWeekStart
+          ? "active" as const
+          : "upcoming" as const,
+  }));
+}
+
+function areFixturesComplete(fixtures: readonly Fixture[]): boolean {
+  return fixtures.every((fixture) => fixture.status === "played" || fixture.status === "postponed");
+}
+
+function areRegularSeasonFixturesComplete(fixtures: readonly Fixture[]): boolean {
+  const regularFixtures = fixtures.filter((fixture) => !fixture.playoff);
+
+  return regularFixtures.length > 0 && areFixturesComplete(regularFixtures);
+}
+
+function withPromotionRelegationProgress(career: CareerState): CareerState {
+  if (!areRegularSeasonFixturesComplete(career.fixtures)) {
+    return career;
+  }
+
+  const tables = createTables(career.leagues, career.fixtures);
+  const progress = progressPromotionRelegation({
+    seasonNumber: career.season.number,
+    seasonStartYear: career.season.year,
+    leagues: career.leagues,
+    tables,
+    fixtures: career.fixtures,
+    currentStatus: career.season.promotionRelegation,
+  });
+  const fixtures = progress.fixtures;
+  const weekTurns = progress.addedFixtureIds.length > 0
+    ? updateWeekTurnStatuses(createWeekTurns(fixtures), career.currentDate)
+    : career.weekTurns;
+
+  return {
+    ...career,
+    fixtures,
+    weekTurns,
+    competitions: createFictionalCompetitions(career.season.number, fixtures),
+    season: {
+      ...career.season,
+      fixtures,
+      months: createSeasonMonths(fixtures, career.season.totalMonths),
+      tables: createTables(career.leagues, fixtures),
+      promotionRelegation: progress.status,
+    },
+  };
+}
+
+function withSeasonCompletionState(career: CareerState): CareerState {
+  const progressed = withPromotionRelegationProgress(career);
+  const promotionRelegationResolved = progressed.season.promotionRelegation?.isResolved ?? true;
+  const isComplete = areFixturesComplete(progressed.fixtures) && promotionRelegationResolved;
+
+  return {
+    ...progressed,
+    season: {
+      ...progressed.season,
+      isComplete,
+    },
+  };
+}
+
+function isPlayerClubFixture(career: CareerState, fixture: Fixture): boolean {
+  const clubId = career.player.clubId;
+  return fixture.homeClubId === clubId || fixture.awayClubId === clubId;
+}
+
+function getWeekWindow(currentDate: string): { start: string; endExclusive: string; endInclusive: string } {
+  return {
+    start: currentDate,
+    endExclusive: addDays(currentDate, 7),
+    endInclusive: addDays(currentDate, 6),
+  };
+}
+
+export function getFixturesBetweenDates(
+  fixtures: readonly Fixture[],
+  startDate: string,
+  endDateInclusive: string,
+): Fixture[] {
+  const startTime = new Date(startDate).getTime();
+  const endExclusive = new Date(addDays(endDateInclusive, 1)).getTime();
+
+  return sortFixturesByDate(
+    fixtures.filter((fixture) => {
+      const fixtureTime = new Date(fixture.date).getTime();
+      return fixtureTime >= startTime && fixtureTime < endExclusive;
+    }),
+  );
+}
+
+export function getCurrentWeekFixtures(career: CareerState): Fixture[] {
+  const { start, endInclusive } = getWeekWindow(career.currentDate);
+  return getFixturesBetweenDates(career.fixtures, start, endInclusive);
+}
+
+export function getCurrentWeekPlayerFixtures(career: CareerState): Fixture[] {
+  return getCurrentWeekFixtures(career).filter((fixture) => isPlayerClubFixture(career, fixture));
+}
+
+function getPendingCurrentWeekFixtures(career: CareerState): Fixture[] {
+  return getCurrentWeekFixtures(career).filter(
+    (fixture) => fixture.status === "scheduled" || fixture.status === "inProgress",
+  );
+}
+
 function createSeason(
   leagues: Record<LeagueTier, League>,
   seasonNumber: number,
   year: number,
 ): Season {
+  const seasonStartDate = getSeasonStartDate(year);
+  const currentMonth = new Date(getWeekStartDate(seasonStartDate)).getUTCMonth() + 1;
   const fixtures = [
-    ...generateLeagueFixtures(leagues[K1_LEAGUE_ID], { seasonNumber, totalMonths: 12 }),
-    ...generateLeagueFixtures(leagues[K2_LEAGUE_ID], { seasonNumber, totalMonths: 12 }),
+    ...generateLeagueFixtures(leagues[K1_LEAGUE_ID], { seasonNumber, totalMonths: 12, seasonStartDate }),
+    ...generateLeagueFixtures(leagues[K2_LEAGUE_ID], { seasonNumber, totalMonths: 12, seasonStartDate }),
   ];
 
   return {
     id: `season-${seasonNumber}`,
     number: seasonNumber,
     year,
-    currentMonth: 1,
+    currentMonth,
     totalMonths: 12,
     months: createSeasonMonths(fixtures, 12),
     fixtures,
@@ -167,7 +385,7 @@ function createSeason(
 }
 
 function getCareerClub(career: CareerState): Club {
-  const club = getClubById(career.player.clubId);
+  const club = career.clubs[career.player.clubId] ?? getClubById(career.player.clubId);
 
   if (!club) {
     throw new Error(`Unknown club: ${career.player.clubId}`);
@@ -207,13 +425,98 @@ export function getNextPlayerFixture(career: CareerState): Fixture | undefined {
   );
 }
 
-function getClubStrength(clubId: string): number {
-  return getClubById(clubId)?.squadStrength ?? 58;
+function getClubStrength(career: CareerState, clubId: string): number {
+  return (career.clubs[clubId] ?? getClubById(clubId))?.squadStrength ?? 58;
 }
 
 function getExpectedGoals(strength: number, rng: RandomSource, homeAdvantage = 0): number {
   const raw = 0.25 + strength / 44 + homeAdvantage + rng() * 1.25;
   return Math.max(0, Math.min(5, Math.floor(raw)));
+}
+
+function getScoreWinner(fixture: Fixture, result: FixtureResult): string | undefined {
+  if (result.homeGoals > result.awayGoals) {
+    return fixture.homeClubId;
+  }
+
+  if (result.awayGoals > result.homeGoals) {
+    return fixture.awayClubId;
+  }
+
+  return undefined;
+}
+
+function completeSimulatedPlayoffResult(
+  career: CareerState,
+  fixture: Fixture,
+  result: FixtureResult,
+  rng: RandomSource,
+): FixtureResult {
+  if (!fixture.playoff) {
+    return result;
+  }
+
+  if (fixture.playoff.tieFormat === "singleLeg") {
+    return {
+      ...result,
+      winnerClubId: getScoreWinner(fixture, result) ?? fixture.playoff.drawAdvantageClubId,
+      decidedBy: "normalTime",
+    };
+  }
+
+  if (fixture.playoff.leg === 1) {
+    return {
+      ...result,
+      decidedBy: "normalTime",
+    };
+  }
+
+  const aggregate = getAggregateScoreBeforeFixture(career.fixtures, fixture);
+
+  if (!aggregate) {
+    return result;
+  }
+
+  const aggregateHomeGoals = aggregate.homeGoals + result.homeGoals;
+  const aggregateAwayGoals = aggregate.awayGoals + result.awayGoals;
+
+  if (aggregateHomeGoals > aggregateAwayGoals) {
+    return {
+      ...result,
+      winnerClubId: fixture.homeClubId,
+      decidedBy: "normalTime",
+    };
+  }
+
+  if (aggregateAwayGoals > aggregateHomeGoals) {
+    return {
+      ...result,
+      winnerClubId: fixture.awayClubId,
+      decidedBy: "normalTime",
+    };
+  }
+
+  if (rng() < 0.5) {
+    const homeWinsExtraTime = rng() < 0.5;
+
+    return {
+      ...result,
+      homeGoals: result.homeGoals + (homeWinsExtraTime ? 1 : 0),
+      awayGoals: result.awayGoals + (homeWinsExtraTime ? 0 : 1),
+      winnerClubId: homeWinsExtraTime ? fixture.homeClubId : fixture.awayClubId,
+      decidedBy: "extraTime",
+    };
+  }
+
+  const homeWinsPenalties = rng() < 0.5;
+
+  return {
+    ...result,
+    winnerClubId: homeWinsPenalties ? fixture.homeClubId : fixture.awayClubId,
+    decidedBy: "penalties",
+    homePenaltyGoals: homeWinsPenalties ? 5 : 4,
+    awayPenaltyGoals: homeWinsPenalties ? 4 : 5,
+  };
 }
 
 function getAppearanceChance(career: CareerState, club: Club): number {
@@ -282,12 +585,13 @@ function simulateFixture(career: CareerState, fixture: Fixture, rng: RandomSourc
     return fixture;
   }
 
-  const homeStrength = getClubStrength(fixture.homeClubId);
-  const awayStrength = getClubStrength(fixture.awayClubId);
-  const result: FixtureResult = {
+  const homeStrength = getClubStrength(career, fixture.homeClubId);
+  const awayStrength = getClubStrength(career, fixture.awayClubId);
+  const regularTimeResult: FixtureResult = {
     homeGoals: getExpectedGoals(homeStrength, rng, 0.14),
     awayGoals: getExpectedGoals(awayStrength, rng),
   };
+  let result = regularTimeResult;
   const club = getCareerClub(career);
 
   if (fixture.homeClubId === club.id || fixture.awayClubId === club.id) {
@@ -303,10 +607,56 @@ function simulateFixture(career: CareerState, fixture: Fixture, rng: RandomSourc
     }
   }
 
+  result = completeSimulatedPlayoffResult(career, fixture, result, rng);
+
   return {
     ...fixture,
     status: "played",
     result,
+  };
+}
+
+function createFixtureResultFromMatch(career: CareerState, fixture: Fixture, match: Match): FixtureResult {
+  const player = [
+    ...match.lineups.home.starters,
+    ...match.lineups.home.substitutes,
+    ...match.lineups.away.starters,
+    ...match.lineups.away.substitutes,
+  ].find((matchPlayer) => matchPlayer.playerId === career.player.id || matchPlayer.isUserPlayer);
+  const playerClub = getCareerClub(career);
+  const playerAppeared = Boolean(player && (fixture.homeClubId === playerClub.id || fixture.awayClubId === playerClub.id));
+  const playerMinutes = playerAppeared
+    ? Math.max(player?.minutesPlayed ?? 0, player?.status === "onPitch" ? Math.min(match.state.minute, 120) : 0)
+    : 0;
+  const playerGoals = player?.goals ?? 0;
+  const playerAssists = player?.assists ?? 0;
+  const drawAdvantageWinner =
+    fixture.playoff?.drawAdvantageClubId &&
+    match.state.homeGoals === match.state.awayGoals
+      ? fixture.playoff.drawAdvantageClubId
+      : undefined;
+  const winnerClubId = match.state.winnerClubId ?? drawAdvantageWinner;
+  const playerWon = winnerClubId === playerClub.id;
+  const playerRating = playerAppeared
+    ? round(clamp(6.2 + playerGoals * 0.8 + playerAssists * 0.5 + (playerWon ? 0.25 : 0), 4.8, 9.8), 1)
+    : 0;
+
+  return {
+    homeGoals: match.state.homeGoals,
+    awayGoals: match.state.awayGoals,
+    winnerClubId,
+    decidedBy: match.state.shootout?.winnerClubId
+      ? "penalties"
+      : match.state.minute > 90
+        ? "extraTime"
+        : "normalTime",
+    homePenaltyGoals: match.state.shootout?.homeGoals,
+    awayPenaltyGoals: match.state.shootout?.awayGoals,
+    playerAppeared,
+    playerMinutes,
+    playerRating,
+    playerGoals,
+    playerAssists,
   };
 }
 
@@ -321,6 +671,73 @@ function combineAverageRating(previous: SeasonStats, delta: SeasonStats): number
     (previous.averageRating * previous.appearances + delta.averageRating * delta.appearances) /
       totalApps,
   );
+}
+
+function getFixtureOutcome(fixture: Fixture, clubId: string): RecentResult["outcome"] {
+  if (!fixture.result) {
+    return undefined;
+  }
+
+  const goalsFor = fixture.homeClubId === clubId ? fixture.result.homeGoals : fixture.result.awayGoals;
+  const goalsAgainst = fixture.homeClubId === clubId ? fixture.result.awayGoals : fixture.result.homeGoals;
+
+  if (goalsFor > goalsAgainst) {
+    return "win";
+  }
+
+  if (goalsFor < goalsAgainst) {
+    return "loss";
+  }
+
+  return "draw";
+}
+
+function createRecentResult(fixture: Fixture, playerClubId: string): RecentResult | undefined {
+  if (!fixture.result) {
+    return undefined;
+  }
+
+  return {
+    id: `result-${fixture.id}`,
+    fixtureId: fixture.id,
+    matchId: fixture.matchId,
+    date: fixture.date,
+    competitionId: fixture.competitionId,
+    homeClubId: fixture.homeClubId,
+    awayClubId: fixture.awayClubId,
+    homeGoals: fixture.result.homeGoals,
+    awayGoals: fixture.result.awayGoals,
+    playerClubId,
+    outcome: getFixtureOutcome(fixture, playerClubId),
+  };
+}
+
+function createAppearanceLog(
+  career: CareerState,
+  fixture: Fixture,
+  club: Club,
+): PlayerAppearanceLog | undefined {
+  if (!fixture.result?.playerAppeared) {
+    return undefined;
+  }
+
+  return {
+    id: `appearance-${fixture.id}`,
+    fixtureId: fixture.id,
+    matchId: fixture.matchId,
+    date: fixture.date,
+    seasonNumber: fixture.seasonNumber,
+    competitionId: fixture.competitionId,
+    clubId: club.id,
+    opponentClubId: fixture.homeClubId === club.id ? fixture.awayClubId : fixture.homeClubId,
+    wasHome: fixture.homeClubId === club.id,
+    position: career.player.selectedPosition,
+    minutes: fixture.result.playerMinutes ?? 0,
+    goals: fixture.result.playerGoals ?? 0,
+    assists: fixture.result.playerAssists ?? 0,
+    rating: fixture.result.playerRating ?? 0,
+    outcome: getFixtureOutcome(fixture, club.id) ?? "draw",
+  };
 }
 
 function simulateCurrentMonth(career: CareerState): MonthSimulationResult {
@@ -366,13 +783,173 @@ function simulateCurrentMonth(career: CareerState): MonthSimulationResult {
     });
   }
 
+  const appearanceLogs = appearanceFixtures
+    .map((fixture) => createAppearanceLog(career, fixture, playerClub))
+    .filter((log): log is PlayerAppearanceLog => Boolean(log));
+  const recentResults = playerFixtures
+    .map((fixture) => createRecentResult(fixture, playerClub.id))
+    .filter((result): result is RecentResult => Boolean(result));
+
   return {
     fixtures: playedFixtures,
     statsDelta,
     averageRatingFromMonth: statsDelta.averageRating,
     playingTimeShare: playerFixtures.length > 0 ? statsDelta.minutesPlayed / (playerFixtures.length * 90) : 0,
     notices,
+    appearanceLogs,
+    recentResults,
   };
+}
+
+function summarizeCurrentWeek(career: CareerState): MonthSimulationResult {
+  const playerClub = getCareerClub(career);
+  const playerFixtures = getCurrentWeekPlayerFixtures(career).filter((fixture) => fixture.status === "played");
+  const appearanceFixtures = playerFixtures.filter((fixture) => fixture.result?.playerAppeared);
+  const ratingTotal = appearanceFixtures.reduce((total, fixture) => total + (fixture.result?.playerRating ?? 0), 0);
+  const statsDelta: SeasonStats = {
+    appearances: appearanceFixtures.length,
+    minutesPlayed: appearanceFixtures.reduce((total, fixture) => total + (fixture.result?.playerMinutes ?? 0), 0),
+    goals: appearanceFixtures.reduce((total, fixture) => total + (fixture.result?.playerGoals ?? 0), 0),
+    assists: appearanceFixtures.reduce((total, fixture) => total + (fixture.result?.playerAssists ?? 0), 0),
+    averageRating: appearanceFixtures.length > 0 ? round(ratingTotal / appearanceFixtures.length) : 0,
+  };
+  const weekNumber =
+    career.weekTurns.find((weekTurn) => weekTurn.startDate === career.currentWeekStartDate)?.weekNumber ?? 0;
+  const notices: MonthlyNotice[] = [];
+
+  if (appearanceFixtures.length > 0) {
+    notices.push({
+      id: `season-${career.season.number}-week-${weekNumber}-appearance`,
+      month: career.season.currentMonth,
+      title: "주간 출전 기록",
+      description: `${appearanceFixtures.length}경기에 출전해 ${statsDelta.goals}골 ${statsDelta.assists}도움을 기록했습니다.`,
+      tone: statsDelta.averageRating >= 7 ? "success" : "info",
+    });
+  } else if (playerFixtures.length > 0) {
+    notices.push({
+      id: `season-${career.season.number}-week-${weekNumber}-bench`,
+      month: career.season.currentMonth,
+      title: "출전 없음",
+      description: "이번 주 공식 경기 출전 기회를 얻지 못했습니다.",
+      tone: "warning",
+    });
+  }
+
+  const appearanceLogs = appearanceFixtures
+    .map((fixture) => createAppearanceLog(career, fixture, playerClub))
+    .filter((log): log is PlayerAppearanceLog => Boolean(log));
+  const recentResults = playerFixtures
+    .map((fixture) => createRecentResult(fixture, playerClub.id))
+    .filter((result): result is RecentResult => Boolean(result));
+
+  return {
+    fixtures: career.fixtures,
+    statsDelta,
+    averageRatingFromMonth: statsDelta.averageRating,
+    playingTimeShare: playerFixtures.length > 0 ? statsDelta.minutesPlayed / (playerFixtures.length * 90) : 0,
+    notices,
+    appearanceLogs,
+    recentResults,
+  };
+}
+
+function openMatchForFixture(career: CareerState, fixture: Fixture): CareerState {
+  const matchId = fixture.matchId ?? `match-${fixture.id}`;
+  const inProgressFixture: Fixture = {
+    ...fixture,
+    matchId,
+    status: "inProgress",
+  };
+  const competition = career.competitions[inProgressFixture.competitionId];
+  const aggregateScore = getAggregateScoreBeforeFixture(career.fixtures, inProgressFixture);
+  const isKnockout = inProgressFixture.playoff
+    ? shouldUseKnockoutMatchState(career.fixtures, inProgressFixture)
+    : competition?.type !== "league";
+  const match =
+    career.matches[matchId] ??
+    createMatchForFixture({
+      fixture: inProgressFixture,
+      homeClubName: getClubById(inProgressFixture.homeClubId)?.name,
+      awayClubName: getClubById(inProgressFixture.awayClubId)?.name,
+      player: career.player,
+      isKnockout,
+      aggregateScore,
+    });
+
+  return withFixtures(
+    {
+      ...career,
+      activeMatchId: matchId,
+      matches: {
+        ...career.matches,
+        [matchId]: match,
+      },
+    },
+    replaceFixture(career.fixtures, inProgressFixture),
+  );
+}
+
+function processCurrentWeekUntilPlayerFixture(
+  career: CareerState,
+  input: AdvanceWeekInput = {},
+): CareerState {
+  let workingCareer = career;
+
+  for (const fixture of getPendingCurrentWeekFixtures(workingCareer)) {
+    const currentFixture = workingCareer.fixtures.find((candidate) => candidate.id === fixture.id);
+
+    if (!currentFixture || currentFixture.status !== "scheduled") {
+      continue;
+    }
+
+    if (isPlayerClubFixture(workingCareer, currentFixture)) {
+      return openMatchForFixture(workingCareer, currentFixture);
+    }
+
+    const rng = createSeededRandom(`${workingCareer.player.id}-${currentFixture.id}-weekly-fixture`);
+    const playedFixture = simulateFixture(workingCareer, currentFixture, rng);
+    workingCareer = withFixtures(workingCareer, replaceFixture(workingCareer.fixtures, playedFixture));
+  }
+
+  return completeCurrentWeek(workingCareer, input);
+}
+
+function completeActiveMatchFromState(
+  career: CareerState,
+  match: Match,
+  activeFixture: Fixture,
+  input: AdvanceWeekInput = {},
+): CareerState {
+  const playedFixture: Fixture = {
+    ...activeFixture,
+    matchId: match.id,
+    status: "played",
+    result: createFixtureResultFromMatch(career, activeFixture, match),
+  };
+  const completedMatch: Match = {
+    ...match,
+    state: {
+      ...match.state,
+      status: "completed",
+      phase: "FINISHED",
+      isPaused: false,
+      pauseReason: undefined,
+      lastEventId: undefined,
+    },
+  };
+  const careerAfterMatch = withFixtures(
+    {
+      ...career,
+      activeMatchId: undefined,
+      matches: {
+        ...career.matches,
+        [completedMatch.id]: completedMatch,
+      },
+    },
+    replaceFixture(career.fixtures, playedFixture),
+  );
+
+  return processCurrentWeekUntilPlayerFixture(careerAfterMatch, input);
 }
 
 function updateInjury(career: CareerState, injuryRiskModifier: number, medicalSupport: number): CareerState {
@@ -431,38 +1008,126 @@ function updateInjury(career: CareerState, injuryRiskModifier: number, medicalSu
   };
 }
 
-function createTransferOffer(career: CareerState): TransferOffer | undefined {
-  const month = career.season.currentMonth;
-
-  if (![6, 12].includes(month) || career.reputation < 42) {
-    return undefined;
-  }
-
-  const currentClub = getCareerClub(career);
-  const candidates = getAllClubs()
-    .filter((club) => club.id !== currentClub.id)
-    .filter((club) => Math.abs(club.squadStrength - calculateOverall(career.player)) <= 12)
-    .sort((left, right) => right.reputation - left.reputation);
-  const target = candidates[0];
-
-  if (!target) {
-    return undefined;
-  }
-
-  return {
-    id: `season-${career.season.number}-month-${month}-offer-${target.id}`,
-    month,
-    clubId: target.id,
-    clubName: target.name,
-    leagueId: target.leagueId,
-    squadRole: target.squadStrength <= calculateOverall(career.player) ? "regular" : "rotation",
-    salary: Math.round((650 + career.reputation * 18 + calculateOverall(career.player) * 12) / 50) * 50,
-    description: `${target.name}이 다음 이적 시장에서 관심을 보이고 있습니다.`,
+function completeCurrentWeek(career: CareerState, input: AdvanceWeekInput = {}): CareerState {
+  const club = getCareerClub(career);
+  const eventRisk = getEventInjuryRisk(career.currentEvent, input.selectedChoiceId);
+  const careerAfterEvent = applyMonthlyEventChoice(career, career.currentEvent, input.selectedChoiceId);
+  const careerAfterLoggedEvent = careerAfterEvent.currentEvent?.selectedChoiceId
+    ? appendEventLog(
+        careerAfterEvent,
+        createEventLogEntry({
+          career,
+          type: careerAfterEvent.currentEvent.type,
+          title: careerAfterEvent.currentEvent.title,
+          description: careerAfterEvent.currentEvent.resolvedDescription ?? careerAfterEvent.currentEvent.description,
+          idSuffix: `${careerAfterEvent.currentEvent.type}-${careerAfterEvent.currentEvent.selectedChoiceId}`,
+          createdAt: input.createdAt,
+          month: careerAfterEvent.currentEvent.month,
+        }),
+      )
+    : careerAfterEvent;
+  const simulated = summarizeCurrentWeek(careerAfterLoggedEvent);
+  const stats: SeasonStats = {
+    appearances: careerAfterLoggedEvent.seasonStats.appearances + simulated.statsDelta.appearances,
+    minutesPlayed: careerAfterLoggedEvent.seasonStats.minutesPlayed + simulated.statsDelta.minutesPlayed,
+    goals: careerAfterLoggedEvent.seasonStats.goals + simulated.statsDelta.goals,
+    assists: careerAfterLoggedEvent.seasonStats.assists + simulated.statsDelta.assists,
+    averageRating: combineAverageRating(careerAfterLoggedEvent.seasonStats, simulated.statsDelta),
   };
+  const formChange = simulated.averageRatingFromMonth >= 7 ? 2 : simulated.averageRatingFromMonth > 0 ? 1 : -1;
+  const coachTrustChange =
+    simulated.statsDelta.appearances > 0 ? (simulated.averageRatingFromMonth >= 7 ? 2 : 1) : 0;
+  const fatigueChange = Math.round(simulated.playingTimeShare * 6) - Math.round(club.trainingFacilities.medicalSupport / 48);
+  const conditionChange = simulated.playingTimeShare > 0.75 ? -2 : 1;
+  const transferOffer = createTransferOfferForCareer(careerAfterLoggedEvent);
+  const transferOffers =
+    transferOffer && !careerAfterLoggedEvent.transferOffers.some((offer) => offer.id === transferOffer.id)
+      ? [...careerAfterLoggedEvent.transferOffers, transferOffer].slice(-8)
+      : careerAfterLoggedEvent.transferOffers;
+  const afterWeek: CareerState = {
+    ...careerAfterLoggedEvent,
+    seasonStats: stats,
+    form: clamp(careerAfterLoggedEvent.form + formChange),
+    coachTrust: clamp(careerAfterLoggedEvent.coachTrust + coachTrustChange),
+    reputation: clamp(
+      careerAfterLoggedEvent.reputation +
+        simulated.statsDelta.goals +
+        Math.round(simulated.statsDelta.assists * 0.5) +
+        (simulated.averageRatingFromMonth >= 7 ? 1 : 0),
+    ),
+    fatigue: clamp(careerAfterLoggedEvent.fatigue + fatigueChange),
+    condition: clamp(careerAfterLoggedEvent.condition + conditionChange),
+    transferOffers,
+    playerAppearanceLogs: [
+      ...careerAfterLoggedEvent.playerAppearanceLogs,
+      ...simulated.appearanceLogs,
+    ].slice(-APPEARANCE_LOG_LIMIT),
+    recentResults: [
+      ...simulated.recentResults,
+      ...careerAfterLoggedEvent.recentResults,
+    ].slice(0, RECENT_RESULT_LIMIT),
+    notices: [...careerAfterLoggedEvent.notices, ...simulated.notices].slice(-20),
+    activeMatchId: undefined,
+  };
+  const afterInjury = updateInjury(afterWeek, eventRisk * 0.35, club.trainingFacilities.medicalSupport);
+  const afterGrowth = applyMonthlyGrowth(afterInjury, club, {
+    month: career.season.currentMonth,
+    playingTimeShare: simulated.playingTimeShare,
+    createdAt: input.createdAt,
+  });
+  const latestGrowth = afterGrowth.monthlyDevelopmentLog.at(-1);
+  const growthCount = latestGrowth?.month === career.season.currentMonth ? latestGrowth.entries.length : 0;
+  const weekNumber =
+    career.weekTurns.find((weekTurn) => weekTurn.startDate === career.currentWeekStartDate)?.weekNumber ?? 0;
+  const afterGrowthLog = appendEventLog(
+    afterGrowth,
+    createEventLogEntry({
+      career,
+      type: "weekly_summary",
+      title: `${weekNumber}주차 진행 완료`,
+      description: `${simulated.statsDelta.appearances}경기 출전, ${simulated.statsDelta.goals}골 ${simulated.statsDelta.assists}도움. 성장 항목 ${growthCount}개가 반영되었습니다.`,
+      idSuffix: `week-${weekNumber}-summary`,
+      createdAt: input.createdAt,
+    }),
+  );
+  const nextDate = addDays(career.currentDate, 7);
+  const nextMonth = new Date(nextDate).getUTCMonth() + 1;
+  const nextCareer: CareerState = withSeasonCompletionState({
+    ...afterGrowthLog,
+    currentDate: nextDate,
+    currentWeekStartDate: getWeekStartDate(nextDate),
+    weekTurns: updateWeekTurnStatuses(afterGrowthLog.weekTurns, nextDate),
+    season: {
+      ...afterGrowthLog.season,
+      currentMonth: nextMonth,
+    },
+    currentEvent: undefined,
+  });
+
+  if (nextCareer.season.isComplete) {
+    return withUnifiedFeed(completeSeason(withSyncedPlayerMetrics(nextCareer)));
+  }
+
+  return withUnifiedFeed(
+    withSyncedPlayerMetrics({
+      ...nextCareer,
+      currentEvent: isSameMonth(career.currentDate, nextDate) ? undefined : generateMonthlyEvent(nextCareer),
+    }),
+  );
 }
 
 function completeSeason(career: CareerState): CareerState {
   const tables = createTables(career.leagues, career.season.fixtures);
+  const promotionRelegation = career.season.promotionRelegation?.isResolved
+    ? career.season.promotionRelegation
+    : progressPromotionRelegation({
+        seasonNumber: career.season.number,
+        seasonStartYear: career.season.year,
+        leagues: career.leagues,
+        tables,
+        fixtures: career.season.fixtures,
+        currentStatus: career.season.promotionRelegation,
+      }).status;
   const club = getCareerClub(career);
   const league = career.leagues[club.leagueId];
   const leaguePosition = getClubLeaguePosition(tables[club.leagueId], club.id);
@@ -482,17 +1147,44 @@ function completeSeason(career: CareerState): CareerState {
     leaguePosition,
     achievement,
   };
+  const evolution = applyClubSeasonEvolution({
+    leagues: career.leagues,
+    clubs: career.clubs,
+    tables,
+    seasonNumber: career.season.number,
+    promotionRelegation,
+  });
+  const majorEvolutionSummary = evolution.results
+    .map((result) => ({
+      result,
+      impact:
+        Math.abs(result.newValues.reputation - result.oldValues.reputation) +
+        Math.abs(result.newValues.squadStrength - result.oldValues.squadStrength),
+    }))
+    .filter(({ impact }) => impact >= 3)
+    .sort((left, right) => right.impact - left.impact)
+    .slice(0, 3)
+    .map(({ result }) => {
+      const evolvedClub = evolution.clubs[result.clubId];
+      const reputationDelta = result.newValues.reputation - result.oldValues.reputation;
+      const squadDelta = result.newValues.squadStrength - result.oldValues.squadStrength;
+
+      return `${evolvedClub?.shortName ?? evolvedClub?.name ?? result.clubId} 평판 ${formatSignedDelta(reputationDelta)}, 전력 ${formatSignedDelta(squadDelta)}`;
+    })
+    .join("; ");
+  const seasonSummaryWithEvolution = majorEvolutionSummary
+    ? `${seasonSummary} 주요 구단 변화: ${majorEvolutionSummary}.`
+    : seasonSummary;
 
   const completed = withSyncedPlayerMetrics({
     ...career,
+    leagues: evolution.leagues,
+    clubs: evolution.clubs,
     season: {
       ...career.season,
       tables,
       isComplete: true,
-      promotionRelegation: calculatePromotionRelegationStatus(
-        tables[K1_LEAGUE_ID],
-        tables[K2_LEAGUE_ID],
-      ),
+      promotionRelegation,
     },
     careerHistory: [...career.careerHistory, historyEntry].slice(-16),
     notices: [
@@ -513,7 +1205,7 @@ function completeSeason(career: CareerState): CareerState {
       career,
       type: "season_complete",
       title: "시즌 종료",
-      description: seasonSummary,
+      description: seasonSummaryWithEvolution,
       idSuffix: "complete",
     }),
   );
@@ -528,15 +1220,25 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
 
   const player = createPlayerFromRoll(input);
   const season = createSeason(FICTIONAL_LEAGUES, 1, 2027);
+  const weekTurns = createWeekTurns(season.fixtures);
+  const currentDate = weekTurns[0]?.startDate ?? getSeasonStartDate(season.year);
   const careerWithoutEvent: CareerState = {
-    saveVersion: 2,
+    saveVersion: 3,
+    currentDate,
+    currentWeekStartDate: currentDate,
     player,
     leagues: FICTIONAL_LEAGUES,
+    competitions: createFictionalCompetitions(season.number, season.fixtures),
+    clubs: getClubsById(),
+    fixtures: season.fixtures,
+    weekTurns,
+    matches: {},
     season,
     condition: 82,
     fatigue: 14,
     form: 50,
     reputation: 28,
+    fanSupport: 50,
     coachTrust: 42,
     salary: 700,
     contractYearsLeft: 2,
@@ -544,7 +1246,10 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
     injury: { severity: "healthy", monthsRemaining: 0 },
     seasonStats: emptySeasonStats(),
     careerHistory: [],
+    unifiedFeed: [],
     transferOffers: [],
+    playerAppearanceLogs: [],
+    recentResults: [],
     notices: [
       {
         id: "career-created",
@@ -568,10 +1273,79 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
     monthlyDevelopmentLog: [],
   };
 
-  return withSyncedPlayerMetrics({
-    ...careerWithoutEvent,
-    currentEvent: generateMonthlyEvent(careerWithoutEvent),
-  });
+  return withUnifiedFeed(
+    withSyncedPlayerMetrics({
+      ...careerWithoutEvent,
+      currentEvent: generateMonthlyEvent(careerWithoutEvent),
+    }),
+  );
+}
+
+export function advanceWeek(career: CareerState, input: AdvanceWeekInput = {}): CareerState {
+  if (career.season.isComplete || career.activeMatchId) {
+    return career;
+  }
+
+  return processCurrentWeekUntilPlayerFixture(career, input);
+}
+
+export function resolveActiveMatch(career: CareerState, input: AdvanceWeekInput = {}): CareerState {
+  if (!career.activeMatchId) {
+    return career;
+  }
+
+  const match = career.matches[career.activeMatchId];
+  const activeFixture = career.fixtures.find(
+    (fixture) => fixture.matchId === career.activeMatchId || fixture.id === match?.fixtureId,
+  );
+
+  if (!match || !activeFixture) {
+    return {
+      ...career,
+      activeMatchId: undefined,
+    };
+  }
+
+  const completedMatch = fastForwardMatchToFinish(match);
+
+  return completeActiveMatchFromState(career, completedMatch, activeFixture, input);
+}
+
+export function progressActiveMatch(
+  career: CareerState,
+  action: MatchAction,
+  input: AdvanceWeekInput = {},
+): CareerState {
+  if (!career.activeMatchId) {
+    return career;
+  }
+
+  const match = career.matches[career.activeMatchId];
+  const activeFixture = career.fixtures.find(
+    (fixture) => fixture.matchId === career.activeMatchId || fixture.id === match?.fixtureId,
+  );
+
+  if (!match || !activeFixture) {
+    return {
+      ...career,
+      activeMatchId: undefined,
+    };
+  }
+
+  const progressedMatch = isMatchReadyToFinalize(match) ? match : advanceMatch(match, action);
+  const careerWithMatch = {
+    ...career,
+    matches: {
+      ...career.matches,
+      [progressedMatch.id]: progressedMatch,
+    },
+  };
+
+  if (isMatchReadyToFinalize(progressedMatch)) {
+    return completeActiveMatchFromState(careerWithMatch, progressedMatch, activeFixture, input);
+  }
+
+  return careerWithMatch;
 }
 
 export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {}): CareerState {
@@ -609,9 +1383,10 @@ export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {})
   const coachTrustChange = simulated.statsDelta.appearances > 0 ? (simulated.averageRatingFromMonth >= 7 ? 3 : 1) : -1;
   const fatigueChange = Math.round(simulated.playingTimeShare * 12) - Math.round(club.trainingFacilities.medicalSupport / 24);
   const conditionChange = simulated.playingTimeShare > 0.75 ? -4 : 2;
-  const transferOffer = createTransferOffer(careerAfterLoggedEvent);
+  const transferOffer = createTransferOfferForCareer(careerAfterLoggedEvent);
   const afterMonth: CareerState = {
     ...careerAfterLoggedEvent,
+    fixtures: simulated.fixtures,
     season: {
       ...careerAfterLoggedEvent.season,
       fixtures: simulated.fixtures,
@@ -626,6 +1401,14 @@ export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {})
     transferOffers: transferOffer
       ? [...careerAfterLoggedEvent.transferOffers, transferOffer].slice(-8)
       : careerAfterLoggedEvent.transferOffers,
+    playerAppearanceLogs: [
+      ...careerAfterLoggedEvent.playerAppearanceLogs,
+      ...simulated.appearanceLogs,
+    ].slice(-APPEARANCE_LOG_LIMIT),
+    recentResults: [
+      ...simulated.recentResults,
+      ...careerAfterLoggedEvent.recentResults,
+    ].slice(0, RECENT_RESULT_LIMIT),
     notices: [...careerAfterLoggedEvent.notices, ...simulated.notices].slice(-20),
   };
   const afterInjury = updateInjury(afterMonth, eventRisk, club.trainingFacilities.medicalSupport);
@@ -648,24 +1431,28 @@ export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {})
     }),
   );
   const nextMonth = career.season.currentMonth + 1;
-  const nextCareer: CareerState = {
+  const nextDate = getMonthStartDate(afterGrowthLog.season.year, Math.min(nextMonth, 12));
+  const nextCareer: CareerState = withSeasonCompletionState({
     ...afterGrowthLog,
+    currentDate: nextDate,
+    currentWeekStartDate: getWeekStartDate(nextDate),
     season: {
       ...afterGrowthLog.season,
       currentMonth: nextMonth,
-      isComplete: nextMonth > afterGrowthLog.season.totalMonths,
     },
     currentEvent: undefined,
-  };
+  });
 
   if (nextCareer.season.isComplete) {
-    return completeSeason(withSyncedPlayerMetrics(nextCareer));
+    return withUnifiedFeed(completeSeason(withSyncedPlayerMetrics(nextCareer)));
   }
 
-  return withSyncedPlayerMetrics({
-    ...nextCareer,
-    currentEvent: generateMonthlyEvent(nextCareer),
-  });
+  return withUnifiedFeed(
+    withSyncedPlayerMetrics({
+      ...nextCareer,
+      currentEvent: generateMonthlyEvent(nextCareer),
+    }),
+  );
 }
 
 export function startNextSeason(career: CareerState): CareerState {
@@ -673,13 +1460,30 @@ export function startNextSeason(career: CareerState): CareerState {
     throw new Error("Cannot start next season before the current season is complete.");
   }
 
-  const nextSeason = createSeason(career.leagues, career.season.number + 1, career.season.year + 1);
+  const rolled = applySeasonRollover({
+    leagues: career.leagues,
+    clubs: career.clubs,
+    promotionRelegation: career.season.promotionRelegation,
+    nextSeasonStartYear: career.season.year + 1,
+  });
+  const nextSeason = createSeason(rolled.leagues, career.season.number + 1, career.season.year + 1);
+  const weekTurns = createWeekTurns(nextSeason.fixtures);
+  const currentDate = weekTurns[0]?.startDate ?? getSeasonStartDate(nextSeason.year);
   const nextCareer: CareerState = {
     ...career,
+    currentDate,
+    currentWeekStartDate: currentDate,
+    activeMatchId: undefined,
     player: {
       ...career.player,
       age: career.player.age + 1,
     },
+    leagues: rolled.leagues,
+    competitions: createFictionalCompetitions(nextSeason.number, nextSeason.fixtures),
+    clubs: rolled.clubs,
+    fixtures: nextSeason.fixtures,
+    weekTurns,
+    matches: {},
     season: nextSeason,
     condition: clamp(career.condition + 14, 62, 94),
     fatigue: clamp(career.fatigue - 24, 4, 36),
@@ -688,6 +1492,7 @@ export function startNextSeason(career: CareerState): CareerState {
     injury: { severity: "healthy", monthsRemaining: 0 },
     seasonStats: emptySeasonStats(),
     transferOffers: [],
+    recentResults: [],
     monthlyDevelopmentLog: [],
     eventLog: [
       ...career.eventLog,
@@ -713,10 +1518,12 @@ export function startNextSeason(career: CareerState): CareerState {
     currentEvent: undefined,
   };
 
-  return withSyncedPlayerMetrics({
-    ...nextCareer,
-    currentEvent: generateMonthlyEvent(nextCareer),
-  });
+  return withUnifiedFeed(
+    withSyncedPlayerMetrics({
+      ...nextCareer,
+      currentEvent: generateMonthlyEvent(nextCareer),
+    }),
+  );
 }
 
 export function getRecentFixtures(career: CareerState, limit = 8): Fixture[] {

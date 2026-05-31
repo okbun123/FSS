@@ -10,9 +10,12 @@ describe("calculateLeagueTable", () => {
       {
         id: "fixture-1",
         leagueId: K1_LEAGUE_ID,
+        competitionId: FICTIONAL_LEAGUES[K1_LEAGUE_ID].competitionId,
         seasonNumber: 1,
         round: 1,
         month: 1,
+        date: "2027-01-04T00:00:00.000Z",
+        weekNumber: 1,
         homeClubId: home.id,
         awayClubId: away.id,
         status: "played",

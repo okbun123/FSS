@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { STARTER_CLUBS } from "../data/fictionalLeagues";
-import { CAREER_DASHBOARD_TABS } from "../screens/CareerDashboardScreen";
-import { advanceMonth, createNewCareer } from "../game/monthlyCareer";
+import { K1_LEAGUE_ID, K2_LEAGUE_ID, STARTER_CLUBS } from "../data/fictionalLeagues";
+import {
+  CAREER_DASHBOARD_TABS,
+  getCareerRecentResultRows,
+  getClubFixtureRows,
+  getLeagueStandingsRows,
+} from "../screens/CareerDashboardScreen";
+import { advanceWeek, createNewCareer, resolveActiveMatch } from "../game/monthlyCareer";
 import { generatePlayerRoll } from "../game/playerGeneration";
 import {
   CAREER_SAVE_KEY,
@@ -43,37 +48,73 @@ describe("career dashboard UI contract", () => {
     expect(CAREER_DASHBOARD_TABS.map((tab) => tab.label)).toEqual([
       "메인",
       "선수 상태",
-      "경기 일정",
+      "소속팀",
       "커리어",
-      "소속팀/리그",
+      "리그",
     ]);
     expect(CAREER_DASHBOARD_TABS.map((tab) => tab.id)).toEqual([
       "main",
       "player",
-      "schedule",
-      "career",
       "club",
+      "career",
+      "league",
     ]);
   });
 
-  it("supports create, progress, save, and load state for the tabbed page", () => {
+  it("supports create, weekly progress, save, and load state for the tabbed page", () => {
     const storage = new MemoryStorage();
     const career = createCareer();
-    const advanced = advanceMonth(career, {
+    const progressed = advanceWeek(career, {
       selectedChoiceId: career.currentEvent?.choices[0]?.id,
       createdAt: "2027-02-01T00:00:00.000Z",
     });
+    const advanced = progressed.activeMatchId ? resolveActiveMatch(progressed) : progressed;
 
     saveCareerState(advanced, storage, new Date("2027-02-01T00:00:00.000Z"));
     const loaded = loadCareerSave(storage);
 
     expect(storage.getItem(CAREER_SAVE_KEY)).not.toBeNull();
-    expect(advanced.season.currentMonth).toBe(2);
+    expect(new Date(advanced.currentDate).getTime()).toBeGreaterThan(new Date(career.currentDate).getTime());
     expect(loaded.status).toBe("loaded");
 
     if (loaded.status === "loaded") {
-      expect(loaded.save.careerState.season.currentMonth).toBe(2);
+      expect(loaded.save.careerState.currentDate).toBe(advanced.currentDate);
       expect(loaded.save.careerState.player.name).toBe("탭 테스트");
     }
+  });
+
+  it("places club fixtures under the Club tab data contract", () => {
+    const career = createCareer();
+    const rows = getClubFixtureRows(career);
+
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0]).toHaveLength(6);
+  });
+
+  it("places recent results under the Career tab data contract", () => {
+    let advanced = createCareer();
+
+    for (let week = 0; week < 8 && advanced.recentResults.length === 0; week += 1) {
+      const progressed = advanceWeek(advanced, {
+        selectedChoiceId: advanced.currentEvent?.choices[0]?.id,
+        createdAt: "2027-02-01T00:00:00.000Z",
+      });
+      advanced = progressed.activeMatchId ? resolveActiveMatch(progressed) : progressed;
+    }
+
+    const rows = getCareerRecentResultRows(advanced);
+
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0]).toHaveLength(4);
+  });
+
+  it("returns different standings when the league selector changes", () => {
+    const career = createCareer();
+    const k1Rows = getLeagueStandingsRows(career, K1_LEAGUE_ID);
+    const k2Rows = getLeagueStandingsRows(career, K2_LEAGUE_ID);
+
+    expect(k1Rows.length).toBeGreaterThan(0);
+    expect(k2Rows.length).toBeGreaterThan(0);
+    expect(k1Rows.map((row) => row[1])).not.toEqual(k2Rows.map((row) => row[1]));
   });
 });

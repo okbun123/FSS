@@ -1,11 +1,31 @@
 import { deriveDominantFoot } from "../domain/player";
-import { FICTIONAL_LEAGUES, K1_LEAGUE_ID, K2_LEAGUE_ID, getClubById } from "../data/fictionalLeagues";
-import type { CareerState } from "../domain/types";
+import {
+  FICTIONAL_LEAGUES,
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  createFictionalCompetitions,
+  getClubById,
+  getClubsById,
+} from "../data/fictionalLeagues";
+import { getLeagueRuleSetsForSeason } from "../domain/leagueRules";
+import type {
+  CareerState,
+  ContractTerms,
+  Fixture,
+  Match,
+  MatchPhase,
+  TransferOffer,
+} from "../domain/types";
+import { createMatchForFixture } from "../domain/matchStateMachine";
+import { createWeekTurns, getDefaultLeagueSeasonStartDate } from "../game/leagueSchedule";
 import { calculateMarketValue, calculateOverall } from "../game/overall";
 import { recommendPositions } from "../game/positionRecommendation";
+import { createUnifiedFeedForCareer } from "../domain/feed";
 
 export const CAREER_SAVE_KEY = "football-career-sim.career-state";
-export const CURRENT_SAVE_VERSION = 2;
+export const CURRENT_SAVE_VERSION = 3;
+export const INCOMPATIBLE_SAVE_MESSAGE =
+  "이전 저장 데이터는 새 리그/경기 시스템과 호환되지 않아 초기화가 필요합니다.";
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -55,7 +75,196 @@ function hasValidCareerShape(value: unknown): value is CareerState {
   );
 }
 
+function isoDate(year: number, month: number, day: number): string {
+  return new Date(Date.UTC(year, month - 1, day)).toISOString();
+}
+
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function getMonthStartDate(year: number, month: number): string {
+  return isoDate(year, Math.min(Math.max(month, 1), 12), 1);
+}
+
+function getWeekStartDate(dateIso: string): string {
+  const date = new Date(dateIso);
+  const daysFromMonday = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - daysFromMonday);
+  return date.toISOString();
+}
+
+function getFixtureDate(year: number, round: number): string {
+  return addDays(new Date(getDefaultLeagueSeasonStartDate(year)), (round - 1) * 7).toISOString();
+}
+
+function normalizeFixture(fixture: Fixture, seasonYear: number): Fixture {
+  const date = fixture.date ?? getFixtureDate(seasonYear, fixture.round);
+  const league = FICTIONAL_LEAGUES[fixture.leagueId];
+
+  return {
+    ...fixture,
+    competitionId: fixture.competitionId ?? league.competitionId,
+    date,
+    weekNumber: fixture.weekNumber ?? fixture.round,
+    month: fixture.month ?? new Date(date).getUTCMonth() + 1,
+  };
+}
+
+function createFallbackContractTerms(offer: TransferOffer): ContractTerms {
+  return {
+    salary: offer.salary,
+    contractYears: 3,
+    signingBonus: Math.round(offer.salary * 0.35),
+    squadRole: offer.squadRole,
+    appearanceBonus: Math.round(offer.salary * 0.08),
+    goalBonus: Math.round(offer.salary * 0.05),
+  };
+}
+
+function normalizeTransferOffer(offer: TransferOffer, seasonYear: number): TransferOffer {
+  const createdAt = offer.createdAt ?? getMonthStartDate(seasonYear, offer.month);
+  const contractTerms = offer.contractTerms ?? createFallbackContractTerms(offer);
+  const currentTerms = {
+    ...contractTerms,
+    ...(offer.negotiation?.currentTerms ?? {}),
+  };
+
+  return {
+    ...offer,
+    salary: currentTerms.salary,
+    squadRole: currentTerms.squadRole,
+    createdAt,
+    expiresAt: offer.expiresAt ?? getMonthStartDate(seasonYear, Math.min(offer.month + 1, 12)),
+    contractTerms: currentTerms,
+    negotiation: {
+      status: offer.negotiation?.status ?? "open",
+      round: offer.negotiation?.round ?? 0,
+      maxRounds: offer.negotiation?.maxRounds ?? 3,
+      currentTerms,
+      playerCounterTerms: offer.negotiation?.playerCounterTerms,
+      lastResponse: offer.negotiation?.lastResponse ?? "waiting",
+      updatedAt: offer.negotiation?.updatedAt ?? createdAt,
+    },
+  };
+}
+
+const MATCH_PHASE_MIGRATIONS: Record<string, MatchPhase> = {
+  preMatch: "PRE_MATCH",
+  firstHalf: "FIRST_HALF",
+  halfTime: "HALF_TIME",
+  secondHalf: "SECOND_HALF",
+  fullTime: "FULL_TIME",
+  extraTimeFirstHalf: "EXTRA_TIME_FIRST_HALF",
+  extraTimeHalfTime: "EXTRA_TIME_HALF_TIME",
+  extraTimeSecondHalf: "EXTRA_TIME_SECOND_HALF",
+  penaltyShootout: "PENALTY_SHOOTOUT",
+};
+
+function normalizeMatchPhase(phase: unknown): MatchPhase {
+  if (typeof phase === "string" && phase in MATCH_PHASE_MIGRATIONS) {
+    return MATCH_PHASE_MIGRATIONS[phase];
+  }
+
+  return typeof phase === "string" ? (phase as MatchPhase) : "PRE_MATCH";
+}
+
+function normalizeMatch(
+  match: Match,
+  fixtures: readonly Fixture[],
+  player: CareerState["player"],
+): Match {
+  const fixture = fixtures.find((candidate) => candidate.matchId === match.id || candidate.id === match.fixtureId);
+  const existingLineups = match.lineups;
+  const existingState = match.state;
+  const needsLineup =
+    !existingLineups?.home?.starters?.length ||
+    !existingLineups?.away?.starters?.length;
+  const baseMatch =
+    fixture && needsLineup
+      ? createMatchForFixture({
+          fixture: {
+            ...fixture,
+            matchId: match.id,
+          },
+          player,
+        })
+      : match;
+
+  return {
+    ...baseMatch,
+    ...match,
+    state: {
+      ...baseMatch.state,
+      ...existingState,
+      phase: normalizeMatchPhase(existingState?.phase),
+      nextEventIndex: existingState?.nextEventIndex ?? 0,
+      isPaused: existingState?.isPaused ?? false,
+    },
+    lineups: {
+      home: {
+        ...baseMatch.lineups.home,
+        ...existingLineups?.home,
+        starters: (needsLineup ? baseMatch.lineups.home.starters : existingLineups.home.starters).map((matchPlayer) => ({
+          ...matchPlayer,
+          injured: matchPlayer.injured ?? false,
+          status: matchPlayer.status ?? (matchPlayer.redCard ? "sentOff" : "onPitch"),
+        })),
+        substitutes: (needsLineup ? baseMatch.lineups.home.substitutes : existingLineups.home.substitutes).map((matchPlayer) => ({
+          ...matchPlayer,
+          injured: matchPlayer.injured ?? false,
+          status: matchPlayer.status ?? (matchPlayer.redCard ? "sentOff" : "available"),
+        })),
+      },
+      away: {
+        ...baseMatch.lineups.away,
+        ...existingLineups?.away,
+        starters: (needsLineup ? baseMatch.lineups.away.starters : existingLineups.away.starters).map((matchPlayer) => ({
+          ...matchPlayer,
+          injured: matchPlayer.injured ?? false,
+          status: matchPlayer.status ?? (matchPlayer.redCard ? "sentOff" : "onPitch"),
+        })),
+        substitutes: (needsLineup ? baseMatch.lineups.away.substitutes : existingLineups.away.substitutes).map((matchPlayer) => ({
+          ...matchPlayer,
+          injured: matchPlayer.injured ?? false,
+          status: matchPlayer.status ?? (matchPlayer.redCard ? "sentOff" : "available"),
+        })),
+      },
+    },
+    events: (match.events ?? []).map((event) => ({
+      ...event,
+      phase: normalizeMatchPhase(event.phase),
+    })),
+    scriptedEvents: match.scriptedEvents?.map((event) => ({
+      ...event,
+      phase: normalizeMatchPhase(event.phase),
+    })),
+  };
+}
+
 function normalizeCareerState(careerState: CareerState): CareerState {
+  const seasonYear = careerState.season.year ?? 2027;
+  const seasonNumber = careerState.season.number ?? 1;
+  const seasonFixtures = (careerState.season.fixtures ?? []).map((fixture) =>
+    normalizeFixture(fixture, seasonYear),
+  );
+  const season = {
+    ...careerState.season,
+    number: seasonNumber,
+    year: seasonYear,
+    fixtures: seasonFixtures,
+  };
+  const transferOffers = (careerState.transferOffers ?? []).map((offer) =>
+    normalizeTransferOffer(offer, seasonYear),
+  );
+  const weekTurns = careerState.weekTurns ?? createWeekTurns(seasonFixtures);
+  const currentDate =
+    careerState.currentDate ?? weekTurns[0]?.startDate ?? getMonthStartDate(seasonYear, careerState.season.currentMonth ?? 1);
+  const currentWeekStartDate = careerState.currentWeekStartDate ?? getWeekStartDate(currentDate);
+  const notices = careerState.notices ?? [];
+  const eventLog = careerState.eventLog ?? [];
   const selectedPosition = careerState.player.selectedPosition ?? careerState.player.position ?? "ST";
   const form = careerState.form ?? careerState.player.form ?? 50;
   const condition = careerState.condition ?? careerState.player.condition ?? 80;
@@ -89,23 +298,62 @@ function normalizeCareerState(careerState: CareerState): CareerState {
     OVR,
     marketValue: careerState.player.marketValue ?? calculateMarketValue({ ...playerBase, OVR }, reputation),
   };
+  const fixtures = careerState.fixtures?.map((fixture) => normalizeFixture(fixture, seasonYear)) ?? seasonFixtures;
+  const matches = Object.fromEntries(
+    Object.entries(careerState.matches ?? {}).map(([matchId, match]) => [
+      matchId,
+      normalizeMatch(match, fixtures, player),
+    ]),
+  );
+  const ruleSets = getLeagueRuleSetsForSeason(seasonYear);
+  const clubs = careerState.clubs ?? getClubsById();
+  const leagues = {
+    [K1_LEAGUE_ID]: {
+      ...(careerState.leagues?.[K1_LEAGUE_ID] ?? FICTIONAL_LEAGUES[K1_LEAGUE_ID]),
+      ruleSet: ruleSets[K1_LEAGUE_ID],
+      clubs: Object.values(clubs).filter((club) => club.leagueId === K1_LEAGUE_ID),
+    },
+    [K2_LEAGUE_ID]: {
+      ...(careerState.leagues?.[K2_LEAGUE_ID] ?? FICTIONAL_LEAGUES[K2_LEAGUE_ID]),
+      ruleSet: ruleSets[K2_LEAGUE_ID],
+      clubs: Object.values(clubs).filter((club) => club.leagueId === K2_LEAGUE_ID),
+    },
+  };
 
-  return {
+  const normalizedCareer: CareerState = {
     ...careerState,
     saveVersion: CURRENT_SAVE_VERSION,
+    currentDate,
+    currentWeekStartDate,
+    activeMatchId: careerState.activeMatchId,
     player,
-    leagues: FICTIONAL_LEAGUES,
+    leagues,
+    competitions: careerState.competitions ?? createFictionalCompetitions(seasonNumber, fixtures),
+    clubs,
+    fixtures,
+    weekTurns,
+    matches,
+    season,
     form,
     condition,
     fatigue,
     reputation,
+    fanSupport: careerState.fanSupport ?? 50,
     coachTrust,
     careerHistory: careerState.careerHistory ?? [],
-    transferOffers: careerState.transferOffers ?? [],
-    notices: careerState.notices ?? [],
-    eventLog: careerState.eventLog ?? [],
+    unifiedFeed: [],
+    transferOffers,
+    playerAppearanceLogs: careerState.playerAppearanceLogs ?? [],
+    recentResults: careerState.recentResults ?? [],
+    notices,
+    eventLog,
     monthlyDevelopmentLog: careerState.monthlyDevelopmentLog ?? [],
     injury: careerState.injury ?? { severity: "healthy", monthsRemaining: 0 },
+  };
+
+  return {
+    ...normalizedCareer,
+    unifiedFeed: createUnifiedFeedForCareer(normalizedCareer),
   };
 }
 
@@ -120,16 +368,15 @@ function parseSaveFile(value: unknown): CareerSaveLoadResult {
   if (typeof value.saveVersion !== "number") {
     return {
       status: "invalid",
-      message: "이전 형식의 저장 데이터입니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
+      message: INCOMPATIBLE_SAVE_MESSAGE,
     };
   }
 
-  if (value.saveVersion !== CURRENT_SAVE_VERSION) {
+  if (![2, CURRENT_SAVE_VERSION].includes(value.saveVersion)) {
     return {
       status: "unsupportedVersion",
       foundVersion: value.saveVersion,
-      message:
-        "주간 MVP 저장은 월간 커리어 시스템과 호환되지 않습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
+      message: INCOMPATIBLE_SAVE_MESSAGE,
     };
   }
 
@@ -148,8 +395,7 @@ function parseSaveFile(value: unknown): CareerSaveLoadResult {
     return {
       status: "unsupportedVersion",
       foundVersion: value.saveVersion,
-      message:
-        "리그 구조가 코리아 프리미어 1 / 코리아 챌린지 2로 변경되어 이전 저장과 호환되지 않습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
+      message: INCOMPATIBLE_SAVE_MESSAGE,
     };
   }
 

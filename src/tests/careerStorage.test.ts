@@ -7,6 +7,7 @@ import {
   clearSavedCareerState,
   createCareerSaveFile,
   CURRENT_SAVE_VERSION,
+  INCOMPATIBLE_SAVE_MESSAGE,
   loadCareerSave,
   saveCareerState,
   type StorageLike,
@@ -40,8 +41,8 @@ function createCareer() {
   });
 }
 
-describe("careerStorage v2", () => {
-  it("saves and loads a versioned monthly career", () => {
+describe("careerStorage v3", () => {
+  it("saves and loads a versioned weekly career", () => {
     const storage = new MemoryStorage();
     const career = createCareer();
     const savedAt = new Date("2027-01-01T00:00:00.000Z");
@@ -60,10 +61,11 @@ describe("careerStorage v2", () => {
     }
   });
 
-  it("normalizes older v2 monthly saves that lack new player model fields", () => {
+  it("migrates older v2 monthly saves to the weekly career model", () => {
     const storage = new MemoryStorage();
     const career = createCareer() as unknown as Record<string, unknown>;
     const player = career.player as Record<string, unknown>;
+    const season = career.season as { fixtures: Array<Record<string, unknown>> };
 
     player.position = player.selectedPosition;
     delete player.selectedPosition;
@@ -76,11 +78,27 @@ describe("careerStorage v2", () => {
     delete player.reputation;
     delete player.coachTrust;
     delete player.marketValue;
+    delete career.currentDate;
+    delete career.currentWeekStartDate;
+    delete career.competitions;
+    delete career.clubs;
+    delete career.fixtures;
+    delete career.weekTurns;
+    delete career.matches;
+    delete career.unifiedFeed;
+    delete career.playerAppearanceLogs;
+    delete career.recentResults;
+
+    for (const fixture of season.fixtures) {
+      delete fixture.competitionId;
+      delete fixture.date;
+      delete fixture.weekNumber;
+    }
 
     storage.setItem(
       CAREER_SAVE_KEY,
       JSON.stringify({
-        saveVersion: CURRENT_SAVE_VERSION,
+        saveVersion: 2,
         savedAt: "2027-01-01T00:00:00.000Z",
         careerState: career,
       }),
@@ -91,6 +109,14 @@ describe("careerStorage v2", () => {
     expect(result.status).toBe("loaded");
 
     if (result.status === "loaded") {
+      expect(result.save.saveVersion).toBe(CURRENT_SAVE_VERSION);
+      expect(result.save.careerState.saveVersion).toBe(CURRENT_SAVE_VERSION);
+      expect(result.save.careerState.currentDate).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(result.save.careerState.currentWeekStartDate).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(result.save.careerState.fixtures[0]?.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(result.save.careerState.weekTurns.length).toBeGreaterThan(0);
+      expect(Object.keys(result.save.careerState.competitions).length).toBeGreaterThan(0);
+      expect(Object.keys(result.save.careerState.clubs).length).toBeGreaterThan(0);
       expect(result.save.careerState.player.selectedPosition).toBe(result.save.careerState.player.position);
       expect(result.save.careerState.player.recommendedPositions.length).toBeGreaterThan(0);
       expect(result.save.careerState.player.marketValue).toBeGreaterThan(0);
@@ -101,8 +127,9 @@ describe("careerStorage v2", () => {
     const career = createCareer();
     const saveFile = createCareerSaveFile(career, new Date("2027-02-01T00:00:00.000Z"));
 
-    expect(saveFile.saveVersion).toBe(2);
-    expect(saveFile.careerState.season.currentMonth).toBe(1);
+    expect(saveFile.saveVersion).toBe(3);
+    expect(saveFile.careerState.season.currentMonth).toBeGreaterThanOrEqual(2);
+    expect(saveFile.careerState.currentDate).toBeTruthy();
   });
 
   it("rejects incompatible weekly v1 saves without deleting them", () => {
@@ -119,6 +146,7 @@ describe("careerStorage v2", () => {
     const result = loadCareerSave(storage);
 
     expect(result.status).toBe("unsupportedVersion");
+    expect(result.status === "unsupportedVersion" ? result.message : "").toBe(INCOMPATIBLE_SAVE_MESSAGE);
     expect(storage.getItem(CAREER_SAVE_KEY)).not.toBeNull();
   });
 

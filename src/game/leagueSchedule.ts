@@ -1,8 +1,12 @@
-import type { Club, Fixture, League, SeasonMonth } from "../domain/types";
+import type { Club, Fixture, League, SeasonMonth, WeekTurn } from "../domain/types";
 
 interface ScheduleOptions {
   seasonNumber?: number;
   totalMonths?: number;
+  seasonStartDate?: string;
+  roundIntervalDays?: number;
+  weekendFixtureSlots?: number;
+  kickoffHourUtc?: number;
 }
 
 const MONTH_LABELS = [
@@ -31,24 +35,76 @@ function createFixtureId(
   return `${leagueId}-s${seasonNumber}-r${round}-m${fixtureNumber}-${homeClubId}-${awayClubId}`;
 }
 
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function getFirstSaturdayOnOrAfter(year: number, month: number, day: number): Date {
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
+
+  while (date.getUTCDay() !== 6) {
+    date.setUTCDate(date.getUTCDate() + 1);
+  }
+
+  return date;
+}
+
+function toIsoDate(date: Date): string {
+  return date.toISOString();
+}
+
+export function getDefaultLeagueSeasonStartDate(year: number): string {
+  return toIsoDate(getFirstSaturdayOnOrAfter(year, 2, 24));
+}
+
+function getFixtureDate(input: {
+  seasonStartDate: Date;
+  round: number;
+  fixtureNumber: number;
+  roundIntervalDays: number;
+  weekendFixtureSlots: number;
+  kickoffHourUtc: number;
+}): Date {
+  const roundStart = addDays(input.seasonStartDate, (input.round - 1) * input.roundIntervalDays);
+  const dayOffset = Math.floor((input.fixtureNumber - 1) / input.weekendFixtureSlots);
+  const slotIndex = (input.fixtureNumber - 1) % input.weekendFixtureSlots;
+  const fixtureDate = addDays(roundStart, dayOffset);
+  fixtureDate.setUTCHours(input.kickoffHourUtc + slotIndex * 2, 0, 0, 0);
+  return fixtureDate;
+}
+
 function createFixture(
   league: League,
   seasonNumber: number,
   round: number,
-  totalRounds: number,
   fixtureNumber: number,
   homeClubId: string,
   awayClubId: string,
-  totalMonths: number,
+  seasonStartDate: Date,
+  roundIntervalDays: number,
+  weekendFixtureSlots: number,
+  kickoffHourUtc: number,
 ): Fixture {
-  const month = Math.min(totalMonths, Math.max(1, Math.floor(((round - 1) / totalRounds) * totalMonths) + 1));
+  const fixtureDate = getFixtureDate({
+    seasonStartDate,
+    round,
+    fixtureNumber,
+    roundIntervalDays,
+    weekendFixtureSlots,
+    kickoffHourUtc,
+  });
 
   return {
     id: createFixtureId(league.id, seasonNumber, round, fixtureNumber, homeClubId, awayClubId),
     leagueId: league.id,
+    competitionId: league.competitionId,
     seasonNumber,
     round,
-    month,
+    month: fixtureDate.getUTCMonth() + 1,
+    date: toIsoDate(fixtureDate),
+    weekNumber: round,
     homeClubId,
     awayClubId,
     status: "scheduled",
@@ -115,10 +171,13 @@ export function generateLeagueFixtures(
   options: ScheduleOptions = {},
 ): Fixture[] {
   const seasonNumber = options.seasonNumber ?? 1;
-  const totalMonths = options.totalMonths ?? 12;
-  const cycles = league.id === "k1_fictional" ? 3 : 2;
+  const seasonYear = 2026 + seasonNumber;
+  const seasonStartDate = new Date(options.seasonStartDate ?? getDefaultLeagueSeasonStartDate(seasonYear));
+  const roundIntervalDays = options.roundIntervalDays ?? 7;
+  const weekendFixtureSlots = options.weekendFixtureSlots ?? 4;
+  const kickoffHourUtc = options.kickoffHourUtc ?? 11;
+  const cycles = league.ruleSet.roundRobinCycles;
   const rounds = repeatRoundRobin(league.clubs, cycles);
-  const totalRounds = rounds.length;
 
   return rounds.flatMap((round, roundIndex) =>
     round.map(([homeClubId, awayClubId], fixtureIndex) =>
@@ -126,11 +185,13 @@ export function generateLeagueFixtures(
         league,
         seasonNumber,
         roundIndex + 1,
-        totalRounds,
         fixtureIndex + 1,
         homeClubId,
         awayClubId,
-        totalMonths,
+        seasonStartDate,
+        roundIntervalDays,
+        weekendFixtureSlots,
+        kickoffHourUtc,
       ),
     ),
   );
@@ -146,4 +207,37 @@ export function createSeasonMonths(fixtures: readonly Fixture[], totalMonths = 1
       fixtureIds: fixtures.filter((fixture) => fixture.month === month).map((fixture) => fixture.id),
     };
   });
+}
+
+export function createWeekTurns(fixtures: readonly Fixture[]): WeekTurn[] {
+  const weekStarts = new Map<string, Date>();
+  const fixtureIdsByWeek = new Map<string, string[]>();
+
+  for (const fixture of fixtures) {
+    const fixtureDate = new Date(fixture.date);
+    const daysFromMonday = (fixtureDate.getUTCDay() + 6) % 7;
+    const weekStart = addDays(fixtureDate, -daysFromMonday);
+    const weekKey = toIsoDate(weekStart);
+    weekStarts.set(weekKey, weekStart);
+    fixtureIdsByWeek.set(weekKey, [
+      ...(fixtureIdsByWeek.get(weekKey) ?? []),
+      fixture.id,
+    ]);
+  }
+
+  return [...weekStarts.entries()]
+    .sort(([, left], [, right]) => left.getTime() - right.getTime())
+    .map(([weekKey, startDate], index) => ({
+      id: `week-${index + 1}`,
+      seasonNumber: fixtures[0]?.seasonNumber ?? 1,
+      weekNumber: index + 1,
+      startDate: toIsoDate(startDate),
+      endDate: toIsoDate(addDays(startDate, 6)),
+      fixtureIds: (fixtureIdsByWeek.get(weekKey) ?? []).sort((leftId, rightId) => {
+        const leftFixture = fixtures.find((fixture) => fixture.id === leftId);
+        const rightFixture = fixtures.find((fixture) => fixture.id === rightId);
+        return (leftFixture?.date ?? "").localeCompare(rightFixture?.date ?? "");
+      }),
+      status: index === 0 ? "active" : "upcoming",
+    }));
 }

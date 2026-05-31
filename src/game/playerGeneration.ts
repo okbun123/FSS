@@ -146,13 +146,20 @@ function createBaseAttributes(rng: RandomSource, age: number): Attributes {
   return {
     technical: {
       finishing: rollYouthAttribute(rng, age),
+      shooting: rollYouthAttribute(rng, age),
       passing: rollYouthAttribute(rng, age),
       dribbling: rollYouthAttribute(rng, age),
       defending: rollYouthAttribute(rng, age),
       firstTouch: rollYouthAttribute(rng, age),
+      crossing: rollYouthAttribute(rng, age),
+      tackling: rollYouthAttribute(rng, age),
+      marking: rollYouthAttribute(rng, age),
+      heading: rollYouthAttribute(rng, age),
     },
     physical: {
       pace: rollYouthAttribute(rng, age),
+      speed: rollYouthAttribute(rng, age),
+      acceleration: rollYouthAttribute(rng, age),
       stamina: rollYouthAttribute(rng, age),
       strength: rollYouthAttribute(rng, age),
       agility: rollYouthAttribute(rng, age),
@@ -160,6 +167,7 @@ function createBaseAttributes(rng: RandomSource, age: number): Attributes {
     mental: {
       decisions: rollYouthAttribute(rng, age),
       composure: rollYouthAttribute(rng, age),
+      concentration: rollYouthAttribute(rng, age),
       workRate: rollYouthAttribute(rng, age),
       teamwork: rollYouthAttribute(rng, age),
     },

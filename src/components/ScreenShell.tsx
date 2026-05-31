@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
 interface ScreenShellProps {
-  eyebrow: string;
-  title: string;
+  eyebrow: ReactNode;
+  title: ReactNode;
   children: ReactNode;
   actions?: ReactNode;
   wide?: boolean;

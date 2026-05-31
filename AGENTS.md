@@ -12,14 +12,46 @@ Build the project as a static web app that can be deployed to GitHub Pages. Use 
 - Persist save data in `localStorage`.
 - Keep game systems data-driven where practical, using typed data structures and small reusable simulation functions.
 - Prefer simple deterministic simulation logic over complex animation or physics.
-- Use Korean UI text by default.
+- Use Korean UI text only.
 - Keep the UI readable and usable on desktop and mobile.
 - Do not require network access at runtime for core gameplay.
 
+## Game Direction
+
+- The game advances by weekly turns.
+- The player must not manually choose weekly training.
+- Player growth is driven by club facilities, age, potential, professionalism, playing time, fatigue, form, and injuries.
+- If a match exists during the current week, open a dedicated match simulation screen.
+- The match screen must use a phase/state-machine structure.
+- Do not simulate a match as one instant result if the player opens the match screen.
+- Match simulation must pause on important events: goal, substitution, yellow card, red card, injury, penalty, half-time, full-time, extra-time transition, and penalty shootout kick result.
+- Transfer offers must be actionable and negotiable.
+- The Main tab must use one unified feed for alerts, logs, and offers.
+- Recent results and appearance logs belong in the Career tab.
+- The old "소속팀/리그" tab is now "리그".
+- The old "경기 일정" tab is now "소속팀".
+- Team names should open a team detail modal.
+- Promotion and relegation must be data-driven through `LeagueRuleSet`.
+- Do not hardcode one promotion rule into scattered UI code.
+- Fixture schedules must use exact dates.
+- Attribute UI must not overflow.
+- Position-important attributes must be highlighted.
+- Attribute colors must depend on value bands.
+- Club reputation, budget level, youth opportunity, and squad strength must evolve gradually by season results with league-level caps.
+
+## Content Rules
+
+- Use fictional club names.
+- Do not use real club names, real logos, real player names, real sponsors, or copyrighted assets.
+- Use Korean UI text only.
+
 ## Engineering Rules
 
-- Every feature must pass `npm run build`.
+- `npm run test` and `npm run build` must pass before finishing.
+- Add or update tests for match state machine, schedule generation, promotion/relegation, playoff results, team evolution, and transfer negotiation.
 - Add or update tests for core simulation logic when behavior changes.
+- Keep core simulation logic in pure TypeScript modules.
+- React components should call domain functions but not contain business rules.
 - Keep simulation logic separated from React presentation where practical so it can be tested directly.
 - Prefer pure functions for career progression, match results, stat growth, transfers, contracts, injuries, and season advancement.
 - Make randomness controllable for tests, such as by using a seed or injectable random source.
@@ -40,12 +72,12 @@ Follow the existing structure if the project has already established one.
 
 ## Validation Commands
 
-Run these before handing off substantial changes:
+Run these before finishing implementation changes:
 
 ```sh
 npm install
-npm run build
 npm run test
+npm run build
 ```
 
 If only documentation changes are made, note that the build and tests were not run.

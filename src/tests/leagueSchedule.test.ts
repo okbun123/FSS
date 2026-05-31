@@ -12,15 +12,21 @@ describe("generateLeagueFixtures", () => {
   it("creates a K1 three-round-robin schedule with 39 matches per club", () => {
     const fixtures = generateLeagueFixtures(FICTIONAL_LEAGUES[K1_LEAGUE_ID], { seasonNumber: 1 });
     const counts = new Map<string, number>();
+    const pairCounts = new Map<string, number>();
 
     for (const fixture of fixtures) {
       counts.set(fixture.homeClubId, (counts.get(fixture.homeClubId) ?? 0) + 1);
       counts.set(fixture.awayClubId, (counts.get(fixture.awayClubId) ?? 0) + 1);
+      pairCounts.set(
+        [fixture.homeClubId, fixture.awayClubId].sort().join(":"),
+        (pairCounts.get([fixture.homeClubId, fixture.awayClubId].sort().join(":")) ?? 0) + 1,
+      );
     }
 
     expect(new Set(fixtures.map((fixture) => fixture.round)).size).toBe(39);
     expect(fixtures).toHaveLength(273);
     expect([...counts.values()].every((count) => count === 39)).toBe(true);
+    expect([...pairCounts.values()].every((count) => count === 3)).toBe(true);
   });
 
   it("creates a simplified K2 double-round-robin schedule with byes", () => {
@@ -35,6 +41,29 @@ describe("generateLeagueFixtures", () => {
     expect(new Set(fixtures.map((fixture) => fixture.round)).size).toBe(34);
     expect(fixtures).toHaveLength(272);
     expect([...counts.values()].every((count) => count === 32)).toBe(true);
+  });
+
+  it("gives every generated league fixture a valid weekend ISO date", () => {
+    const fixtures = [
+      ...generateLeagueFixtures(FICTIONAL_LEAGUES[K1_LEAGUE_ID], { seasonNumber: 1 }),
+      ...generateLeagueFixtures(FICTIONAL_LEAGUES[K2_LEAGUE_ID], { seasonNumber: 1 }),
+    ];
+
+    expect(fixtures.every((fixture) => !Number.isNaN(new Date(fixture.date).getTime()))).toBe(true);
+    expect(fixtures.every((fixture) => [0, 6].includes(new Date(fixture.date).getUTCDay()))).toBe(true);
+    expect(new Date(fixtures[0].date).getUTCMonth()).toBe(1);
+    expect(new Date(fixtures[0].date).getUTCDate()).toBeGreaterThanOrEqual(24);
+  });
+
+  it("keeps rounds chronological and avoids self matches", () => {
+    const fixtures = generateLeagueFixtures(FICTIONAL_LEAGUES[K1_LEAGUE_ID], { seasonNumber: 1 });
+    const roundDates = [...new Set(fixtures.map((fixture) => fixture.round))].map((round) => {
+      const roundFixtures = fixtures.filter((fixture) => fixture.round === round);
+      return Math.min(...roundFixtures.map((fixture) => new Date(fixture.date).getTime()));
+    });
+
+    expect(fixtures.every((fixture) => fixture.homeClubId !== fixture.awayClubId)).toBe(true);
+    expect(roundDates.every((date, index) => index === 0 || date > roundDates[index - 1])).toBe(true);
   });
 
   it("does not use exact real K League club names", () => {

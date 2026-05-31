@@ -23,7 +23,7 @@ export function StartScreen({
 
   return (
     <ScreenShell
-      eyebrow="월간 커리어 시뮬레이션"
+      eyebrow="주간 커리어 시뮬레이션"
       title="풋볼 커리어"
       actions={
         <>
@@ -65,7 +65,7 @@ export function StartScreen({
         </div>
         <div>
           <dt>진행 방식</dt>
-          <dd>월간 이벤트</dd>
+          <dd>주간 진행</dd>
         </div>
       </dl>
     </ScreenShell>

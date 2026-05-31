@@ -1,0 +1,134 @@
+
+> football-career-sim@0.1.0 dev
+> vite --host 127.0.0.1 --port 5182
+
+Port 5182 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.3.3[39m  [2mready in [0m[1m302[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5183[22m/[39m
+[2m오전 12:01:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/App.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오전 12:01:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:01:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:01:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/App.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오전 12:01:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:01:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:05:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:05:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:05:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:06:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:06:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:06:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/match/MatchControls.tsx[22m
+[2m오전 12:06:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/match/MatchControls.tsx[22m
+[2m오전 12:07:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/match/MatchControls.tsx[22m
+[2m오전 12:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:07:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:07:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:07:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:07:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:07:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:07:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:08:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:08:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:08:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:08:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:08:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:08:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:08:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:08:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:08:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:08:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:08:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:08:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:08:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:08:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:08:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:09:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:09:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:09:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:09:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:09:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:09:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:09:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:09:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:09:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:10:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:10:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:10:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:11:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:11:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:11:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:12:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/App.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오전 12:12:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:12:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:13:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:13:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:13:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:13:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오전 12:13:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:13:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:16:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오전 12:16:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:16:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:16:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:16:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:16:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:17:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:17:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:17:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:17:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/App.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오전 12:17:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:17:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:23:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/App.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/AttributeTable.tsx, /src/components/career/TransferNegotiationModal.tsx, /src/components/career/TransferOfferCard.tsx[22m
+[2m오전 12:23:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:23:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:23:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:23:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:23:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:24:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/AttributeTable.tsx[22m
+[2m오전 12:25:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/AttributeTable.tsx[22m
+[2m오전 12:25:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/career/AttributeTable.tsx[22m Could not Fast Refresh (new export)
+[2m오전 12:25:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:25:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:25:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:25:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:25:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:25:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:25:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오전 12:26:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m오전 12:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/AttributeTable.tsx[22m
+[2m오전 12:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/career/AttributeTable.tsx[22m Could not Fast Refresh (new export)
+[2m오전 12:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:41:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:41:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:41:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:41:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:41:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:41:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:41:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:41:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:41:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:42:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:42:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:42:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:42:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:42:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:42:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:42:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오전 12:42:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오전 12:42:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:42:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:42:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:42:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:42:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:42:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:43:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:43:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:43:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오전 12:43:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오전 12:43:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오전 12:43:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
