@@ -11,7 +11,7 @@ export type Personality =
 
 export type SquadRole = "prospect" | "rotation" | "regular" | "keyPlayer";
 
-export type LeagueTier = "k1_fictional" | "k2_fictional";
+export type LeagueTier = "k1_fictional" | "k2_fictional" | "k3_fictional" | "k4_fictional";
 
 export type IsoDateString = string;
 
@@ -550,8 +550,27 @@ export interface Club {
   /** @deprecated Use primaryColor for display text. */
   secondaryColor: string;
   squadSummary: SquadSummary;
+  positionDepth?: Partial<Record<Position, number>>;
+  licenseEligible?: boolean;
+  promotionIntent?: boolean;
   seasonRecords: ClubSeasonRecord[];
   lastEvolution?: ClubEvolutionResult;
+}
+
+export interface PublicClubStars {
+  reputationStars: number;
+  squadStrengthStars: number;
+  budgetStars: number;
+  youthOpportunityStars: number;
+  trainingFacilityStars: number;
+}
+
+export interface NonPlayableClub extends PublicClubStars {
+  id: string;
+  name: string;
+  region: string;
+  licenseEligible: boolean;
+  promotionWeight: number;
 }
 
 export interface League {
@@ -882,4 +901,7 @@ export interface CareerState {
   currentEvent?: MonthlyEvent;
   eventLog: CareerEventLogEntry[];
   monthlyDevelopmentLog: DevelopmentReport[];
+  archivedNonPlayableClubs?: NonPlayableClub[];
+  playerContractStatus?: "contracted" | "freeAgent";
+  leagueMode?: "realistic" | "gameplay";
 }

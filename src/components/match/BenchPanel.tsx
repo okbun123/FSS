@@ -11,7 +11,7 @@ export function BenchPanel({ title, lineup }: { title: ReactNode; lineup: MatchL
       </div>
       <ol className="match-player-list compact">
         {lineup.substitutes.map((player) => (
-          <li className="match-player-row" key={player.playerId}>
+          <li className={player.isUserPlayer ? "match-player-row user-player" : "match-player-row"} key={player.playerId}>
             <span className="player-number">{player.squadNumber ?? "-"}</span>
             <span>
               <strong>{player.name}</strong>

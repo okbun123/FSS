@@ -10,6 +10,7 @@ import { ScreenShell } from "../components/ScreenShell";
 import { TeamDetailModal } from "../components/TeamDetailModal";
 import { TeamNameLink } from "../components/TeamNameLink";
 import { getPausedMatchEvent } from "../domain/matchEvents";
+import { getVisibleMatchLogEvents } from "../domain/matchLog";
 import type { MatchAction } from "../domain/matchStateMachine";
 import type { CareerState } from "../domain/types";
 
@@ -70,6 +71,7 @@ export function MatchScreen({
   const awayName = career.clubs[match.awayClubId]?.name ?? match.awayClubId;
   const competitionName = career.competitions[match.competitionId]?.name ?? match.competitionId;
   const pausedEvent = getPausedMatchEvent(match);
+  const visibleEvents = getVisibleMatchLogEvents(match.events, career.player.id);
 
   return (
     <ScreenShell
@@ -104,62 +106,65 @@ export function MatchScreen({
           onOpenTeam={setSelectedTeamId}
         />
 
-        <MatchEventCard event={pausedEvent} />
+        <div className="match-fixed-grid">
+          <div className="match-team-column">
+            <LineupPanel
+              title={
+                <>
+                  <TeamNameLink clubId={match.homeClubId} onOpenTeam={setSelectedTeamId}>
+                    {homeName}
+                  </TeamNameLink>{" "}
+                  선발
+                </>
+              }
+              lineup={match.lineups.home}
+            />
+            <BenchPanel
+              title={
+                <>
+                  <TeamNameLink clubId={match.homeClubId} onOpenTeam={setSelectedTeamId}>
+                    {homeName}
+                  </TeamNameLink>{" "}
+                  벤치
+                </>
+              }
+              lineup={match.lineups.home}
+            />
+          </div>
 
-        <div className="match-side-grid">
-          <MatchControls match={match} onAction={onMatchAction} />
-          <PenaltyShootoutPanel match={match} />
-          <MatchTimeline events={match.events} />
+          <div className="match-center-column">
+            <MatchEventCard event={pausedEvent} />
+            <MatchControls match={match} onAction={onMatchAction} />
+            <PenaltyShootoutPanel match={match} />
+            <MatchTimeline events={visibleEvents} />
+            <p className="saved-at">최근 저장: {savedAtLabel ?? "아직 없음"}</p>
+          </div>
+
+          <div className="match-team-column">
+            <LineupPanel
+              title={
+                <>
+                  <TeamNameLink clubId={match.awayClubId} onOpenTeam={setSelectedTeamId}>
+                    {awayName}
+                  </TeamNameLink>{" "}
+                  선발
+                </>
+              }
+              lineup={match.lineups.away}
+            />
+            <BenchPanel
+              title={
+                <>
+                  <TeamNameLink clubId={match.awayClubId} onOpenTeam={setSelectedTeamId}>
+                    {awayName}
+                  </TeamNameLink>{" "}
+                  벤치
+                </>
+              }
+              lineup={match.lineups.away}
+            />
+          </div>
         </div>
-
-        <div className="match-main-grid">
-          <LineupPanel
-            title={
-              <>
-                <TeamNameLink clubId={match.homeClubId} onOpenTeam={setSelectedTeamId}>
-                  {homeName}
-                </TeamNameLink>{" "}
-                선발 XI
-              </>
-            }
-            lineup={match.lineups.home}
-          />
-          <LineupPanel
-            title={
-              <>
-                <TeamNameLink clubId={match.awayClubId} onOpenTeam={setSelectedTeamId}>
-                  {awayName}
-                </TeamNameLink>{" "}
-                선발 XI
-              </>
-            }
-            lineup={match.lineups.away}
-          />
-          <BenchPanel
-            title={
-              <>
-                <TeamNameLink clubId={match.homeClubId} onOpenTeam={setSelectedTeamId}>
-                  {homeName}
-                </TeamNameLink>{" "}
-                벤치
-              </>
-            }
-            lineup={match.lineups.home}
-          />
-          <BenchPanel
-            title={
-              <>
-                <TeamNameLink clubId={match.awayClubId} onOpenTeam={setSelectedTeamId}>
-                  {awayName}
-                </TeamNameLink>{" "}
-                벤치
-              </>
-            }
-            lineup={match.lineups.away}
-          />
-        </div>
-
-        <p className="saved-at">최근 저장: {savedAtLabel ?? "아직 없음"}</p>
 
         {selectedTeamId ? (
           <TeamDetailModal

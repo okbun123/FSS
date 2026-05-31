@@ -10,11 +10,19 @@ import { getLeagueRuleSet } from "../domain/leagueRules";
 
 export const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
 export const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
+export const K3_LEAGUE_ID = "k3_fictional" satisfies LeagueTier;
+export const K4_LEAGUE_ID = "k4_fictional" satisfies LeagueTier;
 export const K1_COMPETITION_ID = "competition-k1-fictional";
 export const K2_COMPETITION_ID = "competition-k2-fictional";
+export const K3_COMPETITION_ID = "competition-k3-fictional";
+export const K4_COMPETITION_ID = "competition-k4-fictional";
+export const DOMESTIC_CUP_COMPETITION_ID = "competition-korea-challenge-cup";
+export const DOMESTIC_CUP_NAME = "코리아 챌린지컵";
 
 export const K1_RULE_SET = getLeagueRuleSet(K1_LEAGUE_ID, 2027);
 export const K2_RULE_SET = getLeagueRuleSet(K2_LEAGUE_ID, 2027);
+export const K3_RULE_SET = getLeagueRuleSet(K3_LEAGUE_ID, 2027);
+export const K4_RULE_SET = getLeagueRuleSet(K4_LEAGUE_ID, 2027);
 
 function facilities(
   technicalTraining: number,
@@ -602,6 +610,101 @@ export const K2_CLUBS: Club[] = [
   }),
 ];
 
+const K3_CLUB_INPUTS = [
+  ["cheon-an-skyworks", "천안 스카이웍스", "스카이", "천안", 49, 50, 36, 76],
+  ["gimhae-river-steel", "김해 리버스틸", "리버", "김해", 48, 51, 38, 72],
+  ["pocheon-granite", "포천 그래나이트", "포천", "포천", 44, 48, 32, 70],
+  ["gyeongju-moonlight", "경주 문라이트", "문라이트", "경주", 52, 53, 41, 66],
+  ["siheung-wave-tech", "시흥 웨이브테크", "시흥", "시흥", 47, 49, 35, 78],
+  ["gangneung-pine-city", "강릉 파인시티", "파인", "강릉", 45, 47, 31, 74],
+  ["dangjin-tide", "당진 타이드", "타이드", "당진", 43, 46, 30, 73],
+  ["yangpyeong-hill", "양평 힐스", "힐스", "양평", 42, 45, 29, 79],
+  ["changwon-machine", "창원 머신", "머신", "창원", 50, 52, 40, 68],
+  ["ulsan-port-juniors", "울산 포트 주니어스", "포트", "울산", 46, 50, 37, 81],
+  ["mokpo-horizon", "목포 호라이즌", "호라이즌", "목포", 44, 47, 33, 75],
+  ["chungju-lake-city", "충주 레이크시티", "레이크", "충주", 41, 44, 27, 80],
+  ["namyang-forest", "남양 포레스트", "포레스트", "남양", 40, 43, 26, 82],
+  ["jinju-namriver", "진주 남리버", "남리버", "진주", 43, 45, 28, 78],
+  ["seosan-flight", "서산 플라이트", "플라이트", "서산", 42, 44, 29, 76],
+] as const;
+
+const K4_CLUB_INPUTS = [
+  ["pyeongtaek-breeze", "평택 브리즈", "브리즈", "평택", 36, 39, 24, 77],
+  ["geojin-breakers", "거진 브레이커스", "거진", "거진", 34, 37, 22, 80],
+  ["jecheon-sparks", "제천 스파크스", "스파크", "제천", 35, 38, 23, 83],
+  ["geumsan-herbs", "금산 허브스", "허브스", "금산", 33, 36, 21, 84],
+  ["haman-ironfield", "함안 아이언필드", "아이언", "함안", 34, 37, 22, 75],
+  ["jincheon-beacons", "진천 비컨스", "비컨스", "진천", 36, 39, 25, 78],
+  ["sejong-roads", "세종 로드스", "로드스", "세종", 38, 41, 27, 82],
+  ["jungnang-metro", "중랑 메트로", "메트로", "중랑", 37, 40, 26, 79],
+  ["pyeongchang-peak", "평창 피크", "피크", "평창", 32, 35, 20, 86],
+  ["gijang-coast", "기장 코스트", "코스트", "기장", 35, 37, 22, 81],
+  ["namhae-sunrise", "남해 선라이즈", "선라이즈", "남해", 31, 34, 19, 87],
+  ["andong-paper", "안동 페이퍼", "페이퍼", "안동", 33, 36, 21, 83],
+  ["boryeong-mudcity", "보령 머드시티", "머드", "보령", 34, 36, 21, 80],
+  ["yeongwol-ridge", "영월 리지", "리지", "영월", 30, 33, 18, 88],
+  ["miryang-arirang", "밀양 아리랑", "아리랑", "밀양", 32, 35, 19, 84],
+  ["sacheon-aero", "사천 에어로", "에어로", "사천", 35, 38, 24, 79],
+  ["gwangmyeong-lanterns", "광명 랜턴스", "랜턴스", "광명", 37, 39, 25, 81],
+  ["naju-orchard", "나주 오차드", "오차드", "나주", 31, 34, 18, 86],
+] as const;
+
+function lowerDivisionClub(
+  [id, name, shortName, city, reputation, squadStrength, budgetLevel, youthOpportunity]: readonly [
+    string,
+    string,
+    string,
+    string,
+    number,
+    number,
+    number,
+    number,
+  ],
+  leagueId: LeagueTier,
+  index: number,
+): Club {
+  const isK3 = leagueId === K3_LEAGUE_ID;
+  const baseFacilities = isK3 ? 48 : 38;
+  const depth = isK3 ? 46 + (index % 5) : 34 + (index % 5);
+
+  return club({
+    id,
+    name,
+    shortName,
+    city,
+    leagueId,
+    reputation,
+    squadStrength,
+    budgetLevel,
+    primaryColor: isK3 ? "지역 청록" : "지역 초록",
+    trainingFacilities: facilities(
+      baseFacilities + (index % 7),
+      baseFacilities + ((index + 2) % 7),
+      baseFacilities + ((index + 3) % 7),
+      baseFacilities + ((index + 4) % 7),
+      Math.min(92, youthOpportunity + 4),
+      baseFacilities + ((index + 5) % 7),
+    ),
+    playStyle: isK3 ? "조직적인 압박과 빠른 전환" : "활동량 중심의 지역 축구",
+    youthOpportunity,
+    transferPolicy: isK3 ? "지역 유망주와 저비용 계약 중심" : "승격 의지가 있는 유망주 육성 중심",
+    depth,
+    averageAge: isK3 ? 24 + (index % 3) : 22 + (index % 4),
+  });
+}
+
+export const K3_CLUBS: Club[] = K3_CLUB_INPUTS.map((input, index) => ({
+  ...lowerDivisionClub(input, K3_LEAGUE_ID, index),
+  licenseEligible: index < 8,
+  promotionIntent: index < 10,
+}));
+
+export const K4_CLUBS: Club[] = K4_CLUB_INPUTS.map((input, index) => ({
+  ...lowerDivisionClub(input, K4_LEAGUE_ID, index),
+  licenseEligible: index < 11,
+  promotionIntent: index < 12,
+}));
+
 export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
   [K1_LEAGUE_ID]: {
     id: K1_LEAGUE_ID,
@@ -627,15 +730,41 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     seasonEndMonth: 12,
     clubs: K2_CLUBS,
   },
+  [K3_LEAGUE_ID]: {
+    id: K3_LEAGUE_ID,
+    name: "코리아 내셔널 3",
+    country: "대한민국",
+    tier: K3_LEAGUE_ID,
+    level: 3,
+    competitionId: K3_COMPETITION_ID,
+    ruleSet: K3_RULE_SET,
+    seasonStartMonth: 1,
+    seasonEndMonth: 12,
+    clubs: K3_CLUBS,
+  },
+  [K4_LEAGUE_ID]: {
+    id: K4_LEAGUE_ID,
+    name: "코리아 커뮤니티 4",
+    country: "대한민국",
+    tier: K4_LEAGUE_ID,
+    level: 4,
+    competitionId: K4_COMPETITION_ID,
+    ruleSet: K4_RULE_SET,
+    seasonStartMonth: 1,
+    seasonEndMonth: 12,
+    clubs: K4_CLUBS,
+  },
 };
 
 export const STARTER_CLUBS = [
+  ...K4_CLUBS.filter((club) => club.youthOpportunity >= 82).slice(0, 8),
+  ...K3_CLUBS.filter((club) => club.youthOpportunity >= 76).slice(0, 8),
   ...K2_CLUBS.filter((club) => club.youthOpportunity >= 78).slice(0, 8),
   ...K1_CLUBS.filter((club) => club.youthOpportunity >= 74).slice(0, 4),
 ];
 
 export function getAllClubs(): Club[] {
-  return [...K1_CLUBS, ...K2_CLUBS];
+  return [...K1_CLUBS, ...K2_CLUBS, ...K3_CLUBS, ...K4_CLUBS];
 }
 
 export function getClubsById(): Record<string, Club> {
@@ -686,9 +815,24 @@ export function createFictionalCompetitions(
       ];
     }),
   );
+  const cupFixtures = fixtures.filter((fixture) => fixture.competitionId === DOMESTIC_CUP_COMPETITION_ID);
+  const cupCompetitions: Record<string, Competition> = cupFixtures.length > 0
+    ? {
+        [DOMESTIC_CUP_COMPETITION_ID]: {
+          id: DOMESTIC_CUP_COMPETITION_ID,
+          name: DOMESTIC_CUP_NAME,
+          type: "cup" as const,
+          country: FICTIONAL_LEAGUES[K1_LEAGUE_ID].country,
+          seasonNumber,
+          leagueIds: Object.keys(FICTIONAL_LEAGUES) as LeagueTier[],
+          fixtureIds: cupFixtures.map((fixture) => fixture.id),
+        },
+      }
+    : {};
 
   return {
     ...leagueCompetitions,
+    ...cupCompetitions,
     ...playoffCompetitions,
   };
 }

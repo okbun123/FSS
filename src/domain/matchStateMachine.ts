@@ -57,6 +57,20 @@ const MATCH_ACTION_LABELS: Record<MatchAction, string> = {
   CONTINUE: "계속 진행",
 };
 
+const READABLE_MATCH_ACTION_LABELS: Record<MatchAction, string> = {
+  START_FIRST_HALF: "전반 시작",
+  RUN_TO_HALF_TIME: "하프타임까지 진행",
+  START_SECOND_HALF: "후반 시작",
+  RUN_TO_FULL_TIME: "경기 종료까지 진행",
+  START_EXTRA_TIME_FIRST_HALF: "연장 전반 시작",
+  RUN_TO_EXTRA_TIME_HALF_TIME: "연장 하프타임까지 진행",
+  START_EXTRA_TIME_SECOND_HALF: "연장 후반 시작",
+  RUN_TO_EXTRA_TIME_FULL_TIME: "연장 종료까지 진행",
+  START_PENALTY_SHOOTOUT: "승부차기 시작",
+  NEXT_PENALTY_KICK: "다음 키커 진행",
+  CONTINUE: "계속 진행",
+};
+
 const PHASE_ORDER: Record<MatchPhase, number> = {
   PRE_MATCH: 0,
   FIRST_HALF: 1,
@@ -748,7 +762,7 @@ export function advanceMatch(match: Match, action: MatchAction): Match {
 
 export function getAvailableMatchActions(match: Match): MatchControlAction[] {
   if (match.state.isPaused) {
-    return [{ id: "CONTINUE", label: MATCH_ACTION_LABELS.CONTINUE }];
+    return [{ id: "CONTINUE", label: READABLE_MATCH_ACTION_LABELS.CONTINUE }];
   }
 
   const action = (() => {
@@ -780,7 +794,7 @@ export function getAvailableMatchActions(match: Match): MatchControlAction[] {
     }
   })();
 
-  return action ? [{ id: action, label: MATCH_ACTION_LABELS[action] }] : [];
+  return action ? [{ id: action, label: READABLE_MATCH_ACTION_LABELS[action] }] : [];
 }
 
 export function isMatchReadyToFinalize(match: Match): boolean {

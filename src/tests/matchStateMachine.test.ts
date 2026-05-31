@@ -64,7 +64,7 @@ describe("matchStateMachine", () => {
     const actions = getAvailableMatchActions(match);
     const started = advanceMatch(match, actions[0].id);
 
-    expect(actions[0].label).toBe("전반전 시작");
+    expect(actions[0].label).toBe("전반 시작");
     expect(started.state.phase).toBe("FIRST_HALF");
     expect(started.state.minute).toBe(0);
   });

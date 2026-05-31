@@ -11,7 +11,7 @@ describe("generatePlayerRoll", () => {
     expect(first.age).toBeLessThanOrEqual(20);
     expect(first.potential).toBeGreaterThanOrEqual(72);
     expect(first.potential).toBeLessThanOrEqual(95);
-    expect(first.recommendations).toHaveLength(3);
+    expect(first.recommendations).toHaveLength(8);
   });
 
   it("sets exactly one dominant foot to 20 and keeps the weaker foot below 20", () => {

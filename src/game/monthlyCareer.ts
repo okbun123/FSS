@@ -1,7 +1,5 @@
 import {
   FICTIONAL_LEAGUES,
-  K1_LEAGUE_ID,
-  K2_LEAGUE_ID,
   createFictionalCompetitions,
   getClubsById,
   getClubById,
@@ -22,6 +20,7 @@ import type {
   RecentResult,
   Season,
   SeasonStats,
+  TransferOffer,
 } from "../domain/types";
 import {
   advanceMatch,
@@ -51,9 +50,18 @@ import {
   getAggregateScoreBeforeFixture,
   shouldUseKnockoutMatchState,
 } from "../domain/playoffs";
+import {
+  createInitialDomesticCupFixtures,
+  ensureCupWinner,
+  getCupResultLabel,
+  isDomesticCupFixture,
+  progressDomesticCupFixtures,
+} from "../domain/domesticCup";
 import { progressPromotionRelegation } from "../domain/promotionRelegation";
 import { applySeasonRollover } from "../domain/seasonRollover";
 import { applyClubSeasonEvolution } from "../domain/clubEvolution";
+import { createInitialNegotiation } from "../domain/negotiation";
+import { calculateTeamFit } from "../domain/teamFit";
 
 export interface CreateMonthlyCareerInput {
   name: string;
@@ -211,10 +219,12 @@ function withSyncedPlayerMetrics(career: CareerState): CareerState {
 }
 
 function createTables(leagues: Record<LeagueTier, League>, fixtures: readonly Fixture[]) {
-  return {
-    [K1_LEAGUE_ID]: calculateLeagueTable(leagues[K1_LEAGUE_ID], fixtures),
-    [K2_LEAGUE_ID]: calculateLeagueTable(leagues[K2_LEAGUE_ID], fixtures),
-  };
+  return Object.fromEntries(
+    Object.entries(leagues).map(([leagueId, league]) => [
+      leagueId,
+      calculateLeagueTable(league, fixtures),
+    ]),
+  ) as Record<LeagueTier, ReturnType<typeof calculateLeagueTable>>;
 }
 
 function sortFixturesByDate(fixtures: readonly Fixture[]): Fixture[] {
@@ -231,15 +241,27 @@ function replaceFixture(fixtures: readonly Fixture[], updatedFixture: Fixture): 
 }
 
 function withFixtures(career: CareerState, fixtures: Fixture[]): CareerState {
+  const progressedFixtures = progressDomesticCupFixtures({
+    fixtures,
+    clubsById: career.clubs,
+    seasonNumber: career.season.number,
+    seasonYear: career.season.year,
+  });
+  const weekTurns = progressedFixtures.length === fixtures.length
+    ? career.weekTurns
+    : updateWeekTurnStatuses(createWeekTurns(progressedFixtures), career.currentDate);
+
   return {
     ...career,
-    fixtures,
+    fixtures: progressedFixtures,
+    weekTurns,
     season: {
       ...career.season,
-      fixtures,
-      tables: createTables(career.leagues, fixtures),
+      fixtures: progressedFixtures,
+      months: createSeasonMonths(progressedFixtures, career.season.totalMonths),
+      tables: createTables(career.leagues, progressedFixtures),
     },
-    competitions: createFictionalCompetitions(career.season.number, fixtures),
+    competitions: createFictionalCompetitions(career.season.number, progressedFixtures),
   };
 }
 
@@ -262,7 +284,7 @@ function areFixturesComplete(fixtures: readonly Fixture[]): boolean {
 }
 
 function areRegularSeasonFixturesComplete(fixtures: readonly Fixture[]): boolean {
-  const regularFixtures = fixtures.filter((fixture) => !fixture.playoff);
+  const regularFixtures = fixtures.filter((fixture) => !fixture.playoff && !isDomesticCupFixture(fixture));
 
   return regularFixtures.length > 0 && areFixturesComplete(regularFixtures);
 }
@@ -280,6 +302,7 @@ function withPromotionRelegationProgress(career: CareerState): CareerState {
     tables,
     fixtures: career.fixtures,
     currentStatus: career.season.promotionRelegation,
+    leagueMode: career.leagueMode ?? "gameplay",
   });
   const fixtures = progress.fixtures;
   const weekTurns = progress.addedFixtureIds.length > 0
@@ -367,9 +390,20 @@ function createSeason(
   const seasonStartDate = getSeasonStartDate(year);
   const currentMonth = new Date(getWeekStartDate(seasonStartDate)).getUTCMonth() + 1;
   const fixtures = [
-    ...generateLeagueFixtures(leagues[K1_LEAGUE_ID], { seasonNumber, totalMonths: 12, seasonStartDate }),
-    ...generateLeagueFixtures(leagues[K2_LEAGUE_ID], { seasonNumber, totalMonths: 12, seasonStartDate }),
-  ];
+    ...Object.values(leagues).flatMap((league) =>
+      generateLeagueFixtures(league, { seasonNumber, totalMonths: 12, seasonStartDate }),
+    ),
+    ...createInitialDomesticCupFixtures({
+      clubs: Object.values(leagues).flatMap((league) => league.clubs),
+      seasonNumber,
+      seasonYear: year,
+    }),
+  ].sort(
+    (left, right) =>
+      left.date.localeCompare(right.date) ||
+      left.round - right.round ||
+      left.id.localeCompare(right.id),
+  );
 
   return {
     id: `season-${seasonNumber}`,
@@ -409,7 +443,6 @@ export function getCurrentMonthFixtures(career: CareerState): Fixture[] {
   return career.season.fixtures.filter(
     (fixture) =>
       fixture.month === career.season.currentMonth &&
-      fixture.leagueId === club.leagueId &&
       (fixture.homeClubId === club.id || fixture.awayClubId === club.id),
   );
 }
@@ -420,7 +453,6 @@ export function getNextPlayerFixture(career: CareerState): Fixture | undefined {
   return career.season.fixtures.find(
     (fixture) =>
       fixture.status === "scheduled" &&
-      fixture.leagueId === club.leagueId &&
       (fixture.homeClubId === club.id || fixture.awayClubId === club.id),
   );
 }
@@ -607,7 +639,7 @@ function simulateFixture(career: CareerState, fixture: Fixture, rng: RandomSourc
     }
   }
 
-  result = completeSimulatedPlayoffResult(career, fixture, result, rng);
+  result = ensureCupWinner(fixture, completeSimulatedPlayoffResult(career, fixture, result, rng), rng);
 
   return {
     ...fixture,
@@ -869,8 +901,8 @@ function openMatchForFixture(career: CareerState, fixture: Fixture): CareerState
     career.matches[matchId] ??
     createMatchForFixture({
       fixture: inProgressFixture,
-      homeClubName: getClubById(inProgressFixture.homeClubId)?.name,
-      awayClubName: getClubById(inProgressFixture.awayClubId)?.name,
+      homeClubName: career.clubs[inProgressFixture.homeClubId]?.name ?? getClubById(inProgressFixture.homeClubId)?.name,
+      awayClubName: career.clubs[inProgressFixture.awayClubId]?.name ?? getClubById(inProgressFixture.awayClubId)?.name,
       player: career.player,
       isKnockout,
       aggregateScore,
@@ -1127,11 +1159,19 @@ function completeSeason(career: CareerState): CareerState {
         tables,
         fixtures: career.season.fixtures,
         currentStatus: career.season.promotionRelegation,
+        leagueMode: career.leagueMode ?? "gameplay",
       }).status;
   const club = getCareerClub(career);
   const league = career.leagues[club.leagueId];
   const leaguePosition = getClubLeaguePosition(tables[club.leagueId], club.id);
   const achievement = leaguePosition === 1 ? "리그 우승" : leaguePosition <= 3 ? "상위권 시즌" : undefined;
+  const cupResults = Object.fromEntries(
+    Object.values(career.clubs).map((candidate) => [
+      candidate.id,
+      getCupResultLabel(career.season.fixtures, candidate.id),
+    ]),
+  ) as Record<string, string | undefined>;
+  const playerCupResult = cupResults[club.id];
   const seasonSummary = `${career.season.year} 시즌이 종료되었습니다. ${club.name}은 ${leaguePosition}위로 마쳤습니다.`;
   const historyEntry: CareerHistoryEntry = {
     id: `season-${career.season.number}-history`,
@@ -1145,7 +1185,7 @@ function completeSeason(career: CareerState): CareerState {
     assists: career.seasonStats.assists,
     averageRating: career.seasonStats.averageRating,
     leaguePosition,
-    achievement,
+    achievement: playerCupResult === "우승" ? "컵 대회 우승" : achievement,
   };
   const evolution = applyClubSeasonEvolution({
     leagues: career.leagues,
@@ -1153,6 +1193,7 @@ function completeSeason(career: CareerState): CareerState {
     tables,
     seasonNumber: career.season.number,
     promotionRelegation,
+    cupResults,
   });
   const majorEvolutionSummary = evolution.results
     .map((result) => ({
@@ -1223,7 +1264,7 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
   const weekTurns = createWeekTurns(season.fixtures);
   const currentDate = weekTurns[0]?.startDate ?? getSeasonStartDate(season.year);
   const careerWithoutEvent: CareerState = {
-    saveVersion: 3,
+    saveVersion: 4,
     currentDate,
     currentWeekStartDate: currentDate,
     player,
@@ -1271,6 +1312,9 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
       },
     ],
     monthlyDevelopmentLog: [],
+    archivedNonPlayableClubs: [],
+    playerContractStatus: "contracted",
+    leagueMode: "gameplay",
   };
 
   return withUnifiedFeed(
@@ -1282,7 +1326,7 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
 }
 
 export function advanceWeek(career: CareerState, input: AdvanceWeekInput = {}): CareerState {
-  if (career.season.isComplete || career.activeMatchId) {
+  if (career.playerContractStatus === "freeAgent" || career.season.isComplete || career.activeMatchId) {
     return career;
   }
 
@@ -1455,6 +1499,52 @@ export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {})
   );
 }
 
+function createFreeAgentOffers(career: CareerState, clubs: Record<string, Club>, leagues: Record<LeagueTier, League>): TransferOffer[] {
+  const playerOverall = calculateOverall(career.player);
+  const createdAt = new Date(Date.UTC(career.season.year + 1, 0, 1)).toISOString();
+
+  return Object.values(clubs)
+    .filter((club) => club.id !== career.player.clubId)
+    .map((club) => ({
+      club,
+      fit: calculateTeamFit({
+        club,
+        league: leagues[club.leagueId],
+        playerOverall,
+        selectedPosition: career.player.selectedPosition,
+      }),
+    }))
+    .sort((left, right) => right.fit.score - left.fit.score || right.club.reputation - left.club.reputation)
+    .slice(0, 6)
+    .map(({ club, fit }) => {
+      const salary = Math.round((450 + playerOverall * 10 + club.reputation * 8 + fit.score * 4) / 50) * 50;
+      const terms = {
+        salary,
+        contractYears: 2,
+        signingBonus: Math.round(salary * 0.2),
+        squadRole: fit.role === "starter" ? "regular" as const : fit.role === "rotation" ? "rotation" as const : "prospect" as const,
+        promisedPosition: career.player.selectedPosition,
+        appearanceBonus: Math.round(salary * 0.08),
+        goalBonus: Math.round(salary * 0.05),
+      };
+
+      return {
+        id: `free-agent-s${career.season.number + 1}-${club.id}`,
+        month: 1,
+        clubId: club.id,
+        clubName: club.name,
+        leagueId: club.leagueId,
+        squadRole: terms.squadRole,
+        salary,
+        createdAt,
+        expiresAt: new Date(Date.UTC(career.season.year + 1, 1, 1)).toISOString(),
+        contractTerms: terms,
+        negotiation: createInitialNegotiation(terms, createdAt),
+        description: `${club.name}이 자유계약 상태인 선수에게 ${fit.role === "starter" ? "주전 경쟁" : fit.role === "rotation" ? "로테이션" : "벤치"} 역할을 제안했습니다.`,
+      };
+    });
+}
+
 export function startNextSeason(career: CareerState): CareerState {
   if (!career.season.isComplete) {
     throw new Error("Cannot start next season before the current season is complete.");
@@ -1465,10 +1555,16 @@ export function startNextSeason(career: CareerState): CareerState {
     clubs: career.clubs,
     promotionRelegation: career.season.promotionRelegation,
     nextSeasonStartYear: career.season.year + 1,
+    archivedNonPlayableClubs: career.archivedNonPlayableClubs,
+    leagueMode: career.leagueMode ?? "gameplay",
   });
   const nextSeason = createSeason(rolled.leagues, career.season.number + 1, career.season.year + 1);
   const weekTurns = createWeekTurns(nextSeason.fixtures);
   const currentDate = weekTurns[0]?.startDate ?? getSeasonStartDate(nextSeason.year);
+  const playerBecameFreeAgent = rolled.relegatedOutClubIds.includes(career.player.clubId);
+  const freeAgentOffers = playerBecameFreeAgent
+    ? createFreeAgentOffers(career, rolled.clubs, rolled.leagues)
+    : [];
   const nextCareer: CareerState = {
     ...career,
     currentDate,
@@ -1491,7 +1587,7 @@ export function startNextSeason(career: CareerState): CareerState {
     contractYearsLeft: Math.max(1, career.contractYearsLeft - 1),
     injury: { severity: "healthy", monthsRemaining: 0 },
     seasonStats: emptySeasonStats(),
-    transferOffers: [],
+    transferOffers: freeAgentOffers,
     recentResults: [],
     monthlyDevelopmentLog: [],
     eventLog: [
@@ -1505,6 +1601,17 @@ export function startNextSeason(career: CareerState): CareerState {
         description: `${nextSeason.year} 시즌 일정이 발표되었습니다.`,
         createdAt: new Date().toISOString(),
       },
+      ...(playerBecameFreeAgent
+        ? [{
+            id: `season-${nextSeason.number}-free-agent-relegation`,
+            seasonNumber: nextSeason.number,
+            month: 1,
+            type: "transfer_offer" as const,
+            title: "자유계약 전환",
+            description: "소속팀이 비활성 리그로 강등되어 자유계약 신분이 되었습니다.",
+            createdAt: new Date().toISOString(),
+          }]
+        : []),
     ].slice(-EVENT_LOG_LIMIT),
     notices: [
       {
@@ -1514,8 +1621,20 @@ export function startNextSeason(career: CareerState): CareerState {
         description: `${nextSeason.year}시즌 일정이 발표되었습니다.`,
         tone: "success",
       },
+      ...(playerBecameFreeAgent
+        ? [{
+            id: `season-${nextSeason.number}-free-agent-relegation`,
+            month: 1,
+            title: "자유계약 전환",
+            description: "소속팀이 비활성 리그로 강등되어 자유계약 신분이 되었습니다.",
+            tone: "warning" as const,
+          }]
+        : []),
     ],
     currentEvent: undefined,
+    archivedNonPlayableClubs: rolled.archivedNonPlayableClubs,
+    playerContractStatus: playerBecameFreeAgent ? "freeAgent" : "contracted",
+    leagueMode: career.leagueMode ?? "gameplay",
   };
 
   return withUnifiedFeed(

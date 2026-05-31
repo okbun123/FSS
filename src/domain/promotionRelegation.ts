@@ -20,6 +20,8 @@ import type {
 
 const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
 const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
+const K3_LEAGUE_ID = "k3_fictional" satisfies LeagueTier;
+const K4_LEAGUE_ID = "k4_fictional" satisfies LeagueTier;
 
 export interface PromotionRelegationProgressInput {
   seasonNumber: number;
@@ -28,6 +30,7 @@ export interface PromotionRelegationProgressInput {
   tables: Record<LeagueTier, LeagueTableRow[]>;
   fixtures: readonly Fixture[];
   currentStatus?: PromotionRelegationStatus;
+  leagueMode?: "realistic" | "gameplay";
 }
 
 export interface PromotionRelegationProgressResult {
@@ -88,6 +91,8 @@ function isSpecialBottomClub(ruleSet: League["ruleSet"], clubId?: string): boole
 function createInitialStatus(input: PromotionRelegationProgressInput): PromotionRelegationStatus {
   const k1RuleSet = getLeagueRuleSet(K1_LEAGUE_ID, input.seasonStartYear);
   const k2RuleSet = getLeagueRuleSet(K2_LEAGUE_ID, input.seasonStartYear);
+  const k3RuleSet = getLeagueRuleSet(K3_LEAGUE_ID, input.seasonStartYear);
+  const k4RuleSet = getLeagueRuleSet(K4_LEAGUE_ID, input.seasonStartYear);
   const k1Table = input.tables[K1_LEAGUE_ID];
   const k2Table = input.tables[K2_LEAGUE_ID];
   const directPromotionClubIds = k2Table.slice(0, k2RuleSet.directPromotionSlots).map((row) => row.clubId);
@@ -128,6 +133,8 @@ function createInitialStatus(input: PromotionRelegationProgressInput): Promotion
     ruleSetIds: {
       [K1_LEAGUE_ID]: k1RuleSet.id,
       [K2_LEAGUE_ID]: k2RuleSet.id,
+      [K3_LEAGUE_ID]: k3RuleSet.id,
+      [K4_LEAGUE_ID]: k4RuleSet.id,
     },
     stage: promotionPlayoffRows.length >= 2 ? "promotionPlayoffSemifinals" : "resolved",
     isResolved: promotionPlayoffRows.length < 2,
@@ -162,6 +169,85 @@ function appendFixtures(
       left.round - right.round ||
       left.id.localeCompare(right.id),
   );
+}
+
+function getClubFromLeague(input: PromotionRelegationProgressInput, clubId?: string) {
+  if (!clubId) {
+    return undefined;
+  }
+
+  return Object.values(input.leagues)
+    .flatMap((league) => league.clubs)
+    .find((club) => club.id === clubId);
+}
+
+function appendLowerDivisionMovements(
+  input: PromotionRelegationProgressInput,
+  status: PromotionRelegationStatus,
+): PromotionRelegationStatus {
+  const k2Table = input.tables[K2_LEAGUE_ID] ?? [];
+  const k3Table = input.tables[K3_LEAGUE_ID] ?? [];
+  const k4Table = input.tables[K4_LEAGUE_ID] ?? [];
+  const promoted: string[] = [...(status.promotedClubIds ?? status.directPromotionClubIds ?? [])];
+  const relegated: string[] = [...(status.relegatedClubIds ?? status.directRelegationClubIds ?? [])];
+  const notes: string[] = [];
+  const k2Bottom = k2Table.at(-1);
+  const k3Champion = k3Table[0];
+  const k3ChampionClub = getClubFromLeague(input, k3Champion?.clubId);
+
+  if (k2Bottom && k3Champion && k3ChampionClub?.licenseEligible) {
+    promoted.push(k3Champion.clubId);
+    relegated.push(k2Bottom.clubId);
+    notes.push(`${clubName(input.tables, k3Champion.clubId)}가 라이선스 조건을 충족해 2부 승강전을 통과했습니다.`);
+  }
+
+  const k3Target = input.leagues[K3_LEAGUE_ID]?.ruleSet.teamCountTargetByLeague[K3_LEAGUE_ID] ?? 16;
+  const k3AtTarget = (input.leagues[K3_LEAGUE_ID]?.clubs.length ?? 0) >= k3Target;
+  const k3Bottom = k3Table.at(-1);
+  const k4Champion = k4Table[0];
+  const k4RunnerUp = k4Table[1];
+  const k4ChampionClub = getClubFromLeague(input, k4Champion?.clubId);
+  const k4RunnerUpClub = getClubFromLeague(input, k4RunnerUp?.clubId);
+
+  if (k4Champion && k4ChampionClub?.promotionIntent && k4ChampionClub.licenseEligible) {
+    promoted.push(k4Champion.clubId);
+    notes.push(`${clubName(input.tables, k4Champion.clubId)}가 승격 의사를 충족해 3부로 승격합니다.`);
+  }
+
+  if (k3AtTarget && k3Bottom && k4RunnerUp && k4RunnerUpClub?.promotionIntent && k4RunnerUpClub.licenseEligible) {
+    promoted.push(k4RunnerUp.clubId);
+    relegated.push(k3Bottom.clubId);
+    notes.push(`${clubName(input.tables, k4RunnerUp.clubId)}가 3부 최하위팀과의 승강전을 통과했습니다.`);
+  }
+
+  if ((input.leagueMode ?? "gameplay") === "gameplay") {
+    const k4Bottom = k4Table.at(-1);
+    if (k4Bottom) {
+      relegated.push(k4Bottom.clubId);
+      notes.push(`${clubName(input.tables, k4Bottom.clubId)}가 비활성 5부 풀로 이동합니다.`);
+    }
+  }
+
+  return {
+    ...status,
+    promotedClubIds: unique(promoted),
+    relegatedClubIds: unique(relegated),
+    note: unique([status.note, ...notes]).join(" / "),
+  };
+}
+
+function resolvedResult(
+  input: PromotionRelegationProgressInput,
+  result: PromotionRelegationProgressResult,
+): PromotionRelegationProgressResult {
+  if (!result.status.isResolved && result.status.stage !== "resolved") {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: appendLowerDivisionMovements(input, result.status),
+  };
 }
 
 function stageFixtures(fixtures: readonly Fixture[], status: PromotionRelegationStatus, stage = status.stage): Fixture[] {
@@ -426,15 +512,15 @@ export function progressPromotionRelegation(
   const status = input.currentStatus ?? createInitialStatus(input);
 
   if (!input.currentStatus) {
-    return createInitialPlayoffs(input, status);
+    return resolvedResult(input, createInitialPlayoffs(input, status));
   }
 
   if (status.isResolved || status.stage === "resolved") {
-    return {
+    return resolvedResult(input, {
       fixtures: [...input.fixtures],
       status,
       addedFixtureIds: [],
-    };
+    });
   }
 
   const next = status.stage === "promotionPlayoffSemifinals"
@@ -445,11 +531,11 @@ export function progressPromotionRelegation(
         ? resolvePromotionRelegationPlayoff(input, status)
         : undefined;
 
-  return next ?? {
+  return resolvedResult(input, next ?? {
     fixtures: [...input.fixtures],
     status,
     addedFixtureIds: [],
-  };
+  });
 }
 
 export function getPromotionRelegationZoneLabel(input: {

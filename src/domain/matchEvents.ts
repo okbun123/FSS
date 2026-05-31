@@ -9,9 +9,9 @@ import type {
 
 export const MATCH_PHASE_LABELS: Record<MatchPhase, string> = {
   PRE_MATCH: "경기 전",
-  FIRST_HALF: "전반전",
+  FIRST_HALF: "전반",
   HALF_TIME: "하프타임",
-  SECOND_HALF: "후반전",
+  SECOND_HALF: "후반",
   FULL_TIME: "정규시간 종료",
   EXTRA_TIME_FIRST_HALF: "연장 전반",
   EXTRA_TIME_HALF_TIME: "연장 하프타임",

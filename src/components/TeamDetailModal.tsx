@@ -1,5 +1,6 @@
+import { formatStars, getPublicClubStars } from "../domain/clubPublicInfo";
 import type { CareerState } from "../domain/types";
-import { getTeamDetail } from "../domain/teamDetails";
+import { getTeamDetail, type TeamLeagueMovement } from "../domain/teamDetails";
 import { TeamNameLink } from "./TeamNameLink";
 
 interface TeamDetailModalProps {
@@ -8,6 +9,13 @@ interface TeamDetailModalProps {
   onClose: () => void;
   onOpenTeam: (clubId: string) => void;
 }
+
+const MOVEMENT_LABELS: Record<TeamLeagueMovement, string> = {
+  promoted: "승격",
+  relegated: "강등",
+  stayed: "잔류",
+  unknown: "기록 없음",
+};
 
 function formatDate(dateIso: string): string {
   const date = new Date(dateIso);
@@ -30,8 +38,10 @@ export function TeamDetailModal({
   onOpenTeam,
 }: TeamDetailModalProps) {
   const detail = getTeamDetail(career, clubId);
+  const club = career.clubs[clubId];
+  const stars = club ? getPublicClubStars(club) : undefined;
 
-  if (!detail) {
+  if (!detail || !club || !stars) {
     return (
       <div className="modal-backdrop">
         <section className="team-detail-modal" role="dialog" aria-modal="true" aria-labelledby="team-detail-title">
@@ -70,30 +80,25 @@ export function TeamDetailModal({
           </div>
           <div>
             <dt>평판</dt>
-            <dd>{detail.reputation}</dd>
+            <dd>{formatStars(stars.reputationStars)}</dd>
           </div>
           <div>
-            <dt>예산 수준</dt>
-            <dd>{detail.budgetLevel}</dd>
+            <dt>예산</dt>
+            <dd>{formatStars(stars.budgetStars)}</dd>
           </div>
           <div>
-            <dt>스쿼드 전력</dt>
-            <dd>{detail.squadStrength}</dd>
+            <dt>스쿼드</dt>
+            <dd>{formatStars(stars.squadStrengthStars)}</dd>
           </div>
           <div>
             <dt>유스 기회</dt>
-            <dd>{detail.youthOpportunity}</dd>
+            <dd>{formatStars(stars.youthOpportunityStars)}</dd>
           </div>
           <div>
-            <dt>예상 순위</dt>
-            <dd>{detail.predictedFinish > 0 ? `${detail.predictedFinish}위` : "-"}</dd>
+            <dt>훈련 환경</dt>
+            <dd>{formatStars(stars.trainingFacilityStars)}</dd>
           </div>
         </dl>
-
-        <section className="team-detail-section">
-          <h3>훈련 시설</h3>
-          <p>{detail.trainingFacilitiesSummary}</p>
-        </section>
 
         <section className="team-detail-section">
           <h3>최근 5경기</h3>
@@ -104,7 +109,7 @@ export function TeamDetailModal({
               <table>
                 <thead>
                   <tr>
-                    <th scope="col">폼</th>
+                    <th scope="col">결과</th>
                     <th scope="col">스코어</th>
                     <th scope="col">상대</th>
                     <th scope="col">대회</th>
@@ -132,29 +137,29 @@ export function TeamDetailModal({
         </section>
 
         <section className="team-detail-section">
-          <h3>지난 시즌 결과</h3>
+          <h3>지난 시즌</h3>
           {detail.lastSeasonResult.fallback ? (
-            <p className="empty-note">{detail.lastSeasonResult.fallback}</p>
+            <p className="empty-note">지난 시즌 기록이 아직 없습니다.</p>
           ) : (
             <dl className="team-detail-grid compact">
               <div>
                 <dt>최종 순위</dt>
-                <dd>{detail.lastSeasonResult.finalLeaguePosition}위</dd>
+                <dd>{detail.lastSeasonResult.finalLeaguePosition ? `${detail.lastSeasonResult.finalLeaguePosition}위` : "-"}</dd>
               </div>
               <div>
                 <dt>예상 순위</dt>
                 <dd>{detail.lastSeasonResult.predictedFinish ? `${detail.lastSeasonResult.predictedFinish}위` : "-"}</dd>
               </div>
               <div>
-                <dt>승강 결과</dt>
-                <dd>{detail.lastSeasonResult.movementLabel}</dd>
+                <dt>리그 결과</dt>
+                <dd>{MOVEMENT_LABELS[detail.lastSeasonResult.movement]}</dd>
               </div>
               <div>
                 <dt>국내 컵</dt>
                 <dd>{detail.lastSeasonResult.cupResult ?? "해당 없음"}</dd>
               </div>
               <div>
-                <dt>대륙 대회</dt>
+                <dt>대륙 컵</dt>
                 <dd>{detail.lastSeasonResult.continentalResult ?? "해당 없음"}</dd>
               </div>
             </dl>

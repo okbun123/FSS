@@ -16,9 +16,9 @@ function eventScore(event: MatchEvent): string {
 export function MatchTimeline({ events }: { events: MatchEvent[] }) {
   return (
     <section className="data-panel match-timeline-panel">
-      <h2>타임라인</h2>
+      <h2>경기 로그</h2>
       {events.length === 0 ? (
-        <p className="empty-note">아직 기록된 이벤트가 없습니다.</p>
+        <p className="empty-note">아직 표시할 이벤트가 없습니다.</p>
       ) : (
         <ol className="match-timeline">
           {[...events].reverse().map((event) => (

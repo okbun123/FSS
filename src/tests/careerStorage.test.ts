@@ -41,7 +41,7 @@ function createCareer() {
   });
 }
 
-describe("careerStorage v3", () => {
+describe("careerStorage v4", () => {
   it("saves and loads a versioned weekly career", () => {
     const storage = new MemoryStorage();
     const career = createCareer();
@@ -127,7 +127,7 @@ describe("careerStorage v3", () => {
     const career = createCareer();
     const saveFile = createCareerSaveFile(career, new Date("2027-02-01T00:00:00.000Z"));
 
-    expect(saveFile.saveVersion).toBe(3);
+    expect(saveFile.saveVersion).toBe(CURRENT_SAVE_VERSION);
     expect(saveFile.careerState.season.currentMonth).toBeGreaterThanOrEqual(2);
     expect(saveFile.careerState.currentDate).toBeTruthy();
   });

@@ -11,14 +11,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 button,
@@ -41,16 +49,21 @@ button:disabled {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100%;
   padding: 24px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
     #eef2ed;
+  overflow: hidden;
 }
 
 .screen-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   width: min(100%, 980px);
+  height: 100%;
   margin: 0 auto;
+  min-height: 0;
   border: 1px solid #d5ded6;
   border-radius: 8px;
   background: #fbfcf8;
@@ -69,6 +82,7 @@ button:disabled {
   gap: 20px;
   align-items: start;
   margin-bottom: 22px;
+  min-height: 0;
 }
 
 .screen-heading h1,
@@ -96,6 +110,11 @@ button:disabled {
 .stacked-tab {
   display: grid;
   gap: 16px;
+  min-height: 0;
+}
+
+.screen-body {
+  overflow: hidden;
 }
 
 .screen-actions,
@@ -223,10 +242,23 @@ button:disabled {
 .data-panel {
   display: grid;
   gap: 14px;
+  min-height: 0;
   border: 1px solid #d5ded6;
   border-radius: 8px;
   background: #f8faf6;
   padding: 16px;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-title-row span {
+  color: #61716a;
+  font-weight: 900;
 }
 
 .career-dashboard {
@@ -243,6 +275,183 @@ button:disabled {
   grid-template-columns: minmax(420px, 1.1fr) minmax(360px, 0.9fr);
   gap: 16px;
   align-items: start;
+}
+
+.creation-step-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.28fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.creation-step-tabs {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.creation-step-panel,
+.creation-stat-panel {
+  align-content: start;
+  overflow: auto;
+}
+
+.creation-stat-panel {
+  max-height: 100%;
+}
+
+.attribute-compact-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.attribute-compact-grid section {
+  display: grid;
+  gap: 8px;
+}
+
+.attribute-compact-grid h3 {
+  margin: 0;
+  color: #111816;
+  font-size: 0.92rem;
+}
+
+.attribute-compact-grid dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.attribute-compact-grid div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid #e1e7df;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 6px 8px;
+}
+
+.attribute-compact-grid dt,
+.attribute-compact-grid dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.attribute-compact-grid dt {
+  min-width: 0;
+  color: #61716a;
+  overflow-wrap: anywhere;
+}
+
+.attribute-compact-grid dd {
+  color: #111816;
+}
+
+.position-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fit-poor {
+  color: #9a3328;
+}
+
+.fit-average {
+  color: #95651f;
+}
+
+.fit-good {
+  color: #17624f;
+}
+
+.recommendation.fit-poor {
+  border-color: #efc7bf;
+  background: #fff8f6;
+}
+
+.recommendation.fit-average {
+  border-color: #e4d0a5;
+  background: #fffaf0;
+}
+
+.recommendation.fit-good,
+.top-recommendation {
+  border-color: #9fc5ad;
+  background: #f4fbf6;
+}
+
+.team-selection-stack {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+}
+
+.team-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.team-filter-grid label {
+  display: grid;
+  gap: 6px;
+  color: #43534c;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.team-filter-grid select {
+  min-height: 38px;
+  border: 1px solid #cbd7ce;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111816;
+  padding: 0 10px;
+}
+
+.team-table-scroll {
+  max-height: min(410px, 46vh);
+}
+
+.compact-table {
+  min-width: 760px;
+}
+
+.compact-table th,
+.compact-table td {
+  padding: 7px 8px;
+  font-size: 0.86rem;
+}
+
+.selected-row td {
+  background: #eef9f2;
+}
+
+.table-action-button {
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.pagination-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-row span {
+  color: #61716a;
+  font-weight: 900;
+}
+
+.creation-nav-actions {
+  justify-content: flex-end;
 }
 
 .creation-form {
@@ -797,6 +1006,8 @@ td {
 
 .match-screen {
   gap: 18px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .match-header {
@@ -861,6 +1072,23 @@ td {
   gap: 16px;
 }
 
+.match-fixed-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.86fr) minmax(320px, 1fr) minmax(260px, 0.86fr);
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.match-team-column,
+.match-center-column {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+  align-content: start;
+  overflow: auto;
+}
+
 .match-side-grid {
   display: grid;
   grid-template-columns: minmax(280px, 0.7fr) minmax(280px, 0.7fr) minmax(360px, 1fr);
@@ -870,6 +1098,7 @@ td {
 
 .match-roster-panel {
   align-content: start;
+  overflow: auto;
 }
 
 .match-panel-heading h2 {
@@ -988,6 +1217,11 @@ td {
   padding: 10px;
 }
 
+.match-timeline-panel {
+  max-height: min(360px, 40vh);
+  overflow: auto;
+}
+
 .match-timeline p {
   grid-column: 2 / -1;
   margin: 0;
@@ -1025,10 +1259,12 @@ td {
   }
 
   .creation-layout,
+  .creation-step-layout,
   .tab-grid-main,
   .career-main-grid,
   .career-two-column,
   .match-main-grid,
+  .match-fixed-grid,
   .match-side-grid,
   .form-grid,
   .attribute-table-grid,
@@ -1044,6 +1280,19 @@ td {
   .modal-header,
   .league-browser-header {
     grid-template-columns: 1fr;
+  }
+
+  .creation-step-tabs,
+  .position-grid,
+  .team-filter-grid,
+  .attribute-compact-grid dl {
+    grid-template-columns: 1fr;
+  }
+
+  .creation-step-tabs,
+  .creation-stat-panel,
+  .creation-step-panel {
+    grid-column: 1;
   }
 
   .screen-actions,

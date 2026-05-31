@@ -23,12 +23,15 @@ function createCareer(clubId = STARTER_CLUBS[0].id, seed = "weekly-career") {
 }
 
 describe("weekly career loop", () => {
-  it("creates a v3 weekly career with optional monthly event state", () => {
+  it("creates a v4 weekly career with optional monthly event state", () => {
     const career = createCareer();
 
-    expect(career.saveVersion).toBe(3);
+    expect(career.saveVersion).toBe(4);
     expect(career.season.currentMonth).toBeGreaterThanOrEqual(2);
     expect(career.season.fixtures.length).toBeGreaterThan(500);
+    expect(Object.keys(career.leagues)).toHaveLength(4);
+    expect(career.playerContractStatus).toBe("contracted");
+    expect(career.leagueMode).toBe("gameplay");
     expect(career.eventLog[0]?.type).toBe("career_start");
 
     if (career.currentEvent) {

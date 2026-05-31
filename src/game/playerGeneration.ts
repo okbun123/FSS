@@ -9,7 +9,7 @@ import type {
 } from "../domain/types";
 import { createSeededRandom, type RandomSource } from "./random";
 import { calculateMarketValue, calculateOverall } from "./overall";
-import { recommendPositions } from "./positionRecommendation";
+import { calculatePositionRecommendations } from "./positionRecommendation";
 
 export interface PlayerRoll {
   seed: string;
@@ -288,7 +288,7 @@ export function generatePlayerRoll(seed: string | number = Date.now()): PlayerRo
   const attributes = applyPersonality(applyPatch(createBaseAttributes(rng, age), archetype.modifiers), personality);
   const footedness = rollFootedness(rng);
   const basePotential = rollPotential(rng, age, personality);
-  const previewRecommendations = recommendPositions({
+  const previewRecommendations = calculatePositionRecommendations({
     attributes,
     potential: basePotential,
     leftFoot: footedness.leftFoot,
@@ -299,7 +299,7 @@ export function generatePlayerRoll(seed: string | number = Date.now()): PlayerRo
     basePotential,
     Math.min(95, topOverall + getYouthGrowthRoom(age) + randomInt(rng, 0, 3)),
   );
-  const recommendations = recommendPositions({
+  const recommendations = calculatePositionRecommendations({
     attributes,
     potential,
     leftFoot: footedness.leftFoot,

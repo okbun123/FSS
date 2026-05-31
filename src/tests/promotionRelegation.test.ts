@@ -3,6 +3,8 @@ import {
   FICTIONAL_LEAGUES,
   K1_LEAGUE_ID,
   K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
 } from "../data/fictionalLeagues";
 import { progressPromotionRelegation } from "../domain/promotionRelegation";
 import {
@@ -56,6 +58,8 @@ function progressFor2026(fixtures: readonly Fixture[] = [regularFixture()]) {
     tables: {
       [K1_LEAGUE_ID]: tableRows(FICTIONAL_LEAGUES[K1_LEAGUE_ID].clubs),
       [K2_LEAGUE_ID]: tableRows(FICTIONAL_LEAGUES[K2_LEAGUE_ID].clubs),
+      [K3_LEAGUE_ID]: tableRows(FICTIONAL_LEAGUES[K3_LEAGUE_ID].clubs),
+      [K4_LEAGUE_ID]: tableRows(FICTIONAL_LEAGUES[K4_LEAGUE_ID].clubs),
     },
     fixtures,
   });

@@ -32,7 +32,7 @@ function roundToNearest(value: number, unit: number): number {
 }
 
 function getCurrentClub(career: CareerState): Club {
-  const club = getClubById(career.player.clubId);
+  const club = career.clubs[career.player.clubId] ?? getClubById(career.player.clubId);
 
   if (!club) {
     throw new Error(`Unknown current club: ${career.player.clubId}`);
@@ -171,11 +171,11 @@ export function createTransferOfferForCareer(career: CareerState): TransferOffer
 
   const currentClub = getCurrentClub(career);
   const overall = calculateOverall(career.player);
-  const candidates = getAllClubs()
+  const candidates = Object.values(career.clubs).length > 0 ? Object.values(career.clubs) : getAllClubs();
+  const target = candidates
     .filter((club) => club.id !== currentClub.id)
     .filter((club) => Math.abs(club.squadStrength - overall) <= 12)
-    .sort((left, right) => right.reputation - left.reputation);
-  const target = candidates[0];
+    .sort((left, right) => right.reputation - left.reputation)[0];
 
   if (!target) {
     return undefined;
@@ -219,7 +219,7 @@ export function acceptTransferOffer(
 ): CareerState {
   const offer = getOffer(career, offerId);
   const currentClub = getCurrentClub(career);
-  const targetClub = getClubById(offer.clubId);
+  const targetClub = career.clubs[offer.clubId] ?? getClubById(offer.clubId);
 
   if (!targetClub) {
     throw new Error(`Unknown target club: ${offer.clubId}`);
@@ -259,6 +259,7 @@ export function acceptTransferOffer(
       ...career.player,
       clubId: offer.clubId,
     },
+    playerContractStatus: "contracted",
     reputation: nextReputation,
     fanSupport: clamp((career.fanSupport ?? 50) + fanSupportDelta, 10, 95),
     salary: terms.salary,
