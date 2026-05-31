@@ -25,6 +25,8 @@ export type Personality =
   | "teamPlayer"
   | "maverick";
 
+export type SquadRole = "prospect" | "rotation" | "regular" | "keyPlayer";
+
 export interface TechnicalAttributes {
   finishing: number;
   passing: number;
@@ -238,6 +240,8 @@ export interface DevelopmentReport {
 
 export interface SeasonBaseline {
   seasonNumber: number;
+  clubId: string;
+  clubName: string;
   coachTrust: number;
   fanSupport: number;
   reputation: number;
@@ -287,6 +291,23 @@ export interface SeasonStats {
   keyMomentsWon: number;
 }
 
+export type ContractOfferType =
+  | "stay"
+  | "strongerLowerPlayingTime"
+  | "weakerHigherPlayingTime";
+
+export interface ContractOffer {
+  id: string;
+  type: ContractOfferType;
+  clubId: string;
+  clubName: string;
+  salary: number;
+  contractYears: number;
+  squadRole: SquadRole;
+  fanSupportChange: number;
+  description: string;
+}
+
 export interface CareerState {
   saveVersion: number;
   player: Player;
@@ -300,6 +321,9 @@ export interface CareerState {
   fanSupport: number;
   reputation: number;
   tacticalFit: number;
+  salary: number;
+  contractYearsLeft: number;
+  squadRole: SquadRole;
   weeklyActionCompleted: boolean;
   seasonStats: SeasonStats;
   availableWeeklyActions: WeeklyAction[];
@@ -307,6 +331,9 @@ export interface CareerState {
   developmentLog: DevelopmentReport[];
   seasonBaseline: SeasonBaseline;
   careerHistory: CareerHistoryEntry[];
+  seasonOffers: ContractOffer[];
+  acceptedContractOfferId?: string;
+  rejectedContractOfferIds: string[];
 }
 
 export interface CareerWeek {

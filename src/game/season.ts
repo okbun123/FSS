@@ -22,7 +22,7 @@ interface StartNextSeasonOptions {
 
 type SeasonBaselineCareer = Pick<
   CareerState,
-  "season" | "player" | "coachTrust" | "fanSupport" | "reputation"
+  "season" | "player" | "league" | "coachTrust" | "fanSupport" | "reputation"
 >;
 
 function clamp(value: number, min = 0, max = 100): number {
@@ -43,10 +43,18 @@ function cloneAttributes(attributes: Attributes): Attributes {
   };
 }
 
+function getSeasonClubId(career: CareerState): string {
+  return career.seasonBaseline?.seasonNumber === career.season.number
+    ? career.seasonBaseline.clubId
+    : career.player.clubId;
+}
+
 function getPlayerSeasonMatches(career: CareerState) {
+  const seasonClubId = getSeasonClubId(career);
+
   return career.season.matches.filter(
     (match) =>
-      match.homeClubId === career.player.clubId || match.awayClubId === career.player.clubId,
+      match.homeClubId === seasonClubId || match.awayClubId === seasonClubId,
   );
 }
 
@@ -72,7 +80,7 @@ function getClubScore(career: CareerState, club: Club): number {
     club.reputation * 0.55 +
     getDeterministicSwing(club.id, career.season.number);
 
-  if (club.id !== career.player.clubId) {
+  if (club.id !== getSeasonClubId(career)) {
     return baseScore;
   }
 
@@ -132,8 +140,12 @@ export function createEmptySeasonStats(): SeasonStats {
 }
 
 export function createSeasonBaseline(career: SeasonBaselineCareer): SeasonBaseline {
+  const club = career.league.clubs.find((candidate) => candidate.id === career.player.clubId);
+
   return {
     seasonNumber: career.season.number,
+    clubId: career.player.clubId,
+    clubName: club?.name ?? "소속 없음",
     coachTrust: career.coachTrust,
     fanSupport: career.fanSupport,
     reputation: career.reputation,
@@ -148,11 +160,12 @@ export function isSeasonComplete(career: CareerState): boolean {
 }
 
 export function calculateLeaguePosition(career: CareerState): number {
+  const seasonClubId = getSeasonClubId(career);
   const rankedClubs = [...career.league.clubs].sort(
     (left, right) => getClubScore(career, right) - getClubScore(career, left),
   );
 
-  return rankedClubs.findIndex((club) => club.id === career.player.clubId) + 1;
+  return rankedClubs.findIndex((club) => club.id === seasonClubId) + 1;
 }
 
 export function createAttributeGrowthSummary(career: CareerState): AttributeGrowthEntry[] {
@@ -179,12 +192,12 @@ export function createAttributeGrowthSummary(career: CareerState): AttributeGrow
 
 export function createSeasonSummary(career: CareerState): SeasonSummary {
   const baseline = career.seasonBaseline ?? createSeasonBaseline(career);
-  const playerClub = career.league.clubs.find((club) => club.id === career.player.clubId);
+  const playerClub = career.league.clubs.find((club) => club.id === baseline.clubId);
 
   return {
     seasonNumber: career.season.number,
-    clubId: career.player.clubId,
-    clubName: playerClub?.name ?? "소속 없음",
+    clubId: baseline.clubId,
+    clubName: baseline.clubName ?? playerClub?.name ?? "소속 없음",
     leaguePosition: calculateLeaguePosition(career),
     appearances: career.seasonStats.appearances,
     goals: career.seasonStats.goals,
@@ -234,10 +247,16 @@ export function startNextSeason(
     condition: clamp(career.condition + 12, 65, 92),
     fatigue: clamp(career.fatigue - 22, 5, 35),
     form: clamp(Math.round(50 + (career.form - 50) * 0.25), 40, 62),
+    contractYearsLeft: career.acceptedContractOfferId
+      ? career.contractYearsLeft
+      : Math.max(1, career.contractYearsLeft - 1),
     weeklyActionCompleted: false,
     seasonStats: createEmptySeasonStats(),
     availableWeeklyActions: WEEKLY_ACTIONS,
     developmentLog: [],
+    seasonOffers: [],
+    acceptedContractOfferId: undefined,
+    rejectedContractOfferIds: [],
     careerHistory: [
       ...(career.careerHistory ?? []),
       createHistoryEntry(summary, completedAt),

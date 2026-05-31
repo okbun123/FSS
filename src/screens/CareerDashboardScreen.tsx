@@ -10,6 +10,7 @@ import type {
   AttributeFocus,
   AttributeGrowthEntry,
   CareerState,
+  ContractOffer,
   DevelopmentReport,
   KeyMoment,
   Match,
@@ -20,6 +21,13 @@ import type {
 } from "../domain/types";
 import { ScreenShell } from "../components/ScreenShell";
 import { advanceWeek, getCurrentWeek } from "../game/career";
+import {
+  acceptContractOffer,
+  getSeasonContractOffers,
+  OFFER_TYPE_LABELS,
+  rejectContractOffer,
+  SQUAD_ROLE_LABELS,
+} from "../game/contracts";
 import {
   generateKeyMoments,
   simulateCurrentMatch,
@@ -106,6 +114,10 @@ function formatGrowthAmount(amount: number): string {
 
 function formatSignedChange(value: number): string {
   return value > 0 ? `+${value}` : `${value}`;
+}
+
+function formatSalary(salary: number): string {
+  return `${salary.toLocaleString("ko-KR")}만`;
 }
 
 function aggregateGrowth(reports: DevelopmentReport[]): AttributeGrowthEntry[] {
@@ -243,6 +255,88 @@ function SeasonSummaryPanel({
   );
 }
 
+function ContractOffersPanel({
+  career,
+  offers,
+  onAcceptOffer,
+  onRejectOffer,
+}: {
+  career: CareerState;
+  offers: ContractOffer[];
+  onAcceptOffer: (offerId: string) => void;
+  onRejectOffer: (offerId: string) => void;
+}) {
+  const acceptedOfferId = career.acceptedContractOfferId;
+  const rejectedOfferIds = new Set(career.rejectedContractOfferIds);
+
+  return (
+    <section className="contract-offers-panel" aria-labelledby="contract-offers-title">
+      <div className="section-heading">
+        <span className="eyebrow">계약과 이적</span>
+        <h2 id="contract-offers-title">시즌 종료 제안</h2>
+      </div>
+
+      {offers.length === 0 ? (
+        <p className="empty-note">이번 시즌에는 공식 제안이 없습니다. 현재 계약으로 다음 시즌을 준비합니다.</p>
+      ) : (
+        <div className="offer-list">
+          {offers.map((offer) => {
+            const isAccepted = acceptedOfferId === offer.id;
+            const isRejected = rejectedOfferIds.has(offer.id);
+            const decisionMade = Boolean(acceptedOfferId);
+
+            return (
+              <article key={offer.id}>
+                <div>
+                  <span>{OFFER_TYPE_LABELS[offer.type]}</span>
+                  <h3>{offer.clubName}</h3>
+                  <p>{offer.description}</p>
+                </div>
+                <dl>
+                  <div>
+                    <dt>연봉</dt>
+                    <dd>{formatSalary(offer.salary)}</dd>
+                  </div>
+                  <div>
+                    <dt>계약 기간</dt>
+                    <dd>{offer.contractYears}년</dd>
+                  </div>
+                  <div>
+                    <dt>역할</dt>
+                    <dd>{SQUAD_ROLE_LABELS[offer.squadRole]}</dd>
+                  </div>
+                  <div>
+                    <dt>팬 지지</dt>
+                    <dd>{formatSignedChange(offer.fanSupportChange)}</dd>
+                  </div>
+                </dl>
+                <div className="offer-actions">
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => onAcceptOffer(offer.id)}
+                    disabled={decisionMade || isRejected}
+                  >
+                    {isAccepted ? "수락됨" : "수락"}
+                  </button>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => onRejectOffer(offer.id)}
+                    disabled={decisionMade || isRejected}
+                  >
+                    {isRejected ? "거절됨" : "거절"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function CareerHistoryPanel({ career }: { career: CareerState }) {
   const history = career.careerHistory ?? [];
 
@@ -354,6 +448,10 @@ export function CareerDashboardScreen({
     () => (seasonComplete ? createSeasonSummary(career) : null),
     [career, seasonComplete],
   );
+  const contractOffers = useMemo(
+    () => (seasonComplete ? getSeasonContractOffers(career) : []),
+    [career, seasonComplete],
+  );
   const opponentName = getOpponentName(career);
   const weeklyActionCompleted = Boolean(career.weeklyActionCompleted);
   const currentPlayerMatch = currentWeek.playerMatch;
@@ -449,6 +547,30 @@ export function CareerDashboardScreen({
     }
   };
 
+  const acceptOffer = (offerId: string) => {
+    try {
+      const updatedCareer = acceptContractOffer(career, offerId);
+
+      setMatchError(null);
+      setMatchMessage("계약 제안을 수락했습니다.");
+      onCareerChange(updatedCareer);
+    } catch {
+      setMatchError("계약 제안을 처리하지 못했습니다. 제안 목록을 다시 확인해 주세요.");
+    }
+  };
+
+  const rejectOffer = (offerId: string) => {
+    try {
+      const updatedCareer = rejectContractOffer(career, offerId);
+
+      setMatchError(null);
+      setMatchMessage("계약 제안을 거절했습니다.");
+      onCareerChange(updatedCareer);
+    } catch {
+      setMatchError("계약 제안을 처리하지 못했습니다. 제안 목록을 다시 확인해 주세요.");
+    }
+  };
+
   return (
     <ScreenShell
       eyebrow="커리어 대시보드"
@@ -537,6 +659,15 @@ export function CareerDashboardScreen({
 
       {seasonSummary ? (
         <SeasonSummaryPanel summary={seasonSummary} onStartNextSeason={beginNextSeason} />
+      ) : null}
+
+      {seasonComplete ? (
+        <ContractOffersPanel
+          career={career}
+          offers={contractOffers}
+          onAcceptOffer={acceptOffer}
+          onRejectOffer={rejectOffer}
+        />
       ) : null}
 
       {!seasonComplete ? (
@@ -683,6 +814,18 @@ export function CareerDashboardScreen({
           <article>
             <span>평판</span>
             <strong>{career.reputation}</strong>
+          </article>
+          <article>
+            <span>연봉</span>
+            <strong>{formatSalary(career.salary)}</strong>
+          </article>
+          <article>
+            <span>계약</span>
+            <strong>{career.contractYearsLeft}년 남음</strong>
+          </article>
+          <article>
+            <span>스쿼드 역할</span>
+            <strong>{SQUAD_ROLE_LABELS[career.squadRole]}</strong>
           </article>
           <article>
             <span>최근 저장</span>

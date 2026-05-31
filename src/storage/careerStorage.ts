@@ -57,6 +57,9 @@ function hasValidCareerShape(value: unknown): value is CareerState {
 }
 
 function normalizeCareerState(careerState: CareerState): CareerState {
+  const hasSeasonBaselineClub =
+    typeof careerState.seasonBaseline?.clubId === "string" &&
+    typeof careerState.seasonBaseline?.clubName === "string";
   const seasonStats = {
     appearances: careerState.seasonStats.appearances,
     minutesPlayed: careerState.seasonStats.minutesPlayed ?? 0,
@@ -77,6 +80,9 @@ function normalizeCareerState(careerState: CareerState): CareerState {
       potential: careerState.player.potential ?? 84,
     },
     tacticalFit: careerState.tacticalFit ?? 42,
+    salary: careerState.salary ?? 900,
+    contractYearsLeft: careerState.contractYearsLeft ?? 2,
+    squadRole: careerState.squadRole ?? "prospect",
     weeklyActionCompleted: careerState.weeklyActionCompleted ?? false,
     seasonStats,
     availableWeeklyActions: WEEKLY_ACTIONS,
@@ -91,12 +97,19 @@ function normalizeCareerState(careerState: CareerState): CareerState {
     ],
     developmentLog: careerState.developmentLog ?? [],
     careerHistory: careerState.careerHistory ?? [],
-    seasonBaseline: careerState.seasonBaseline ?? createSeasonBaseline(careerState),
+    seasonOffers: careerState.seasonOffers ?? [],
+    acceptedContractOfferId: careerState.acceptedContractOfferId,
+    rejectedContractOfferIds: careerState.rejectedContractOfferIds ?? [],
+    seasonBaseline: hasSeasonBaselineClub
+      ? careerState.seasonBaseline
+      : createSeasonBaseline(careerState),
   };
 
   return {
     ...normalizedCareer,
-    seasonBaseline: careerState.seasonBaseline ?? createSeasonBaseline(normalizedCareer),
+    seasonBaseline: hasSeasonBaselineClub
+      ? careerState.seasonBaseline
+      : createSeasonBaseline(normalizedCareer),
   };
 }
 

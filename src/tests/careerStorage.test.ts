@@ -116,6 +116,11 @@ describe("careerStorage", () => {
     delete olderCareer.eventLog;
     delete olderCareer.seasonBaseline;
     delete olderCareer.careerHistory;
+    delete olderCareer.salary;
+    delete olderCareer.contractYearsLeft;
+    delete olderCareer.squadRole;
+    delete olderCareer.seasonOffers;
+    delete olderCareer.rejectedContractOfferIds;
 
     storage.setItem(
       CAREER_SAVE_KEY,
@@ -136,7 +141,13 @@ describe("careerStorage", () => {
       expect(result.save.careerState.availableWeeklyActions[0].label).toBe("팀 훈련");
       expect(result.save.careerState.eventLog).toHaveLength(1);
       expect(result.save.careerState.seasonBaseline.seasonNumber).toBe(1);
+      expect(result.save.careerState.seasonBaseline.clubId).toBe(result.save.careerState.player.clubId);
       expect(result.save.careerState.careerHistory).toEqual([]);
+      expect(result.save.careerState.salary).toBe(900);
+      expect(result.save.careerState.contractYearsLeft).toBe(2);
+      expect(result.save.careerState.squadRole).toBe("prospect");
+      expect(result.save.careerState.seasonOffers).toEqual([]);
+      expect(result.save.careerState.rejectedContractOfferIds).toEqual([]);
     }
   });
 

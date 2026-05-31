@@ -140,6 +140,7 @@ h1 {
 .match-panel,
 .development-panel,
 .season-summary-panel,
+.contract-offers-panel,
 .career-history,
 .event-log {
   display: grid;
@@ -162,6 +163,7 @@ h1 {
 .match-panel,
 .development-panel,
 .season-summary-panel,
+.contract-offers-panel,
 .career-history {
   border: 1px solid rgba(23, 33, 28, 0.11);
   border-radius: 8px;
@@ -199,6 +201,73 @@ h1 {
 .season-summary-panel h3 {
   margin: 0 0 10px;
   font-size: 1rem;
+}
+
+.offer-list {
+  display: grid;
+  gap: 12px;
+}
+
+.offer-list article {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(23, 33, 28, 0.1);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 14px;
+}
+
+.offer-list h3,
+.offer-list p {
+  margin: 0;
+}
+
+.offer-list span {
+  color: #2d705c;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.offer-list p {
+  color: #48554d;
+  font-weight: 700;
+}
+
+.offer-list dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.offer-list dl div {
+  display: grid;
+  gap: 4px;
+  border-radius: 8px;
+  background: #fffaf0;
+  padding: 10px;
+}
+
+.offer-list dt,
+.offer-list dd {
+  margin: 0;
+}
+
+.offer-list dt {
+  color: #647267;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.offer-list dd {
+  color: #17211c;
+  font-weight: 900;
+}
+
+.offer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .weekly-action-controls {
@@ -641,7 +710,8 @@ h1 {
     .match-stats,
     .match-detail-grid,
     .development-grid,
-    .summary-grid {
+    .summary-grid,
+    .offer-list dl {
     grid-template-columns: 1fr;
   }
 

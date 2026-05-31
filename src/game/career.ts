@@ -29,6 +29,7 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
   const initialCareerBase = {
     season,
     player,
+    league: DEFAULT_LEAGUE,
     coachTrust: 45,
     fanSupport: 35,
     reputation: 30,
@@ -47,6 +48,9 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
     fanSupport: 35,
     reputation: 30,
     tacticalFit: 42,
+    salary: 900,
+    contractYearsLeft: 2,
+    squadRole: "prospect",
     weeklyActionCompleted: false,
     seasonStats: createEmptySeasonStats(),
     availableWeeklyActions: WEEKLY_ACTIONS,
@@ -62,6 +66,8 @@ export function createNewCareer(input: CreateCareerInput): CareerState {
     developmentLog: [],
     seasonBaseline: createSeasonBaseline(initialCareerBase),
     careerHistory: [],
+    seasonOffers: [],
+    rejectedContractOfferIds: [],
   };
 }
 
