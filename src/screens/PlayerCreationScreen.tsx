@@ -1,128 +1,47 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { STARTER_CLUBS } from "../data/clubs";
+import { AttributeTable } from "../components/career/AttributeTable";
+import { MetricGrid } from "../components/career/MetricGrid";
 import { ScreenShell } from "../components/ScreenShell";
+import { STARTER_CLUBS, getLeagueName } from "../data/fictionalLeagues";
 import {
-  FOOT_LABELS,
-  generateStartingAttributes,
-  getPlayStylesForPosition,
+  getDominantFootLabel,
+  getPotentialHint,
   PERSONALITY_LABELS,
-  PLAY_STYLE_LABELS,
   POSITION_LABELS,
   validatePlayerCreationInput,
-  type Personality,
   type PlayerCreationInput,
-  type PlayerPosition,
-  type PreferredFoot,
 } from "../domain/player";
-import type { Attributes, CareerState } from "../domain/types";
-import { createNewCareer } from "../game/career";
+import type { CareerState, Position } from "../domain/types";
+import { createNewCareer } from "../game/monthlyCareer";
+import { generatePlayerRoll } from "../game/playerGeneration";
 
 interface PlayerCreationScreenProps {
   onBack: () => void;
   onCreateCareer: (career: CareerState) => void;
 }
 
-const POSITIONS = Object.keys(POSITION_LABELS) as PlayerPosition[];
-const FOOT_OPTIONS = Object.keys(FOOT_LABELS) as PreferredFoot[];
-const PERSONALITIES = Object.keys(PERSONALITY_LABELS) as Personality[];
 const STARTER_CLUB_IDS = STARTER_CLUBS.map((club) => club.id);
-
-const ATTRIBUTE_GROUPS: Array<{
-  title: string;
-  values: keyof Attributes;
-  labels: Record<string, string>;
-}> = [
-  {
-    title: "기술",
-    values: "technical",
-    labels: {
-      finishing: "결정력",
-      passing: "패스",
-      dribbling: "드리블",
-      defending: "수비",
-      firstTouch: "퍼스트 터치",
-    },
-  },
-  {
-    title: "피지컬",
-    values: "physical",
-    labels: {
-      pace: "스피드",
-      stamina: "체력",
-      strength: "힘",
-      agility: "민첩성",
-    },
-  },
-  {
-    title: "멘탈",
-    values: "mental",
-    labels: {
-      decisions: "판단력",
-      composure: "침착성",
-      workRate: "활동량",
-      teamwork: "팀워크",
-    },
-  },
-  {
-    title: "커리어",
-    values: "career",
-    labels: {
-      professionalism: "프로 의식",
-      adaptability: "적응력",
-      leadership: "리더십",
-      marketability: "스타성",
-    },
-  },
-];
+const DEFAULT_STARTER_CLUB = STARTER_CLUBS[0];
 
 const INITIAL_INPUT: PlayerCreationInput = {
   name: "",
   nationality: "대한민국",
-  age: 18,
-  preferredFoot: "right",
-  position: "ST",
-  playStyle: "poacher",
-  personality: "diligent",
-  clubId: STARTER_CLUBS[0]?.id ?? "",
+  clubId: DEFAULT_STARTER_CLUB?.id ?? "",
 };
 
-function AttributePreview({ attributes }: { attributes: Attributes }) {
-  return (
-    <aside className="attribute-preview" aria-label="생성 능력치 미리보기">
-      <div>
-        <span className="eyebrow">능력치 미리보기</span>
-        <h2>시작 능력치</h2>
-      </div>
-      <div className="attribute-groups">
-        {ATTRIBUTE_GROUPS.map((group) => (
-          <section className="attribute-group" key={group.values}>
-            <h3>{group.title}</h3>
-            <dl>
-              {Object.entries(attributes[group.values]).map(([key, value]) => (
-                <div key={key}>
-                  <dt>{group.labels[key]}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ))}
-      </div>
-    </aside>
-  );
+function createRollSeed(): string {
+  return `roll-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function PlayerCreationScreen({
-  onBack,
-  onCreateCareer,
-}: PlayerCreationScreenProps) {
+export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationScreenProps) {
   const [input, setInput] = useState<PlayerCreationInput>(INITIAL_INPUT);
+  const [rollSeed, setRollSeed] = useState(createRollSeed);
   const [errors, setErrors] = useState<string[]>([]);
-  const playStyleOptions = getPlayStylesForPosition(input.position);
-  const previewAttributes = useMemo(
-    () => generateStartingAttributes(input),
-    [input.age, input.position, input.playStyle, input.personality],
-  );
+  const roll = useMemo(() => generatePlayerRoll(rollSeed), [rollSeed]);
+  const [selectedPosition, setSelectedPosition] = useState<Position>(roll.recommendations[0].position);
+  const selectedRecommendation =
+    roll.recommendations.find((recommendation) => recommendation.position === selectedPosition) ??
+    roll.recommendations[0];
 
   const updateInput = <Key extends keyof PlayerCreationInput>(
     key: Key,
@@ -131,12 +50,13 @@ export function PlayerCreationScreen({
     setInput((currentInput) => ({ ...currentInput, [key]: value }));
   };
 
-  const updatePosition = (position: PlayerPosition) => {
-    setInput((currentInput) => ({
-      ...currentInput,
-      position,
-      playStyle: getPlayStylesForPosition(position)[0].id,
-    }));
+  const reroll = () => {
+    const nextSeed = createRollSeed();
+    const nextRoll = generatePlayerRoll(nextSeed);
+
+    setRollSeed(nextSeed);
+    setSelectedPosition(nextRoll.recommendations[0].position);
+    setErrors([]);
   };
 
   const submitPlayer = (event: FormEvent<HTMLFormElement>) => {
@@ -146,14 +66,36 @@ export function PlayerCreationScreen({
     setErrors(validationErrors);
 
     if (validationErrors.length === 0) {
-      onCreateCareer(createNewCareer(input));
+      onCreateCareer(
+        createNewCareer({
+          ...input,
+          clubId: DEFAULT_STARTER_CLUB.id,
+          position: selectedRecommendation.position,
+          roll,
+        }),
+      );
     }
   };
 
   return (
-    <ScreenShell eyebrow="선수 생성" title="나의 첫 프로필">
-      <div className="creation-layout">
-        <form className="creation-form" onSubmit={submitPlayer} noValidate>
+    <ScreenShell
+      eyebrow="선수 생성"
+      title="랜덤 유망주 뽑기"
+      actions={
+        <>
+          <button className="secondary-button" type="button" onClick={onBack}>
+            돌아가기
+          </button>
+          <button className="secondary-button" type="button" onClick={reroll}>
+            다시 뽑기
+          </button>
+        </>
+      }
+      wide
+    >
+      <form className="creation-layout" onSubmit={submitPlayer} noValidate>
+        <section className="creation-form data-panel">
+          <h2>기본 정보</h2>
           {errors.length > 0 ? (
             <div className="error-list" role="alert">
               {errors.map((error) => (
@@ -169,7 +111,7 @@ export function PlayerCreationScreen({
                 type="text"
                 value={input.name}
                 onChange={(event) => updateInput("name", event.target.value)}
-                placeholder="예: 강민재"
+                placeholder="예: 강하준"
                 maxLength={20}
                 required
               />
@@ -186,110 +128,69 @@ export function PlayerCreationScreen({
                 required
               />
             </label>
-
-            <label>
-              나이
-              <select
-                value={input.age}
-                onChange={(event) => updateInput("age", Number(event.target.value))}
-              >
-                {[16, 17, 18, 19].map((age) => (
-                  <option key={age} value={age}>
-                    {age}세
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              주발
-              <select
-                value={input.preferredFoot}
-                onChange={(event) =>
-                  updateInput("preferredFoot", event.target.value as PreferredFoot)
-                }
-              >
-                {FOOT_OPTIONS.map((foot) => (
-                  <option key={foot} value={foot}>
-                    {FOOT_LABELS[foot]}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              주 포지션
-              <select
-                value={input.position}
-                onChange={(event) => updatePosition(event.target.value as PlayerPosition)}
-              >
-                {POSITIONS.map((position) => (
-                  <option key={position} value={position}>
-                    {position} - {POSITION_LABELS[position]}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              플레이 스타일
-              <select
-                value={input.playStyle}
-                onChange={(event) =>
-                  updateInput("playStyle", event.target.value as PlayerCreationInput["playStyle"])
-                }
-              >
-                {playStyleOptions.map((style) => (
-                  <option key={style.id} value={style.id}>
-                    {style.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              성격
-              <select
-                value={input.personality}
-                onChange={(event) =>
-                  updateInput("personality", event.target.value as Personality)
-                }
-              >
-                {PERSONALITIES.map((personality) => (
-                  <option key={personality} value={personality}>
-                    {PERSONALITY_LABELS[personality]}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              시작 클럽
-              <select value={input.clubId} onChange={(event) => updateInput("clubId", event.target.value)}>
-                {STARTER_CLUBS.map((club) => (
-                  <option key={club.id} value={club.id}>
-                    {club.name} - 평판 {club.reputation}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
 
           <div className="form-actions">
-            <button className="secondary-button" type="button" onClick={onBack}>
-              돌아가기
-            </button>
             <button className="primary-button" type="submit">
               이 선수로 시작
             </button>
           </div>
-        </form>
+        </section>
 
-        <AttributePreview attributes={previewAttributes} />
-      </div>
-      <p className="creation-note">
-        시작 능력치는 포지션, 플레이 스타일, 나이, 성격에 따라 결정됩니다.
-      </p>
+        <section className="roll-summary">
+          <div className="data-panel">
+            <h2>생성 결과</h2>
+            <MetricGrid
+              items={[
+                { label: "나이", value: `${roll.age}세` },
+                { label: "선택 포지션", value: POSITION_LABELS[selectedRecommendation.position] },
+                { label: "OVR", value: selectedRecommendation.overall, tone: selectedRecommendation.overall >= 68 ? "good" : "default" },
+                { label: "잠재력", value: getPotentialHint(roll.potential), tone: roll.potential >= 88 ? "good" : "default" },
+                { label: "성격", value: PERSONALITY_LABELS[roll.personality] },
+                { label: "주발", value: getDominantFootLabel(roll) },
+                { label: "왼발", value: roll.leftFoot },
+                { label: "오른발", value: roll.rightFoot },
+                { label: "성장 유형", value: roll.archetype },
+              ]}
+            />
+          </div>
+
+          <section className="data-panel">
+            <h2>포지션 추천</h2>
+            <div className="recommendation-list">
+              {roll.recommendations.map((recommendation) => (
+                <button
+                  className={recommendation.position === selectedRecommendation.position ? "recommendation selected" : "recommendation"}
+                  key={recommendation.position}
+                  type="button"
+                  onClick={() => setSelectedPosition(recommendation.position)}
+                >
+                  <strong>
+                    {POSITION_LABELS[recommendation.position]} · OVR {recommendation.overall} · 적합도 {recommendation.fitScore}
+                  </strong>
+                  <span>{recommendation.reason}</span>
+                  <small>
+                    강점: {recommendation.keyStrengths.join(", ") || "뚜렷한 강점 없음"} · 보완: {recommendation.keyWeaknesses.join(", ") || "큰 약점 없음"}
+                  </small>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="data-panel">
+            <h2>초기 배정</h2>
+            <MetricGrid
+              items={[
+                { label: "클럽", value: DEFAULT_STARTER_CLUB.name },
+                { label: "리그", value: getLeagueName(DEFAULT_STARTER_CLUB.leagueId) },
+                { label: "유스 시설", value: DEFAULT_STARTER_CLUB.trainingFacilities.youthDevelopment },
+              ]}
+            />
+          </section>
+        </section>
+      </form>
+
+      <AttributeTable attributes={roll.attributes} />
     </ScreenShell>
   );
 }

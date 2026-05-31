@@ -1,22 +1,6 @@
 export type Position = "ST" | "LW" | "RW" | "AM" | "CM" | "DM" | "FB" | "CB";
 
-export type PreferredFoot = "right" | "left" | "both";
-
-export type PlayStyle =
-  | "poacher"
-  | "targetForward"
-  | "insideForward"
-  | "wideCreator"
-  | "playmaker"
-  | "shadowStriker"
-  | "boxToBox"
-  | "deepPlaymaker"
-  | "ballWinner"
-  | "holdingMidfielder"
-  | "overlapper"
-  | "invertedFullback"
-  | "stopper"
-  | "ballPlayingDefender";
+export type Footedness = "left" | "right" | "both";
 
 export type Personality =
   | "diligent"
@@ -27,16 +11,25 @@ export type Personality =
 
 export type SquadRole = "prospect" | "rotation" | "regular" | "keyPlayer";
 
+export type LeagueTier = "k1_fictional" | "k2_fictional";
+
 export interface TechnicalAttributes {
   finishing: number;
+  shooting?: number;
   passing: number;
   dribbling: number;
   defending: number;
   firstTouch: number;
+  crossing?: number;
+  tackling?: number;
+  marking?: number;
+  heading?: number;
 }
 
 export interface PhysicalAttributes {
   pace: number;
+  speed?: number;
+  acceleration?: number;
   stamina: number;
   strength: number;
   agility: number;
@@ -45,6 +38,7 @@ export interface PhysicalAttributes {
 export interface MentalAttributes {
   decisions: number;
   composure: number;
+  concentration?: number;
   workRate: number;
   teamwork: number;
 }
@@ -63,139 +57,6 @@ export interface Attributes {
   career: CareerAttributes;
 }
 
-export interface Player {
-  id: string;
-  name: string;
-  nationality: string;
-  age: number;
-  preferredFoot: PreferredFoot;
-  position: Position;
-  playStyle: PlayStyle;
-  personality: Personality;
-  clubId: string;
-  potential: number;
-  attributes: Attributes;
-}
-
-export interface Club {
-  id: string;
-  name: string;
-  city: string;
-  strength: number;
-  reputation: number;
-}
-
-export interface League {
-  id: string;
-  name: string;
-  country: string;
-  clubs: Club[];
-  seasonWeeks: number;
-}
-
-export type MatchStatus = "scheduled" | "played";
-
-export interface MatchResult {
-  homeGoals: number;
-  awayGoals: number;
-  playerRating?: number;
-  playerMinutes?: number;
-  playerStats?: PlayerMatchStats;
-  ratingModifiers?: RatingModifier[];
-  keyMoments?: KeyMoment[];
-}
-
-export type MatchEventType =
-  | "chance"
-  | "buildUp"
-  | "defensiveAction"
-  | "pressing"
-  | "setPiece";
-
-export interface MatchEventChoice {
-  id: string;
-  label: string;
-  attributeFocus: keyof TechnicalAttributes | keyof PhysicalAttributes | keyof MentalAttributes;
-  risk: "low" | "medium" | "high";
-}
-
-export interface MatchEvent {
-  id: string;
-  matchId: string;
-  minute: number;
-  type: MatchEventType;
-  description: string;
-  choices: MatchEventChoice[];
-  selectedChoiceId?: string;
-  successful?: boolean;
-}
-
-export interface Match {
-  id: string;
-  week: number;
-  homeClubId: string;
-  awayClubId: string;
-  status: MatchStatus;
-  events: MatchEvent[];
-  result?: MatchResult;
-}
-
-export interface PlayerMatchStats {
-  minutesPlayed: number;
-  goals: number;
-  assists: number;
-  shots: number;
-  keyPasses: number;
-  tackles: number;
-  turnovers: number;
-}
-
-export interface RatingModifier {
-  label: string;
-  value: number;
-  kind: "positive" | "negative" | "neutral";
-}
-
-export interface KeyMomentChoice {
-  id: string;
-  label: string;
-  attributeFocus: AttributeFocus;
-  risk: "low" | "medium" | "high";
-}
-
-export interface KeyMomentOutcome {
-  successful: boolean;
-  chance: number;
-  roll: number;
-  description: string;
-  ratingModifier: number;
-  stats: Partial<Omit<PlayerMatchStats, "minutesPlayed">>;
-}
-
-export interface KeyMoment {
-  id: string;
-  minute: number;
-  situation: string;
-  choices: KeyMomentChoice[];
-  selectedChoiceId?: string;
-  outcome?: KeyMomentOutcome;
-}
-
-export type WeeklyActionType =
-  | "teamTraining"
-  | "individualTraining"
-  | "recovery"
-  | "mediaActivity"
-  | "relationship";
-
-export interface WeeklyAction {
-  type: WeeklyActionType;
-  label: string;
-  description: string;
-  fatigueChange: number;
-  conditionChange: number;
-}
-
 export type AttributeFocus =
   | "technical.finishing"
   | "technical.passing"
@@ -209,17 +70,243 @@ export type AttributeFocus =
   | "mental.decisions"
   | "mental.composure"
   | "mental.workRate"
-  | "mental.teamwork";
+  | "mental.teamwork"
+  | "career.professionalism"
+  | "career.adaptability"
+  | "career.leadership"
+  | "career.marketability";
+
+export interface PositionRecommendation {
+  position: Position;
+  fitScore: number;
+  isRecommended: boolean;
+  reason: string;
+  keyStrengths: string[];
+  keyWeaknesses: string[];
+  /** OVR preview for this position. */
+  overall: number;
+  /** @deprecated Use reason. */
+  explanationKo: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  nationality: string;
+  age: number;
+  selectedPosition: Position;
+  recommendedPositions: PositionRecommendation[];
+  attributes: Attributes;
+  leftFoot: number;
+  rightFoot: number;
+  dominantFoot: Footedness;
+  OVR: number;
+  potential: number;
+  form: number;
+  condition: number;
+  fatigue: number;
+  reputation: number;
+  coachTrust: number;
+  marketValue: number;
+  clubId: string;
+  personality: Personality;
+  /** @deprecated Use selectedPosition. Kept only for older internal code and saves. */
+  position: Position;
+}
+
+export interface ClubTrainingFacilities {
+  technicalTraining: number;
+  physicalTraining: number;
+  tacticalTraining: number;
+  mentalTraining: number;
+  youthDevelopment: number;
+  medicalSupport: number;
+}
+
+/** @deprecated Use ClubTrainingFacilities. */
+export type TrainingFacilities = ClubTrainingFacilities;
+
+export interface SquadSummary {
+  averageOvr: number;
+  averageAge: number;
+  depth: number;
+  style: string;
+}
+
+export interface Club {
+  id: string;
+  name: string;
+  shortName: string;
+  city: string;
+  leagueId: LeagueTier;
+  reputation: number;
+  trainingFacilities: ClubTrainingFacilities;
+  squadStrength: number;
+  budgetLevel: number;
+  playStyle: string;
+  youthOpportunity: number;
+  transferPolicy: string;
+  tier: LeagueTier;
+  /** @deprecated Use squadStrength. */
+  strength: number;
+  /** @deprecated Use squadStrength. */
+  squadLevel: number;
+  /** Text-only color label, not a logo or asset reference. */
+  primaryColor: string;
+  /** @deprecated Use primaryColor for display text. */
+  secondaryColor: string;
+  squadSummary: SquadSummary;
+}
+
+export interface League {
+  id: LeagueTier;
+  name: string;
+  country: string;
+  tier: LeagueTier;
+  clubs: Club[];
+}
+
+export type FixtureStatus = "scheduled" | "played";
+
+export interface FixtureResult {
+  homeGoals: number;
+  awayGoals: number;
+  playerAppeared?: boolean;
+  playerMinutes?: number;
+  playerRating?: number;
+  playerGoals?: number;
+  playerAssists?: number;
+}
+
+export interface Fixture {
+  id: string;
+  leagueId: LeagueTier;
+  seasonNumber: number;
+  round: number;
+  month: number;
+  homeClubId: string;
+  awayClubId: string;
+  status: FixtureStatus;
+  result?: FixtureResult;
+}
+
+export interface SeasonMonth {
+  month: number;
+  label: string;
+  fixtureIds: string[];
+}
+
+export interface LeagueTableRow {
+  clubId: string;
+  clubName: string;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+  position: number;
+}
+
+export interface PromotionRelegationStatus {
+  automaticRelegationClubId?: string;
+  playoffClubId?: string;
+  automaticPromotionClubId?: string;
+  promotionPlayoffClubId?: string;
+  note: string;
+}
+
+export interface Season {
+  id: string;
+  number: number;
+  year: number;
+  currentMonth: number;
+  totalMonths: number;
+  months: SeasonMonth[];
+  fixtures: Fixture[];
+  tables: Record<LeagueTier, LeagueTableRow[]>;
+  isComplete: boolean;
+  promotionRelegation?: PromotionRelegationStatus;
+}
+
+export type MonthlyEventType =
+  | "coach_feedback"
+  | "training_report"
+  | "media_attention"
+  | "transfer_rumor"
+  | "rival_competition"
+  | "injury_warning"
+  | "first_team_chance"
+  | "contract_discussion"
+  | "fan_reaction"
+  | "tactical_role_change";
+
+export interface MonthlyEventEffect {
+  coachTrust?: number;
+  reputation?: number;
+  form?: number;
+  condition?: number;
+  fatigue?: number;
+  professionalism?: number;
+  adaptability?: number;
+  marketability?: number;
+  injuryRisk?: number;
+}
+
+export interface MonthlyEventChoice {
+  id: string;
+  label: string;
+  description: string;
+  effect: MonthlyEventEffect;
+}
+
+export interface MonthlyEvent {
+  id: string;
+  month: number;
+  type: MonthlyEventType;
+  title: string;
+  description: string;
+  choices: MonthlyEventChoice[];
+  selectedChoiceId?: string;
+  resolvedDescription?: string;
+}
+
+export interface MonthlyNotice {
+  id: string;
+  month: number;
+  title: string;
+  description: string;
+  tone: "info" | "success" | "warning";
+}
+
+export type CareerEventLogType =
+  | MonthlyEventType
+  | "career_start"
+  | "monthly_summary"
+  | "season_complete"
+  | "season_start";
 
 export interface CareerEventLogEntry {
   id: string;
-  week: number;
+  seasonNumber: number;
+  month: number;
+  type: CareerEventLogType;
   title: string;
   description: string;
   createdAt: string;
 }
 
-export type DevelopmentSource = "weeklyTraining" | "match";
+export type InjurySeverity = "healthy" | "minor" | "major";
+
+export interface InjuryStatus {
+  severity: InjurySeverity;
+  monthsRemaining: number;
+  description?: string;
+}
+
+export type DevelopmentSource = "clubTraining" | "match" | "event";
 
 export interface AttributeGrowthEntry {
   attribute: AttributeFocus;
@@ -231,51 +318,11 @@ export interface AttributeGrowthEntry {
 
 export interface DevelopmentReport {
   id: string;
-  week: number;
+  month: number;
   source: DevelopmentSource;
   title: string;
   entries: AttributeGrowthEntry[];
   createdAt: string;
-}
-
-export interface SeasonBaseline {
-  seasonNumber: number;
-  clubId: string;
-  clubName: string;
-  coachTrust: number;
-  fanSupport: number;
-  reputation: number;
-  attributes: Attributes;
-}
-
-export interface SeasonSummary {
-  seasonNumber: number;
-  clubId: string;
-  clubName: string;
-  leaguePosition: number;
-  appearances: number;
-  goals: number;
-  assists: number;
-  averageRating: number;
-  coachTrustChange: number;
-  fanSupportChange: number;
-  reputationChange: number;
-  attributeGrowthSummary: AttributeGrowthEntry[];
-}
-
-export interface CareerHistoryEntry extends SeasonSummary {
-  id: string;
-  completedAt: string;
-}
-
-export interface Season {
-  id: string;
-  number: number;
-  leagueId: string;
-  currentWeek: number;
-  totalWeeks: number;
-  matches: Match[];
-  isComplete: boolean;
 }
 
 export interface SeasonStats {
@@ -283,62 +330,54 @@ export interface SeasonStats {
   minutesPlayed: number;
   goals: number;
   assists: number;
-  shots: number;
-  keyPasses: number;
-  tackles: number;
-  turnovers: number;
   averageRating: number;
-  keyMomentsWon: number;
 }
 
-export type ContractOfferType =
-  | "stay"
-  | "strongerLowerPlayingTime"
-  | "weakerHigherPlayingTime";
-
-export interface ContractOffer {
+export interface TransferOffer {
   id: string;
-  type: ContractOfferType;
+  month: number;
   clubId: string;
   clubName: string;
-  salary: number;
-  contractYears: number;
+  leagueId: LeagueTier;
   squadRole: SquadRole;
-  fanSupportChange: number;
+  salary: number;
   description: string;
+}
+
+export interface CareerHistoryEntry {
+  id: string;
+  seasonNumber: number;
+  year: number;
+  clubId: string;
+  clubName: string;
+  leagueName: string;
+  appearances: number;
+  goals: number;
+  assists: number;
+  averageRating: number;
+  leaguePosition: number;
+  achievement?: string;
 }
 
 export interface CareerState {
   saveVersion: number;
   player: Player;
-  league: League;
+  leagues: Record<LeagueTier, League>;
   season: Season;
-  currentWeek: number;
   condition: number;
   fatigue: number;
   form: number;
-  coachTrust: number;
-  fanSupport: number;
   reputation: number;
-  tacticalFit: number;
+  coachTrust: number;
   salary: number;
   contractYearsLeft: number;
   squadRole: SquadRole;
-  weeklyActionCompleted: boolean;
+  injury: InjuryStatus;
   seasonStats: SeasonStats;
-  availableWeeklyActions: WeeklyAction[];
-  eventLog: CareerEventLogEntry[];
-  developmentLog: DevelopmentReport[];
-  seasonBaseline: SeasonBaseline;
   careerHistory: CareerHistoryEntry[];
-  seasonOffers: ContractOffer[];
-  acceptedContractOfferId?: string;
-  rejectedContractOfferIds: string[];
-}
-
-export interface CareerWeek {
-  week: number;
-  matches: Match[];
-  playerMatch?: Match;
-  isSeasonComplete: boolean;
+  transferOffers: TransferOffer[];
+  notices: MonthlyNotice[];
+  currentEvent?: MonthlyEvent;
+  eventLog: CareerEventLogEntry[];
+  monthlyDevelopmentLog: DevelopmentReport[];
 }

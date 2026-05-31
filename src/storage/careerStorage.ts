@@ -1,9 +1,11 @@
+import { deriveDominantFoot } from "../domain/player";
+import { FICTIONAL_LEAGUES, K1_LEAGUE_ID, K2_LEAGUE_ID, getClubById } from "../data/fictionalLeagues";
 import type { CareerState } from "../domain/types";
-import { WEEKLY_ACTIONS } from "../data/weeklyActions";
-import { createSeasonBaseline } from "../game/season";
+import { calculateMarketValue, calculateOverall } from "../game/overall";
+import { recommendPositions } from "../game/positionRecommendation";
 
 export const CAREER_SAVE_KEY = "football-career-sim.career-state";
-export const CURRENT_SAVE_VERSION = 1;
+export const CURRENT_SAVE_VERSION = 2;
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -40,76 +42,70 @@ function hasValidCareerShape(value: unknown): value is CareerState {
     return false;
   }
 
-  const player = value.player;
-  const season = value.season;
-  const league = value.league;
-
   return (
-    isRecord(player) &&
-    typeof player.name === "string" &&
-    typeof player.clubId === "string" &&
-    isRecord(season) &&
-    Array.isArray(season.matches) &&
-    isRecord(league) &&
-    Array.isArray(league.clubs) &&
-    typeof value.currentWeek === "number"
+    isRecord(value.player) &&
+    typeof value.player.name === "string" &&
+    typeof value.player.leftFoot === "number" &&
+    typeof value.player.rightFoot === "number" &&
+    isRecord(value.player.attributes) &&
+    isRecord(value.season) &&
+    typeof value.season.currentMonth === "number" &&
+    Array.isArray(value.season.fixtures) &&
+    isRecord(value.leagues)
   );
 }
 
 function normalizeCareerState(careerState: CareerState): CareerState {
-  const hasSeasonBaselineClub =
-    typeof careerState.seasonBaseline?.clubId === "string" &&
-    typeof careerState.seasonBaseline?.clubName === "string";
-  const seasonStats = {
-    appearances: careerState.seasonStats.appearances,
-    minutesPlayed: careerState.seasonStats.minutesPlayed ?? 0,
-    goals: careerState.seasonStats.goals,
-    assists: careerState.seasonStats.assists,
-    shots: careerState.seasonStats.shots ?? 0,
-    keyPasses: careerState.seasonStats.keyPasses ?? 0,
-    tackles: careerState.seasonStats.tackles ?? 0,
-    turnovers: careerState.seasonStats.turnovers ?? 0,
-    averageRating: careerState.seasonStats.averageRating,
-    keyMomentsWon: careerState.seasonStats.keyMomentsWon,
+  const selectedPosition = careerState.player.selectedPosition ?? careerState.player.position ?? "ST";
+  const form = careerState.form ?? careerState.player.form ?? 50;
+  const condition = careerState.condition ?? careerState.player.condition ?? 80;
+  const fatigue = careerState.fatigue ?? careerState.player.fatigue ?? 10;
+  const reputation = careerState.reputation ?? careerState.player.reputation ?? 25;
+  const coachTrust = careerState.coachTrust ?? careerState.player.coachTrust ?? 40;
+  const playerBase = {
+    ...careerState.player,
+    selectedPosition,
+    position: selectedPosition,
+    recommendedPositions:
+      careerState.player.recommendedPositions ??
+      recommendPositions({
+        attributes: careerState.player.attributes,
+        leftFoot: careerState.player.leftFoot,
+        rightFoot: careerState.player.rightFoot,
+        potential: careerState.player.potential,
+      }),
+    dominantFoot:
+      careerState.player.dominantFoot ??
+      deriveDominantFoot(careerState.player.leftFoot, careerState.player.rightFoot),
+    form,
+    condition,
+    fatigue,
+    reputation,
+    coachTrust,
   };
-
-  const normalizedCareer: CareerState = {
-    ...careerState,
-    player: {
-      ...careerState.player,
-      potential: careerState.player.potential ?? 84,
-    },
-    tacticalFit: careerState.tacticalFit ?? 42,
-    salary: careerState.salary ?? 900,
-    contractYearsLeft: careerState.contractYearsLeft ?? 2,
-    squadRole: careerState.squadRole ?? "prospect",
-    weeklyActionCompleted: careerState.weeklyActionCompleted ?? false,
-    seasonStats,
-    availableWeeklyActions: WEEKLY_ACTIONS,
-    eventLog: careerState.eventLog ?? [
-      {
-        id: `week-${careerState.currentWeek}-loaded-save`,
-        week: careerState.currentWeek,
-        title: "저장 불러오기",
-        description: "기존 저장 데이터를 불러왔습니다.",
-        createdAt: new Date(0).toISOString(),
-      },
-    ],
-    developmentLog: careerState.developmentLog ?? [],
-    careerHistory: careerState.careerHistory ?? [],
-    seasonOffers: careerState.seasonOffers ?? [],
-    acceptedContractOfferId: careerState.acceptedContractOfferId,
-    rejectedContractOfferIds: careerState.rejectedContractOfferIds ?? [],
-    seasonBaseline: hasSeasonBaselineClub
-      ? careerState.seasonBaseline
-      : createSeasonBaseline(careerState),
+  const OVR = calculateOverall(playerBase, selectedPosition);
+  const player = {
+    ...playerBase,
+    OVR,
+    marketValue: careerState.player.marketValue ?? calculateMarketValue({ ...playerBase, OVR }, reputation),
   };
 
   return {
-    ...normalizedCareer,
-    seasonBaseline: hasSeasonBaselineClub
-      ? careerState.seasonBaseline
-      : createSeasonBaseline(normalizedCareer),
+    ...careerState,
+    saveVersion: CURRENT_SAVE_VERSION,
+    player,
+    leagues: FICTIONAL_LEAGUES,
+    form,
+    condition,
+    fatigue,
+    reputation,
+    coachTrust,
+    careerHistory: careerState.careerHistory ?? [],
+    transferOffers: careerState.transferOffers ?? [],
+    notices: careerState.notices ?? [],
+    eventLog: careerState.eventLog ?? [],
+    monthlyDevelopmentLog: careerState.monthlyDevelopmentLog ?? [],
+    injury: careerState.injury ?? { severity: "healthy", monthsRemaining: 0 },
   };
 }
 
@@ -117,14 +113,14 @@ function parseSaveFile(value: unknown): CareerSaveLoadResult {
   if (!isRecord(value)) {
     return {
       status: "invalid",
-      message: "저장 데이터를 읽을 수 없습니다. 저장을 삭제한 뒤 새로 시작할 수 있습니다.",
+      message: "저장 데이터를 읽을 수 없습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
     };
   }
 
   if (typeof value.saveVersion !== "number") {
     return {
       status: "invalid",
-      message: "이전 형식의 저장 데이터입니다. 저장을 삭제한 뒤 새로 시작할 수 있습니다.",
+      message: "이전 형식의 저장 데이터입니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
     };
   }
 
@@ -132,21 +128,35 @@ function parseSaveFile(value: unknown): CareerSaveLoadResult {
     return {
       status: "unsupportedVersion",
       foundVersion: value.saveVersion,
-      message: "지원하지 않는 저장 버전입니다. 저장을 삭제한 뒤 새로 시작할 수 있습니다.",
+      message:
+        "주간 MVP 저장은 월간 커리어 시스템과 호환되지 않습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
     };
   }
 
   if (typeof value.savedAt !== "string" || !hasValidCareerShape(value.careerState)) {
     return {
       status: "invalid",
-      message: "저장 데이터가 손상되었습니다. 저장을 삭제한 뒤 새로 시작할 수 있습니다.",
+      message: "저장 데이터가 손상되었습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
+    };
+  }
+
+  if (
+    !isRecord(value.careerState.leagues[K1_LEAGUE_ID]) ||
+    !isRecord(value.careerState.leagues[K2_LEAGUE_ID]) ||
+    !getClubById(value.careerState.player.clubId)
+  ) {
+    return {
+      status: "unsupportedVersion",
+      foundVersion: value.saveVersion,
+      message:
+        "리그 구조가 코리아 프리미어 1 / 코리아 챌린지 2로 변경되어 이전 저장과 호환되지 않습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
     };
   }
 
   return {
     status: "loaded",
     save: {
-      saveVersion: value.saveVersion,
+      saveVersion: CURRENT_SAVE_VERSION,
       savedAt: value.savedAt,
       careerState: normalizeCareerState(value.careerState),
     },
@@ -160,7 +170,7 @@ export function createCareerSaveFile(
   return {
     saveVersion: CURRENT_SAVE_VERSION,
     savedAt: savedAt.toISOString(),
-    careerState,
+    careerState: normalizeCareerState(careerState),
   };
 }
 
@@ -180,7 +190,7 @@ export function loadCareerSave(storage: StorageLike | null = getBrowserStorage()
   } catch {
     return {
       status: "invalid",
-      message: "저장 데이터를 읽을 수 없습니다. 저장을 삭제한 뒤 새로 시작할 수 있습니다.",
+      message: "저장 데이터를 읽을 수 없습니다. 저장을 삭제하고 새 커리어를 시작해 주세요.",
     };
   }
 }

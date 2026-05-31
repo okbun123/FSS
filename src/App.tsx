@@ -102,12 +102,7 @@ export function App() {
   };
 
   if (screen === "playerCreation") {
-    return (
-      <PlayerCreationScreen
-        onBack={() => setScreen("start")}
-        onCreateCareer={createCareer}
-      />
-    );
+    return <PlayerCreationScreen onBack={() => setScreen("start")} onCreateCareer={createCareer} />;
   }
 
   if (screen === "dashboard" && career) {

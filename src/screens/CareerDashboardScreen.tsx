@@ -1,47 +1,25 @@
 import { useMemo, useState } from "react";
-import { getClubName } from "../data/clubs";
-import {
-  FOOT_LABELS,
-  PERSONALITY_LABELS,
-  PLAY_STYLE_LABELS,
-  POSITION_LABELS,
-} from "../domain/player";
-import type {
-  AttributeFocus,
-  AttributeGrowthEntry,
-  CareerState,
-  ContractOffer,
-  DevelopmentReport,
-  KeyMoment,
-  Match,
-  PlayerMatchStats,
-  RatingModifier,
-  SeasonSummary,
-  WeeklyActionType,
-} from "../domain/types";
+import { AttributeTable } from "../components/career/AttributeTable";
+import { MetricGrid, type MetricItem } from "../components/career/MetricGrid";
 import { ScreenShell } from "../components/ScreenShell";
-import { advanceWeek, getCurrentWeek } from "../game/career";
+import { getClubName, getLeagueName } from "../data/fictionalLeagues";
 import {
-  acceptContractOffer,
-  getSeasonContractOffers,
-  OFFER_TYPE_LABELS,
-  rejectContractOffer,
+  getDominantFootLabel,
+  getPotentialHint,
+  PERSONALITY_LABELS,
+  POSITION_LABELS,
   SQUAD_ROLE_LABELS,
-} from "../game/contracts";
+} from "../domain/player";
+import type { CareerHistoryEntry, CareerState, Fixture, LeagueTableRow, MonthlyEvent } from "../domain/types";
 import {
-  generateKeyMoments,
-  simulateCurrentMatch,
-} from "../game/matchSimulation";
-import {
-  createSeasonSummary,
-  isSeasonComplete,
+  advanceMonth,
+  getCurrentClub,
+  getCurrentLeague,
+  getCurrentMonthFixtures,
+  getNextPlayerFixture,
   startNextSeason,
-} from "../game/season";
-import {
-  applyWeeklyAction,
-  ATTRIBUTE_FOCUS_OPTIONS,
-  canSimulateCurrentMatch,
-} from "../game/weeklyActions";
+} from "../game/monthlyCareer";
+import { calculateOverall } from "../game/overall";
 
 interface CareerDashboardScreenProps {
   career: CareerState;
@@ -53,373 +31,544 @@ interface CareerDashboardScreenProps {
   onSaveCareer: () => void;
 }
 
-function getOpponentName(career: CareerState): string {
-  const playerMatch = getCurrentWeek(career).playerMatch;
+export type DashboardTab = "main" | "player" | "schedule" | "career" | "club";
 
-  if (!playerMatch) {
-    return "이번 주 경기가 없습니다";
+export const CAREER_DASHBOARD_TABS: Array<{ id: DashboardTab; label: string }> = [
+  { id: "main", label: "메인" },
+  { id: "player", label: "선수 상태" },
+  { id: "schedule", label: "경기 일정" },
+  { id: "career", label: "커리어" },
+  { id: "club", label: "소속팀/리그" },
+];
+
+function formatMonth(career: CareerState): string {
+  if (career.season.isComplete) {
+    return "시즌 종료";
   }
 
-  const opponentId =
-    playerMatch.homeClubId === career.player.clubId
-      ? playerMatch.awayClubId
-      : playerMatch.homeClubId;
-
-  return getClubName(opponentId);
+  return career.season.months.find((month) => month.month === career.season.currentMonth)?.label ?? `${career.season.currentMonth}월`;
 }
 
-function getMatchSeed(career: CareerState): string {
-  return `${career.player.id}-${career.season.id}-${career.currentWeek}`;
+function formatFixture(fixture?: Fixture): string {
+  if (!fixture) {
+    return "예정 경기 없음";
+  }
+
+  return `${getClubName(fixture.homeClubId)} vs ${getClubName(fixture.awayClubId)}`;
 }
 
-function StatLine({ label, value }: { label: string; value: number | string }) {
+function resultText(fixture: Fixture): string {
+  if (!fixture.result) {
+    return "예정";
+  }
+
+  return `${fixture.result.homeGoals}-${fixture.result.awayGoals}`;
+}
+
+function appearanceText(fixture: Fixture): string {
+  if (!fixture.result?.playerAppeared) {
+    return "미출전";
+  }
+
+  return `${fixture.result.playerMinutes ?? 0}분 · 평점 ${(fixture.result.playerRating ?? 0).toFixed(1)} · ${fixture.result.playerGoals ?? 0}골 ${fixture.result.playerAssists ?? 0}도움`;
+}
+
+function DataTable({
+  columns,
+  rows,
+  emptyMessage = "표시할 데이터가 없습니다.",
+}: {
+  columns: string[];
+  rows: Array<Array<string | number>>;
+  emptyMessage?: string;
+}) {
+  if (rows.length === 0) {
+    return <p className="empty-note">{emptyMessage}</p>;
+  }
+
   return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
+    <div className="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column} scope="col">
+                {column}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={`${rowIndex}-${row.join("-")}`}>
+              {row.map((cell, cellIndex) => (
+                <td key={`${cellIndex}-${cell}`}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function PlayerStatsSummary({ stats }: { stats: PlayerMatchStats }) {
-  return (
-    <dl className="match-stats">
-      <StatLine label="출전 시간" value={`${stats.minutesPlayed}분`} />
-      <StatLine label="득점" value={stats.goals} />
-      <StatLine label="도움" value={stats.assists} />
-      <StatLine label="슈팅" value={stats.shots} />
-      <StatLine label="키 패스" value={stats.keyPasses} />
-      <StatLine label="태클" value={stats.tackles} />
-      <StatLine label="턴오버" value={stats.turnovers} />
-    </dl>
-  );
-}
-
-function RatingModifiers({ modifiers }: { modifiers: RatingModifier[] }) {
-  return (
-    <dl className="rating-modifiers">
-      {modifiers.map((modifier) => (
-        <div className={`modifier-${modifier.kind}`} key={`${modifier.label}-${modifier.value}`}>
-          <dt>{modifier.label}</dt>
-          <dd>{modifier.value > 0 ? `+${modifier.value.toFixed(1)}` : modifier.value.toFixed(1)}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-function formatGrowthAmount(amount: number): string {
-  return `+${amount.toFixed(2)}`;
-}
-
-function formatSignedChange(value: number): string {
-  return value > 0 ? `+${value}` : `${value}`;
-}
-
-function formatSalary(salary: number): string {
-  return `${salary.toLocaleString("ko-KR")}만`;
-}
-
-function aggregateGrowth(reports: DevelopmentReport[]): AttributeGrowthEntry[] {
-  const totals = new Map<string, AttributeGrowthEntry>();
-
-  for (const report of reports) {
-    for (const entry of report.entries) {
-      const existing = totals.get(entry.attribute);
-      totals.set(entry.attribute, {
-        ...entry,
-        before: existing?.before ?? entry.before,
-        after: entry.after,
-        amount: (existing?.amount ?? 0) + entry.amount,
-      });
-    }
-  }
-
-  return [...totals.values()]
-    .map((entry) => ({ ...entry, amount: Math.round(entry.amount * 100) / 100 }))
-    .sort((left, right) => right.amount - left.amount);
-}
-
-function GrowthList({ entries }: { entries: AttributeGrowthEntry[] }) {
-  if (entries.length === 0) {
-    return <p className="empty-note">아직 기록된 성장이 없습니다.</p>;
+function EventPanel({
+  event,
+  selectedChoiceId,
+  onSelectChoice,
+}: {
+  event?: MonthlyEvent;
+  selectedChoiceId: string | null;
+  onSelectChoice: (choiceId: string) => void;
+}) {
+  if (!event) {
+    return (
+      <section className="data-panel event-panel">
+        <h2>월간 이벤트</h2>
+        <p className="empty-note">이번 달에는 큰 의사결정 이벤트가 없습니다.</p>
+      </section>
+    );
   }
 
   return (
-    <dl className="growth-list">
-      {entries.map((entry) => (
-        <div key={entry.attribute}>
-          <dt>{entry.label}</dt>
-          <dd>{formatGrowthAmount(entry.amount)}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
+    <section className="data-panel event-panel">
+      <h2>{event.title}</h2>
+      <p>{event.description}</p>
+      <div className="event-choice-grid">
+        {event.choices.map((choice, index) => {
+          const selected = selectedChoiceId ? selectedChoiceId === choice.id : index === 0;
 
-function DevelopmentReportPanel({ career }: { career: CareerState }) {
-  const reports = career.developmentLog ?? [];
-  const thisWeekEntries = aggregateGrowth(
-    reports.filter((report) => report.week === career.currentWeek),
-  );
-  const recentReports = reports.filter(
-    (report) => report.week >= Math.max(1, career.currentWeek - 4),
-  );
-  const recentEntries = aggregateGrowth(recentReports);
-  const topEntries = recentEntries.slice(0, 3);
-
-  return (
-    <section className="development-panel" aria-labelledby="development-title">
-      <div className="section-heading">
-        <span className="eyebrow">개발 리포트</span>
-        <h2 id="development-title">선수 성장</h2>
-      </div>
-      <div className="development-grid">
-        <article>
-          <h3>이번 주 성장</h3>
-          <GrowthList entries={thisWeekEntries} />
-        </article>
-        <article>
-          <h3>최근 5주 성장</h3>
-          <GrowthList entries={recentEntries.slice(0, 5)} />
-        </article>
-        <article>
-          <h3>주요 상승 능력</h3>
-          <GrowthList entries={topEntries} />
-        </article>
+          return (
+            <button
+              className={selected ? "event-choice selected" : "event-choice"}
+              key={choice.id}
+              type="button"
+              onClick={() => onSelectChoice(choice.id)}
+            >
+              <strong>{choice.label}</strong>
+              <span>{choice.description}</span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-function SeasonSummaryPanel({
-  summary,
+function PanelList({
+  items,
+  emptyMessage,
+}: {
+  items: Array<{ id: string; title: string; description: string; className?: string }>;
+  emptyMessage: string;
+}) {
+  if (items.length === 0) {
+    return <p className="empty-note">{emptyMessage}</p>;
+  }
+
+  return (
+    <ol className="simple-list">
+      {items.map((item) => (
+        <li className={item.className} key={item.id}>
+          <strong>{item.title}</strong>
+          <span>{item.description}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function MainTab({
+  career,
+  selectedChoiceId,
+  onSelectChoice,
+  onAdvanceMonth,
   onStartNextSeason,
 }: {
-  summary: SeasonSummary;
+  career: CareerState;
+  selectedChoiceId: string | null;
+  onSelectChoice: (choiceId: string) => void;
+  onAdvanceMonth: () => void;
   onStartNextSeason: () => void;
 }) {
+  const nextFixture = getNextPlayerFixture(career);
+  const currentMonthFixtures = getCurrentMonthFixtures(career);
+  const recentGrowth = career.monthlyDevelopmentLog.at(-1)?.entries.slice(0, 6) ?? [];
+  const notices = career.notices.slice(-5).reverse();
+  const eventLog = career.eventLog.slice(-5).reverse();
+  const transferOffers = career.transferOffers.slice(-4).reverse();
+
   return (
-    <section className="season-summary-panel" aria-labelledby="season-summary-title">
-      <div className="section-heading">
-        <span className="eyebrow">시즌 완료</span>
-        <h2 id="season-summary-title">{summary.seasonNumber}시즌 요약</h2>
+    <div className="career-main-grid">
+      <div className="career-primary-column">
+        <section className="data-panel dashboard-summary">
+          <div>
+            <h2>{career.season.year} 시즌 · {formatMonth(career)}</h2>
+            <p>{getCurrentClub(career).name} · {getLeagueName(getCurrentClub(career).leagueId)}</p>
+          </div>
+          <MetricGrid
+            items={[
+              { label: "다음 경기", value: formatFixture(nextFixture) },
+              { label: "이번 달 경기", value: `${currentMonthFixtures.length}경기` },
+              { label: "폼", value: career.player.form, tone: career.player.form >= 65 ? "good" : "default" },
+              { label: "컨디션", value: career.player.condition, tone: career.player.condition >= 75 ? "good" : "default" },
+              { label: "피로", value: career.player.fatigue, tone: career.player.fatigue >= 70 ? "warning" : "default" },
+              { label: "감독 신뢰", value: career.player.coachTrust },
+            ]}
+          />
+          <div className="quick-action-row">
+            {career.season.isComplete ? (
+              <button className="primary-button" type="button" onClick={onStartNextSeason}>
+                다음 시즌 시작
+              </button>
+            ) : (
+              <button className="primary-button" type="button" onClick={onAdvanceMonth}>
+                다음 달로 진행
+              </button>
+            )}
+          </div>
+        </section>
+
+        <EventPanel event={career.currentEvent} selectedChoiceId={selectedChoiceId} onSelectChoice={onSelectChoice} />
+
+        <section className="data-panel">
+          <h2>최근 능력치 변화</h2>
+          {recentGrowth.length === 0 ? (
+            <p className="empty-note">아직 성장 리포트가 없습니다.</p>
+          ) : (
+            <dl className="growth-list">
+              {recentGrowth.map((entry) => (
+                <div key={entry.attribute}>
+                  <dt>{entry.label}</dt>
+                  <dd>+{entry.amount.toFixed(2)}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </section>
       </div>
 
-      <div className="summary-grid">
-        <div>
-          <span>리그 순위</span>
-          <strong>{summary.leaguePosition}위</strong>
-        </div>
-        <div>
-          <span>출전</span>
-          <strong>{summary.appearances}경기</strong>
-        </div>
-        <div>
-          <span>득점</span>
-          <strong>{summary.goals}</strong>
-        </div>
-        <div>
-          <span>도움</span>
-          <strong>{summary.assists}</strong>
-        </div>
-        <div>
-          <span>평균 평점</span>
-          <strong>{summary.averageRating.toFixed(2)}</strong>
-        </div>
-        <div>
-          <span>감독 신뢰 변화</span>
-          <strong>{formatSignedChange(summary.coachTrustChange)}</strong>
-        </div>
-        <div>
-          <span>팬 지지 변화</span>
-          <strong>{formatSignedChange(summary.fanSupportChange)}</strong>
-        </div>
-        <div>
-          <span>평판 변화</span>
-          <strong>{formatSignedChange(summary.reputationChange)}</strong>
-        </div>
-      </div>
+      <div className="career-side-column">
+        <section className="data-panel">
+          <h2>이적 제안</h2>
+          <PanelList
+            emptyMessage="현재 공식 이적 제안은 없습니다."
+            items={transferOffers.map((offer) => ({
+              id: offer.id,
+              title: offer.clubName,
+              description: `${getLeagueName(offer.leagueId)} · ${SQUAD_ROLE_LABELS[offer.squadRole]} · 연봉 ${offer.salary.toLocaleString("ko-KR")}만`,
+            }))}
+          />
+        </section>
 
-      <div>
-        <h3>능력치 성장 요약</h3>
-        <GrowthList entries={summary.attributeGrowthSummary.slice(0, 6)} />
-      </div>
+        <section className="data-panel">
+          <h2>긴급 알림</h2>
+          <PanelList
+            emptyMessage="새 알림이 없습니다."
+            items={notices.map((notice) => ({
+              id: notice.id,
+              title: notice.title,
+              description: notice.description,
+              className: `notice-${notice.tone}`,
+            }))}
+          />
+        </section>
 
-      <div className="form-actions">
-        <button className="primary-button" type="button" onClick={onStartNextSeason}>
-          다음 시즌 시작
-        </button>
+        <section className="data-panel">
+          <h2>진행 로그</h2>
+          <PanelList
+            emptyMessage="아직 진행 로그가 없습니다."
+            items={eventLog.map((entry) => ({
+              id: entry.id,
+              title: entry.title,
+              description: entry.description,
+            }))}
+          />
+        </section>
       </div>
-    </section>
+    </div>
   );
 }
 
-function ContractOffersPanel({
-  career,
-  offers,
-  onAcceptOffer,
-  onRejectOffer,
-}: {
-  career: CareerState;
-  offers: ContractOffer[];
-  onAcceptOffer: (offerId: string) => void;
-  onRejectOffer: (offerId: string) => void;
-}) {
-  const acceptedOfferId = career.acceptedContractOfferId;
-  const rejectedOfferIds = new Set(career.rejectedContractOfferIds);
+function PlayerTab({ career }: { career: CareerState }) {
+  const club = getCurrentClub(career);
+  const league = getCurrentLeague(career);
+  const ovr = calculateOverall(career.player);
+  const profileItems: MetricItem[] = [
+    { label: "선수", value: career.player.name },
+    { label: "나이", value: `${career.player.age}세` },
+    { label: "국적", value: career.player.nationality },
+    { label: "소속팀", value: club.name },
+    { label: "리그", value: league.name },
+    { label: "포지션", value: `${career.player.selectedPosition} · ${POSITION_LABELS[career.player.selectedPosition]}` },
+    { label: "OVR", value: ovr, tone: ovr >= 70 ? "good" : "default" },
+    { label: "잠재력", value: getPotentialHint(career.player.potential), tone: career.player.potential >= 88 ? "good" : "default" },
+    { label: "주발", value: getDominantFootLabel(career.player) },
+    { label: "왼발", value: career.player.leftFoot },
+    { label: "오른발", value: career.player.rightFoot },
+    { label: "성격", value: PERSONALITY_LABELS[career.player.personality] },
+    { label: "폼", value: career.player.form },
+    { label: "컨디션", value: career.player.condition },
+    { label: "피로", value: career.player.fatigue, tone: career.player.fatigue >= 70 ? "warning" : "default" },
+    { label: "평판", value: career.player.reputation },
+    { label: "감독 신뢰", value: career.player.coachTrust },
+    { label: "시장 가치", value: `${career.player.marketValue.toLocaleString("ko-KR")}만` },
+    { label: "부상", value: career.injury.severity === "healthy" ? "건강" : career.injury.description ?? "관리 필요" },
+  ];
 
   return (
-    <section className="contract-offers-panel" aria-labelledby="contract-offers-title">
-      <div className="section-heading">
-        <span className="eyebrow">계약과 이적</span>
-        <h2 id="contract-offers-title">시즌 종료 제안</h2>
-      </div>
+    <div className="career-two-column">
+      <section className="data-panel">
+        <h2>선수 프로필</h2>
+        <MetricGrid items={profileItems} />
+      </section>
+      <section className="data-panel attribute-panel">
+        <h2>전체 능력치</h2>
+        <AttributeTable attributes={career.player.attributes} />
+      </section>
+    </div>
+  );
+}
 
-      {offers.length === 0 ? (
-        <p className="empty-note">이번 시즌에는 공식 제안이 없습니다. 현재 계약으로 다음 시즌을 준비합니다.</p>
-      ) : (
-        <div className="offer-list">
-          {offers.map((offer) => {
-            const isAccepted = acceptedOfferId === offer.id;
-            const isRejected = rejectedOfferIds.has(offer.id);
-            const decisionMade = Boolean(acceptedOfferId);
+function ScheduleTab({ career }: { career: CareerState }) {
+  const currentClub = getCurrentClub(career);
+  const leagueFixtures = career.season.fixtures.filter((fixture) => fixture.leagueId === currentClub.leagueId);
+  const playerFixtures = leagueFixtures.filter(
+    (fixture) => fixture.homeClubId === currentClub.id || fixture.awayClubId === currentClub.id,
+  );
+  const playedPlayerFixtures = playerFixtures.filter((fixture) => fixture.status === "played").slice().reverse();
+  const nextFixture = getNextPlayerFixture(career);
 
-            return (
-              <article key={offer.id}>
-                <div>
-                  <span>{OFFER_TYPE_LABELS[offer.type]}</span>
-                  <h3>{offer.clubName}</h3>
-                  <p>{offer.description}</p>
-                </div>
-                <dl>
-                  <div>
-                    <dt>연봉</dt>
-                    <dd>{formatSalary(offer.salary)}</dd>
-                  </div>
-                  <div>
-                    <dt>계약 기간</dt>
-                    <dd>{offer.contractYears}년</dd>
-                  </div>
-                  <div>
-                    <dt>역할</dt>
-                    <dd>{SQUAD_ROLE_LABELS[offer.squadRole]}</dd>
-                  </div>
-                  <div>
-                    <dt>팬 지지</dt>
-                    <dd>{formatSignedChange(offer.fanSupportChange)}</dd>
-                  </div>
-                </dl>
-                <div className="offer-actions">
-                  <button
-                    className="primary-button"
-                    type="button"
-                    onClick={() => onAcceptOffer(offer.id)}
-                    disabled={decisionMade || isRejected}
-                  >
-                    {isAccepted ? "수락됨" : "수락"}
-                  </button>
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => onRejectOffer(offer.id)}
-                    disabled={decisionMade || isRejected}
-                  >
-                    {isRejected ? "거절됨" : "거절"}
-                  </button>
-                </div>
-              </article>
-            );
+  return (
+    <div className="career-two-column">
+      <section className="data-panel highlight-panel">
+        <h2>다음 경기</h2>
+        <MetricGrid
+          items={[
+            { label: "대진", value: formatFixture(nextFixture) },
+            { label: "현재 월", value: formatMonth(career) },
+            { label: "남은 경기", value: playerFixtures.filter((fixture) => fixture.status === "scheduled").length },
+          ]}
+        />
+      </section>
+
+      <section className="data-panel">
+        <h2>월별 캘린더</h2>
+        <DataTable
+          columns={["월", "리그 경기", "우리 팀 경기", "진행 상태"]}
+          rows={career.season.months.map((month) => {
+            const monthPlayerFixtures = playerFixtures.filter((fixture) => fixture.month === month.month);
+            const completed = monthPlayerFixtures.filter((fixture) => fixture.status === "played").length;
+
+            return [
+              month.label,
+              leagueFixtures.filter((fixture) => fixture.month === month.month).length,
+              monthPlayerFixtures.length,
+              month.month < career.season.currentMonth ? `${completed}/${monthPlayerFixtures.length} 완료` : month.month === career.season.currentMonth ? "진행 중" : "예정",
+            ];
           })}
-        </div>
-      )}
-    </section>
+        />
+      </section>
+
+      <section className="data-panel wide-panel">
+        <h2>최근 결과와 출전 기록</h2>
+        <DataTable
+          columns={["라운드", "월", "경기", "결과", "출전/평점"]}
+          rows={playedPlayerFixtures.slice(0, 12).map((fixture) => [
+            fixture.round,
+            `${fixture.month}월`,
+            formatFixture(fixture),
+            resultText(fixture),
+            appearanceText(fixture),
+          ])}
+          emptyMessage="아직 치른 경기가 없습니다."
+        />
+      </section>
+
+      <section className="data-panel wide-panel">
+        <h2>소속 리그 일정</h2>
+        <DataTable
+          columns={["라운드", "월", "홈", "원정", "상태"]}
+          rows={leagueFixtures.slice(0, 120).map((fixture) => [
+            fixture.round,
+            `${fixture.month}월`,
+            getClubName(fixture.homeClubId),
+            getClubName(fixture.awayClubId),
+            fixture.status === "played" ? resultText(fixture) : "예정",
+          ])}
+        />
+      </section>
+    </div>
   );
 }
 
-function CareerHistoryPanel({ career }: { career: CareerState }) {
-  const history = career.careerHistory ?? [];
-
-  if (history.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="career-history" aria-labelledby="career-history-title">
-      <div className="section-heading">
-        <span className="eyebrow">커리어 기록</span>
-        <h2 id="career-history-title">시즌 히스토리</h2>
-      </div>
-      <ol className="history-list">
-        {history.slice().reverse().map((entry) => (
-          <li key={entry.id}>
-            <span>
-              {entry.seasonNumber}시즌 · {entry.clubName}
-            </span>
-            <strong>
-              {entry.leaguePosition}위 / {entry.appearances}경기 / {entry.goals}골{" "}
-              {entry.assists}도움 / 평점 {entry.averageRating.toFixed(2)}
-            </strong>
-          </li>
-        ))}
-      </ol>
-    </section>
+function getCareerTotals(career: CareerState) {
+  return career.careerHistory.reduce(
+    (totals, entry) => ({
+      appearances: totals.appearances + entry.appearances,
+      goals: totals.goals + entry.goals,
+      assists: totals.assists + entry.assists,
+      ratingTotal: totals.ratingTotal + entry.averageRating * entry.appearances,
+      ratingApps: totals.ratingApps + entry.appearances,
+    }),
+    {
+      appearances: career.seasonStats.appearances,
+      goals: career.seasonStats.goals,
+      assists: career.seasonStats.assists,
+      ratingTotal: career.seasonStats.averageRating * career.seasonStats.appearances,
+      ratingApps: career.seasonStats.appearances,
+    },
   );
 }
 
-function MatchResultPanel({ match }: { match: Match }) {
-  const result = match.result;
-
-  if (!result?.playerStats || !result.ratingModifiers || !result.keyMoments) {
-    return null;
-  }
+function CareerTab({ career }: { career: CareerState }) {
+  const totals = getCareerTotals(career);
+  const totalAverageRating = totals.ratingApps > 0 ? totals.ratingTotal / totals.ratingApps : 0;
+  const milestones = [
+    ...career.careerHistory
+      .filter((entry): entry is CareerHistoryEntry & { achievement: string } => Boolean(entry.achievement))
+      .map((entry) => ({
+        id: entry.id,
+        title: entry.achievement,
+        description: `${entry.year} · ${entry.clubName} · ${entry.leagueName}`,
+      })),
+    ...career.eventLog.slice(-6).map((entry) => ({
+      id: entry.id,
+      title: entry.title,
+      description: entry.description,
+    })),
+  ].slice(-8).reverse();
 
   return (
-    <section className="match-panel" aria-labelledby="match-result-title">
-      <div className="section-heading">
-        <span className="eyebrow">경기 결과</span>
-        <h2 id="match-result-title">
-          {getClubName(match.homeClubId)} {result.homeGoals}-{result.awayGoals}{" "}
-          {getClubName(match.awayClubId)}
-        </h2>
-      </div>
+    <div className="career-two-column">
+      <section className="data-panel">
+        <h2>이번 시즌 기록</h2>
+        <MetricGrid
+          items={[
+            { label: "출전", value: `${career.seasonStats.appearances}경기` },
+            { label: "출전 시간", value: `${career.seasonStats.minutesPlayed}분` },
+            { label: "골", value: career.seasonStats.goals },
+            { label: "도움", value: career.seasonStats.assists },
+            { label: "평균 평점", value: career.seasonStats.averageRating.toFixed(2) },
+            { label: "계약", value: `${career.contractYearsLeft}년 남음` },
+            { label: "연봉", value: `${career.salary.toLocaleString("ko-KR")}만` },
+            { label: "역할", value: SQUAD_ROLE_LABELS[career.squadRole] },
+          ]}
+        />
+      </section>
 
-      <div className="match-rating-card">
-        <span>선수 평점</span>
-        <strong>{result.playerRating?.toFixed(1)}</strong>
-      </div>
+      <section className="data-panel">
+        <h2>커리어 합산</h2>
+        <MetricGrid
+          items={[
+            { label: "총 출전", value: `${totals.appearances}경기` },
+            { label: "총 골", value: totals.goals },
+            { label: "총 도움", value: totals.assists },
+            { label: "통산 평점", value: totalAverageRating.toFixed(2) },
+            { label: "소속 클럽 수", value: new Set([...career.careerHistory.map((entry) => entry.clubId), career.player.clubId]).size },
+            { label: "완료 시즌", value: career.careerHistory.length },
+          ]}
+        />
+      </section>
 
-      <PlayerStatsSummary stats={result.playerStats} />
+      <section className="data-panel wide-panel">
+        <h2>시즌/클럽 히스토리</h2>
+        <DataTable
+          columns={["시즌", "클럽", "리그", "순위", "출전", "골", "도움", "평점", "업적"]}
+          rows={career.careerHistory.map((entry) => [
+            `${entry.year}`,
+            entry.clubName,
+            entry.leagueName,
+            `${entry.leaguePosition}위`,
+            entry.appearances,
+            entry.goals,
+            entry.assists,
+            entry.averageRating.toFixed(2),
+            entry.achievement ?? "-",
+          ])}
+          emptyMessage="완료된 시즌 기록이 없습니다."
+        />
+      </section>
 
-      <div className="match-detail-grid">
-        <section>
-          <h3>평점 변화</h3>
-          <RatingModifiers modifiers={result.ratingModifiers} />
-        </section>
+      <section className="data-panel wide-panel">
+        <h2>커리어 마일스톤</h2>
+        <PanelList emptyMessage="아직 기록된 마일스톤이 없습니다." items={milestones} />
+      </section>
+    </div>
+  );
+}
 
-        <section>
-          <h3>핵심 장면</h3>
-          <ol className="moment-result-list">
-            {result.keyMoments.map((moment) => {
-              const selectedChoice = moment.choices.find(
-                (choice) => choice.id === moment.selectedChoiceId,
-              );
+function LeagueTable({ rows }: { rows: LeagueTableRow[] }) {
+  return (
+    <DataTable
+      columns={["순위", "클럽", "경기", "승점", "승", "무", "패", "득실"]}
+      rows={rows.map((row) => [
+        row.position,
+        row.clubName,
+        row.played,
+        row.points,
+        row.wins,
+        row.draws,
+        row.losses,
+        row.goalDifference,
+      ])}
+    />
+  );
+}
 
-              return (
-                <li key={moment.id}>
-                  <span>{moment.minute}분</span>
-                  <strong>{selectedChoice?.label}</strong>
-                  <p>{moment.outcome?.description}</p>
-                  <small>
-                    성공 확률 {moment.outcome?.chance}% / 판정 {moment.outcome?.roll}
-                  </small>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-      </div>
-    </section>
+function ClubTab({ career }: { career: CareerState }) {
+  const club = getCurrentClub(career);
+  const table = career.season.tables[club.leagueId];
+  const facilities = club.trainingFacilities;
+
+  return (
+    <div className="career-two-column">
+      <section className="data-panel club-header">
+        <h2>{club.name}</h2>
+        <MetricGrid
+          items={[
+            { label: "도시/지역", value: club.city },
+            { label: "리그", value: getLeagueName(club.leagueId) },
+            { label: "약칭", value: club.shortName },
+            { label: "대표 색", value: club.primaryColor },
+            { label: "스쿼드 전력", value: club.squadStrength },
+            { label: "평판", value: club.reputation },
+            { label: "예산 수준", value: club.budgetLevel },
+            { label: "유스 기회", value: club.youthOpportunity },
+            { label: "플레이 스타일", value: club.playStyle },
+            { label: "이적 정책", value: club.transferPolicy },
+            { label: "평균 연령", value: `${club.squadSummary.averageAge}세` },
+            { label: "선수층", value: club.squadSummary.depth },
+          ]}
+        />
+      </section>
+
+      <section className="data-panel">
+        <h2>훈련 시설</h2>
+        <MetricGrid
+          items={[
+            { label: "기술 훈련", value: facilities.technicalTraining },
+            { label: "피지컬 훈련", value: facilities.physicalTraining },
+            { label: "전술 훈련", value: facilities.tacticalTraining },
+            { label: "멘탈 훈련", value: facilities.mentalTraining },
+            { label: "유스 육성", value: facilities.youthDevelopment },
+            { label: "의무 지원", value: facilities.medicalSupport },
+          ]}
+        />
+      </section>
+
+      <section className="data-panel wide-panel">
+        <h2>리그 테이블</h2>
+        <LeagueTable rows={table} />
+      </section>
+
+      <section className="data-panel wide-panel">
+        <h2>승강 상태</h2>
+        <p className="empty-note">
+          {career.season.promotionRelegation?.note ?? "시즌이 끝나면 자동 강등 위험 팀과 승격 후보가 정리됩니다."}
+        </p>
+      </section>
+    </div>
   );
 }
 
@@ -432,149 +581,44 @@ export function CareerDashboardScreen({
   onDeleteSave,
   onSaveCareer,
 }: CareerDashboardScreenProps) {
-  const { player } = career;
-  const [selectedAction, setSelectedAction] = useState<WeeklyActionType>("teamTraining");
-  const [selectedAttribute, setSelectedAttribute] =
-    useState<AttributeFocus>("technical.finishing");
+  const [activeTab, setActiveTab] = useState<DashboardTab>("main");
+  const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [matchMessage, setMatchMessage] = useState<string | null>(null);
-  const [matchError, setMatchError] = useState<string | null>(null);
-  const [pendingMoments, setPendingMoments] = useState<KeyMoment[] | null>(null);
-  const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
-  const [latestPlayedMatch, setLatestPlayedMatch] = useState<Match | null>(null);
-  const currentWeek = useMemo(() => getCurrentWeek(career), [career]);
-  const seasonComplete = useMemo(() => isSeasonComplete(career), [career]);
-  const seasonSummary = useMemo(
-    () => (seasonComplete ? createSeasonSummary(career) : null),
-    [career, seasonComplete],
-  );
-  const contractOffers = useMemo(
-    () => (seasonComplete ? getSeasonContractOffers(career) : []),
-    [career, seasonComplete],
-  );
-  const opponentName = getOpponentName(career);
-  const weeklyActionCompleted = Boolean(career.weeklyActionCompleted);
-  const currentPlayerMatch = currentWeek.playerMatch;
-  const canSimulateMatch = canSimulateCurrentMatch(career);
-  const matchWithResult =
-    latestPlayedMatch?.id === currentPlayerMatch?.id ? latestPlayedMatch : currentPlayerMatch;
-  const hasPlayedCurrentMatch = currentPlayerMatch?.status === "played";
-  const canAdvanceToNextWeek = Boolean(hasPlayedCurrentMatch && !seasonComplete);
+  const club = useMemo(() => getCurrentClub(career), [career]);
 
-  const completeWeeklyAction = () => {
+  const advance = () => {
     try {
-      const updatedCareer = applyWeeklyAction(career, {
-        actionType: selectedAction,
-        attributeFocus:
-          selectedAction === "individualTraining" ? selectedAttribute : undefined,
+      const updatedCareer = advanceMonth(career, {
+        selectedChoiceId: selectedChoiceId ?? career.currentEvent?.choices[0]?.id,
       });
+      setSelectedChoiceId(null);
       setActionError(null);
-      setMatchError(null);
-      setMatchMessage(null);
-      setPendingMoments(null);
-      setLatestPlayedMatch(null);
+      setActionMessage(updatedCareer.season.isComplete ? "시즌이 종료되었습니다." : `${formatMonth(updatedCareer)}로 이동했습니다.`);
       onCareerChange(updatedCareer);
     } catch {
-      setActionError("이번 주 행동을 적용하지 못했습니다. 선택 내용을 다시 확인해 주세요.");
+      setActionError("월간 진행을 처리하지 못했습니다. 저장 상태를 확인해 주세요.");
+      setActionMessage(null);
     }
   };
 
-  const prepareMatchSimulation = () => {
-    if (!canSimulateMatch) {
-      return;
-    }
-
-    const moments = generateKeyMoments(career, getMatchSeed(career));
-    setPendingMoments(moments);
-    setSelectedChoices(
-      Object.fromEntries(moments.map((moment) => [moment.id, moment.choices[0].id])),
-    );
-    setMatchError(null);
-    setMatchMessage("핵심 장면의 선택지를 고른 뒤 경기를 진행하세요.");
-  };
-
-  const updateMomentChoice = (momentId: string, choiceId: string) => {
-    setSelectedChoices((currentChoices) => ({
-      ...currentChoices,
-      [momentId]: choiceId,
-    }));
-  };
-
-  const simulateMatch = () => {
-    if (!pendingMoments) {
-      return;
-    }
-
-    try {
-      const output = simulateCurrentMatch(career, {
-        seed: getMatchSeed(career),
-        moments: pendingMoments,
-        choices: selectedChoices,
-      });
-      setLatestPlayedMatch(output.match);
-      setPendingMoments(null);
-      setMatchError(null);
-      setMatchMessage("경기가 완료되었습니다. 결과를 확인하세요.");
-      onCareerChange(output.careerState);
-    } catch {
-      setMatchError("경기 시뮬레이션을 진행하지 못했습니다. 현재 주차와 저장 상태를 확인해 주세요.");
-    }
-  };
-
-  const moveToNextWeek = () => {
-    const updatedCareer = advanceWeek(career);
-
-    setActionError(null);
-    setMatchError(null);
-    setMatchMessage(`${updatedCareer.currentWeek}주차로 이동했습니다.`);
-    setPendingMoments(null);
-    setLatestPlayedMatch(null);
-    onCareerChange(updatedCareer);
-  };
-
-  const beginNextSeason = () => {
+  const nextSeason = () => {
     try {
       const updatedCareer = startNextSeason(career);
-
+      setSelectedChoiceId(null);
       setActionError(null);
-      setMatchError(null);
-      setMatchMessage("새 시즌 일정이 생성되었습니다.");
-      setPendingMoments(null);
-      setLatestPlayedMatch(null);
+      setActionMessage("새 시즌이 시작되었습니다.");
       onCareerChange(updatedCareer);
     } catch {
-      setMatchError("아직 시즌을 마무리할 수 없습니다. 남은 경기를 먼저 완료해 주세요.");
-    }
-  };
-
-  const acceptOffer = (offerId: string) => {
-    try {
-      const updatedCareer = acceptContractOffer(career, offerId);
-
-      setMatchError(null);
-      setMatchMessage("계약 제안을 수락했습니다.");
-      onCareerChange(updatedCareer);
-    } catch {
-      setMatchError("계약 제안을 처리하지 못했습니다. 제안 목록을 다시 확인해 주세요.");
-    }
-  };
-
-  const rejectOffer = (offerId: string) => {
-    try {
-      const updatedCareer = rejectContractOffer(career, offerId);
-
-      setMatchError(null);
-      setMatchMessage("계약 제안을 거절했습니다.");
-      onCareerChange(updatedCareer);
-    } catch {
-      setMatchError("계약 제안을 처리하지 못했습니다. 제안 목록을 다시 확인해 주세요.");
+      setActionError("아직 다음 시즌을 시작할 수 없습니다.");
+      setActionMessage(null);
     }
   };
 
   return (
     <ScreenShell
-      eyebrow="커리어 대시보드"
-      title={`${player.name} 선수`}
+      eyebrow={`${club.name} · ${career.season.year} 시즌`}
+      title={career.player.name}
       actions={
         <>
           <button className="primary-button" type="button" onClick={onSaveCareer}>
@@ -585,270 +629,43 @@ export function CareerDashboardScreen({
           </button>
         </>
       }
+      wide
     >
-      {saveError ? (
-        <div className="save-alert" role="alert">
-          {saveError}
-        </div>
-      ) : null}
+      <div className="career-dashboard">
+        {saveError ? <div className="save-alert" role="alert">{saveError}</div> : null}
+        {saveMessage ? <div className="save-status" role="status">{saveMessage}</div> : null}
+        {actionError ? <div className="save-alert" role="alert">{actionError}</div> : null}
+        {actionMessage ? <div className="save-status" role="status">{actionMessage}</div> : null}
 
-      {saveMessage ? (
-        <div className="save-status" role="status">
-          {saveMessage}
-        </div>
-      ) : null}
-
-      {actionError ? (
-        <div className="save-alert" role="alert">
-          {actionError}
-        </div>
-      ) : null}
-
-      {matchError ? (
-        <div className="save-alert" role="alert">
-          {matchError}
-        </div>
-      ) : null}
-
-      {matchMessage ? (
-        <div className="save-status" role="status">
-          {matchMessage}
-        </div>
-      ) : null}
-
-      <section className="dashboard-section" aria-labelledby="weekly-status-title">
-        <div className="section-heading">
-          <span className="eyebrow">이번 주 일정</span>
-          <h2 id="weekly-status-title">{career.currentWeek}주차</h2>
-        </div>
-        <div className="dashboard-grid">
-          <article>
-            <span>다음 상대</span>
-            <strong>{opponentName}</strong>
-          </article>
-          <article>
-            <span>컨디션</span>
-            <strong>{career.condition}</strong>
-          </article>
-          <article>
-            <span>피로도</span>
-            <strong>{career.fatigue}</strong>
-          </article>
-          <article>
-            <span>폼</span>
-            <strong>{career.form}</strong>
-          </article>
-          <article>
-            <span>감독 신뢰</span>
-            <strong>{career.coachTrust}</strong>
-          </article>
-          <article>
-            <span>팬 지지</span>
-            <strong>{career.fanSupport}</strong>
-          </article>
-          <article>
-            <span>전술 적응도</span>
-            <strong>{career.tacticalFit ?? 42}</strong>
-          </article>
-          <article>
-            <span>이번 주 경기</span>
-            <strong>{currentPlayerMatch ? (hasPlayedCurrentMatch ? "완료" : "있음") : "없음"}</strong>
-          </article>
-        </div>
-      </section>
-
-      {seasonSummary ? (
-        <SeasonSummaryPanel summary={seasonSummary} onStartNextSeason={beginNextSeason} />
-      ) : null}
-
-      {seasonComplete ? (
-        <ContractOffersPanel
-          career={career}
-          offers={contractOffers}
-          onAcceptOffer={acceptOffer}
-          onRejectOffer={rejectOffer}
-        />
-      ) : null}
-
-      {!seasonComplete ? (
-      <section className="weekly-action-panel" aria-labelledby="weekly-action-title">
-        <div className="section-heading">
-          <span className="eyebrow">주간 포커스</span>
-          <h2 id="weekly-action-title">이번 주 행동 선택</h2>
-        </div>
-        <div className="weekly-action-controls">
-          <label>
-            주간 행동
-            <select
-              value={selectedAction}
-              onChange={(event) => setSelectedAction(event.target.value as WeeklyActionType)}
-              disabled={weeklyActionCompleted}
-            >
-              {career.availableWeeklyActions.map((action) => (
-                <option key={action.type} value={action.type}>
-                  {action.label}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {selectedAction === "individualTraining" ? (
-            <label>
-              훈련 능력치
-              <select
-                value={selectedAttribute}
-                onChange={(event) => setSelectedAttribute(event.target.value as AttributeFocus)}
-                disabled={weeklyActionCompleted}
-              >
-                {ATTRIBUTE_FOCUS_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-        </div>
-
-        <div className="form-actions">
-          <button
-            className="primary-button"
-            type="button"
-            onClick={completeWeeklyAction}
-            disabled={weeklyActionCompleted}
-          >
-            주간 행동 완료
-          </button>
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={prepareMatchSimulation}
-            disabled={!canSimulateMatch || Boolean(pendingMoments)}
-          >
-            경기 시뮬레이션
-          </button>
-          {hasPlayedCurrentMatch ? (
+        <nav className="tab-bar" aria-label="커리어 탭">
+          {CAREER_DASHBOARD_TABS.map((tab) => (
             <button
-              className="secondary-button"
+              className={activeTab === tab.id ? "tab-button active" : "tab-button"}
+              key={tab.id}
               type="button"
-              onClick={moveToNextWeek}
-              disabled={!canAdvanceToNextWeek}
+              onClick={() => setActiveTab(tab.id)}
             >
-              다음 주로
+              {tab.label}
             </button>
-          ) : null}
-        </div>
-      </section>
-      ) : null}
-
-      {pendingMoments ? (
-        <section className="match-panel" aria-labelledby="moment-choice-title">
-          <div className="section-heading">
-            <span className="eyebrow">경기 시뮬레이션</span>
-            <h2 id="moment-choice-title">핵심 장면 선택</h2>
-          </div>
-          <ol className="moment-choice-list">
-            {pendingMoments.map((moment) => (
-              <li key={moment.id}>
-                <span>{moment.minute}분</span>
-                <p>{moment.situation}</p>
-                <select
-                  value={selectedChoices[moment.id]}
-                  onChange={(event) => updateMomentChoice(moment.id, event.target.value)}
-                >
-                  {moment.choices.map((choice) => (
-                    <option key={choice.id} value={choice.id}>
-                      {choice.label}
-                    </option>
-                  ))}
-                </select>
-              </li>
-            ))}
-          </ol>
-          <button className="primary-button" type="button" onClick={simulateMatch}>
-            선택 완료 후 경기 진행
-          </button>
-        </section>
-      ) : null}
-
-      {matchWithResult?.result ? <MatchResultPanel match={matchWithResult} /> : null}
-
-      <DevelopmentReportPanel career={career} />
-
-      <CareerHistoryPanel career={career} />
-
-      <section className="dashboard-section" aria-labelledby="player-info-title">
-        <div className="section-heading">
-          <span className="eyebrow">선수 정보</span>
-          <h2 id="player-info-title">프로필</h2>
-        </div>
-        <div className="dashboard-grid">
-          <article>
-            <span>국적 / 나이</span>
-            <strong>
-              {player.nationality}, {player.age}세
-            </strong>
-          </article>
-          <article>
-            <span>포지션</span>
-            <strong>
-              {player.position} - {POSITION_LABELS[player.position]}
-            </strong>
-          </article>
-          <article>
-            <span>플레이 스타일</span>
-            <strong>{PLAY_STYLE_LABELS[player.playStyle]}</strong>
-          </article>
-          <article>
-            <span>주발</span>
-            <strong>{FOOT_LABELS[player.preferredFoot]}</strong>
-          </article>
-          <article>
-            <span>성격</span>
-            <strong>{PERSONALITY_LABELS[player.personality]}</strong>
-          </article>
-          <article>
-            <span>소속 클럽</span>
-            <strong>{getClubName(player.clubId)}</strong>
-          </article>
-          <article>
-            <span>평판</span>
-            <strong>{career.reputation}</strong>
-          </article>
-          <article>
-            <span>연봉</span>
-            <strong>{formatSalary(career.salary)}</strong>
-          </article>
-          <article>
-            <span>계약</span>
-            <strong>{career.contractYearsLeft}년 남음</strong>
-          </article>
-          <article>
-            <span>스쿼드 역할</span>
-            <strong>{SQUAD_ROLE_LABELS[career.squadRole]}</strong>
-          </article>
-          <article>
-            <span>최근 저장</span>
-            <strong>{savedAtLabel ?? "아직 없음"}</strong>
-          </article>
-        </div>
-      </section>
-
-      <section className="event-log" aria-labelledby="event-log-title">
-        <div className="section-heading">
-          <span className="eyebrow">기록</span>
-          <h2 id="event-log-title">이벤트 로그</h2>
-        </div>
-        <ol>
-          {(career.eventLog ?? []).slice().reverse().map((event) => (
-            <li key={event.id}>
-              <span>{event.week}주차</span>
-              <strong>{event.title}</strong>
-              <p>{event.description}</p>
-            </li>
           ))}
-        </ol>
-      </section>
+        </nav>
+
+        {activeTab === "main" ? (
+          <MainTab
+            career={career}
+            selectedChoiceId={selectedChoiceId}
+            onSelectChoice={setSelectedChoiceId}
+            onAdvanceMonth={advance}
+            onStartNextSeason={nextSeason}
+          />
+        ) : null}
+        {activeTab === "player" ? <PlayerTab career={career} /> : null}
+        {activeTab === "schedule" ? <ScheduleTab career={career} /> : null}
+        {activeTab === "career" ? <CareerTab career={career} /> : null}
+        {activeTab === "club" ? <ClubTab career={career} /> : null}
+
+        <p className="saved-at">최근 저장: {savedAtLabel ?? "아직 없음"}</p>
+      </div>
     </ScreenShell>
   );
 }

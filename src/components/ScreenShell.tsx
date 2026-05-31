@@ -5,18 +5,21 @@ interface ScreenShellProps {
   title: string;
   children: ReactNode;
   actions?: ReactNode;
+  wide?: boolean;
 }
 
-export function ScreenShell({ eyebrow, title, children, actions }: ScreenShellProps) {
+export function ScreenShell({ eyebrow, title, children, actions, wide = false }: ScreenShellProps) {
   return (
     <main className="app-shell">
-      <section className="screen-panel" aria-labelledby="screen-title">
-        <div className="screen-heading">
-          <span className="eyebrow">{eyebrow}</span>
-          <h1 id="screen-title">{title}</h1>
-        </div>
+      <section className={wide ? "screen-panel screen-panel-wide" : "screen-panel"} aria-labelledby="screen-title">
+        <header className="screen-heading">
+          <div>
+            <span className="eyebrow">{eyebrow}</span>
+            <h1 id="screen-title">{title}</h1>
+          </div>
+          {actions ? <div className="screen-actions">{actions}</div> : null}
+        </header>
         <div className="screen-body">{children}</div>
-        {actions ? <div className="screen-actions">{actions}</div> : null}
       </section>
     </main>
   );

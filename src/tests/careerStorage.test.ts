@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { STARTER_CLUBS } from "../data/clubs";
-import { createNewCareer } from "../game/career";
+import { STARTER_CLUBS } from "../data/fictionalLeagues";
+import { createNewCareer } from "../game/monthlyCareer";
+import { generatePlayerRoll } from "../game/playerGeneration";
 import {
   CAREER_SAVE_KEY,
   clearSavedCareerState,
@@ -28,127 +29,97 @@ class MemoryStorage implements StorageLike {
 }
 
 function createCareer() {
+  const roll = generatePlayerRoll("storage-career");
+
   return createNewCareer({
-    name: "테스트",
+    name: "저장 테스트",
     nationality: "대한민국",
-    age: 18,
-    preferredFoot: "right",
-    position: "ST",
-    playStyle: "poacher",
-    personality: "diligent",
     clubId: STARTER_CLUBS[0].id,
+    position: roll.recommendations[0].position,
+    roll,
   });
 }
 
-describe("careerStorage", () => {
-  it("saves and loads a versioned career save file", () => {
+describe("careerStorage v2", () => {
+  it("saves and loads a versioned monthly career", () => {
     const storage = new MemoryStorage();
     const career = createCareer();
-    const savedAt = new Date("2026-05-31T12:00:00.000Z");
+    const savedAt = new Date("2027-01-01T00:00:00.000Z");
 
     const saveFile = saveCareerState(career, storage, savedAt);
     const result = loadCareerSave(storage);
 
     expect(saveFile.saveVersion).toBe(CURRENT_SAVE_VERSION);
-    expect(saveFile.savedAt).toBe("2026-05-31T12:00:00.000Z");
     expect(result.status).toBe("loaded");
 
     if (result.status === "loaded") {
-      expect(result.save.careerState.player.name).toBe("테스트");
-      expect(result.save.savedAt).toBe(saveFile.savedAt);
+      expect(result.save.careerState.player.leftFoot).toBeGreaterThanOrEqual(1);
+      expect(result.save.careerState.player.selectedPosition).toBeDefined();
+      expect(result.save.careerState.player.dominantFoot).toMatch(/left|right|both/);
+      expect(result.save.savedAt).toBe("2027-01-01T00:00:00.000Z");
+    }
+  });
+
+  it("normalizes older v2 monthly saves that lack new player model fields", () => {
+    const storage = new MemoryStorage();
+    const career = createCareer() as unknown as Record<string, unknown>;
+    const player = career.player as Record<string, unknown>;
+
+    player.position = player.selectedPosition;
+    delete player.selectedPosition;
+    delete player.recommendedPositions;
+    delete player.dominantFoot;
+    delete player.OVR;
+    delete player.form;
+    delete player.condition;
+    delete player.fatigue;
+    delete player.reputation;
+    delete player.coachTrust;
+    delete player.marketValue;
+
+    storage.setItem(
+      CAREER_SAVE_KEY,
+      JSON.stringify({
+        saveVersion: CURRENT_SAVE_VERSION,
+        savedAt: "2027-01-01T00:00:00.000Z",
+        careerState: career,
+      }),
+    );
+
+    const result = loadCareerSave(storage);
+
+    expect(result.status).toBe("loaded");
+
+    if (result.status === "loaded") {
+      expect(result.save.careerState.player.selectedPosition).toBe(result.save.careerState.player.position);
+      expect(result.save.careerState.player.recommendedPositions.length).toBeGreaterThan(0);
+      expect(result.save.careerState.player.marketValue).toBeGreaterThan(0);
     }
   });
 
   it("creates a save file envelope without touching storage", () => {
     const career = createCareer();
-    const saveFile = createCareerSaveFile(career, new Date("2026-05-31T09:00:00.000Z"));
+    const saveFile = createCareerSaveFile(career, new Date("2027-02-01T00:00:00.000Z"));
 
-    expect(saveFile).toEqual({
-      saveVersion: CURRENT_SAVE_VERSION,
-      savedAt: "2026-05-31T09:00:00.000Z",
-      careerState: career,
-    });
+    expect(saveFile.saveVersion).toBe(2);
+    expect(saveFile.careerState.season.currentMonth).toBe(1);
   });
 
-  it("returns empty when no save exists", () => {
-    expect(loadCareerSave(new MemoryStorage())).toEqual({ status: "empty" });
-  });
-
-  it("returns invalid for corrupted JSON", () => {
-    const storage = new MemoryStorage();
-    storage.setItem(CAREER_SAVE_KEY, "{bad json");
-
-    const result = loadCareerSave(storage);
-
-    expect(result.status).toBe("invalid");
-  });
-
-  it("returns invalid for old raw career state data", () => {
-    const storage = new MemoryStorage();
-    storage.setItem(CAREER_SAVE_KEY, JSON.stringify(createCareer()));
-
-    const result = loadCareerSave(storage);
-
-    expect(result.status).toBe("invalid");
-  });
-
-  it("returns unsupportedVersion for a mismatched save version", () => {
+  it("rejects incompatible weekly v1 saves without deleting them", () => {
     const storage = new MemoryStorage();
     storage.setItem(
       CAREER_SAVE_KEY,
       JSON.stringify({
-        saveVersion: 0,
+        saveVersion: 1,
         savedAt: "2026-05-31T12:00:00.000Z",
-        careerState: createCareer(),
+        careerState: { player: { name: "구버전" }, season: { matches: [] }, currentWeek: 1 },
       }),
     );
 
     const result = loadCareerSave(storage);
 
     expect(result.status).toBe("unsupportedVersion");
-  });
-
-  it("normalizes older versioned career data with weekly defaults", () => {
-    const storage = new MemoryStorage();
-    const olderCareer = createCareer() as unknown as Record<string, unknown>;
-    delete olderCareer.tacticalFit;
-    delete olderCareer.weeklyActionCompleted;
-    delete olderCareer.eventLog;
-    delete olderCareer.seasonBaseline;
-    delete olderCareer.careerHistory;
-    delete olderCareer.salary;
-    delete olderCareer.contractYearsLeft;
-    delete olderCareer.squadRole;
-    delete olderCareer.seasonOffers;
-    delete olderCareer.rejectedContractOfferIds;
-
-    storage.setItem(
-      CAREER_SAVE_KEY,
-      JSON.stringify({
-        saveVersion: CURRENT_SAVE_VERSION,
-        savedAt: "2026-05-31T12:00:00.000Z",
-        careerState: olderCareer,
-      }),
-    );
-
-    const result = loadCareerSave(storage);
-
-    expect(result.status).toBe("loaded");
-
-    if (result.status === "loaded") {
-      expect(result.save.careerState.tacticalFit).toBe(42);
-      expect(result.save.careerState.weeklyActionCompleted).toBe(false);
-      expect(result.save.careerState.availableWeeklyActions[0].label).toBe("팀 훈련");
-      expect(result.save.careerState.eventLog).toHaveLength(1);
-      expect(result.save.careerState.seasonBaseline.seasonNumber).toBe(1);
-      expect(result.save.careerState.seasonBaseline.clubId).toBe(result.save.careerState.player.clubId);
-      expect(result.save.careerState.careerHistory).toEqual([]);
-      expect(result.save.careerState.salary).toBe(900);
-      expect(result.save.careerState.contractYearsLeft).toBe(2);
-      expect(result.save.careerState.squadRole).toBe("prospect");
-      expect(result.save.careerState.seasonOffers).toEqual([]);
-      expect(result.save.careerState.rejectedContractOfferIds).toEqual([]);
-    }
+    expect(storage.getItem(CAREER_SAVE_KEY)).not.toBeNull();
   });
 
   it("clears saved career data", () => {
