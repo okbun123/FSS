@@ -25,6 +25,12 @@ export function StartScreen({
     <ScreenShell
       eyebrow="주간 커리어 시뮬레이션"
       title="풋볼 커리어"
+      subtitle={
+        <p className="screen-lede">
+          낮은 리그에서 출발해 몸상태, 입지, 이적 제안을 관리하며 시즌을 쌓아가는 커리어 시뮬레이션
+        </p>
+      }
+      variant="start"
       actions={
         <>
           <button className="primary-button" type="button" onClick={onContinueCareer} disabled={!hasSavedCareer}>

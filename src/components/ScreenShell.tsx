@@ -8,6 +8,7 @@ interface ScreenShellProps {
   actions?: ReactNode;
   subtitle?: ReactNode;
   navigation?: ReactNode;
+  variant?: "default" | "start" | "match";
   wide?: boolean;
 }
 
@@ -18,6 +19,7 @@ export function ScreenShell({
   actions,
   subtitle,
   navigation,
+  variant = "default",
   wide = false,
 }: ScreenShellProps) {
   return (
@@ -34,6 +36,7 @@ export function ScreenShell({
       }
       labelledBy="screen-title"
       navigation={navigation}
+      variant={variant}
       wide={wide}
     >
       {children}

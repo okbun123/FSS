@@ -96,6 +96,7 @@ export function MatchScreen({
           </button>
         </>
       }
+      variant="match"
       wide
     >
       <div className="career-dashboard match-screen">

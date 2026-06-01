@@ -5,6 +5,7 @@ interface AppShellProps {
   header: ReactNode;
   labelledBy?: string;
   navigation?: ReactNode;
+  variant?: "default" | "start" | "match";
   wide?: boolean;
 }
 
@@ -13,10 +14,12 @@ export function AppShell({
   header,
   labelledBy,
   navigation,
+  variant = "default",
   wide = false,
 }: AppShellProps) {
   const panelClassName = [
     "screen-panel",
+    variant !== "default" ? `screen-panel-${variant}` : "",
     wide ? "screen-panel-wide" : "",
     navigation ? "screen-panel-with-nav" : "",
   ]
