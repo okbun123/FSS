@@ -79,6 +79,9 @@ const ATTRIBUTE_LABELS_KO: Record<string, string> = {
 const DEFAULT_CLUB = getAllClubs()[0];
 const ALL_CLUBS = getAllClubs();
 const ALL_CLUB_IDS = ALL_CLUBS.map((club) => club.id);
+const ALL_LEAGUES = Object.values(FICTIONAL_LEAGUES);
+const DEFAULT_LEAGUE = DEFAULT_CLUB ? FICTIONAL_LEAGUES[DEFAULT_CLUB.leagueId] : ALL_LEAGUES[0];
+const ALL_COUNTRIES = [...new Set(ALL_LEAGUES.map((league) => league.country))];
 export const CREATION_TEAM_PAGE_SIZE = 8;
 
 const INITIAL_INPUT: PlayerCreationInput = {
@@ -132,6 +135,11 @@ export function getPositionFitBand(fitScore: number): PositionFitBand {
 export function getPositionFitLabel(fitScore: number): string {
   const band = getPositionFitBand(fitScore);
 
+  return getPositionFitBandLabel(band);
+}
+
+export function getPositionFitBandLabel(band: PositionFitBand): string {
+
   if (band === "fit-excellent") {
     return "최상";
   }
@@ -145,6 +153,31 @@ export function getPositionFitLabel(fitScore: number): string {
     return "약함";
   }
   return "위험";
+}
+
+export function getRelativePositionFitBand(
+  recommendation: Pick<PositionRecommendation, "fitScore">,
+  recommendations: Array<Pick<PositionRecommendation, "fitScore">>,
+): PositionFitBand {
+  const scores = recommendations.map((item) => item.fitScore);
+  const bestScore = Math.max(...scores, recommendation.fitScore);
+  const worstScore = Math.min(...scores, recommendation.fitScore);
+  const scoreRange = Math.max(1, bestScore - worstScore);
+  const relativeScore = ((recommendation.fitScore - worstScore) / scoreRange) * 100;
+
+  if (recommendation.fitScore >= bestScore - 2) {
+    return "fit-excellent";
+  }
+  if (relativeScore >= 72) {
+    return "fit-good";
+  }
+  if (relativeScore >= 46) {
+    return "fit-average";
+  }
+  if (relativeScore >= 22) {
+    return "fit-weak";
+  }
+  return "fit-poor";
 }
 
 export function getPoorFitRiskNote(recommendation: Pick<PositionRecommendation, "fitScore" | "keyWeaknesses">): string | null {
@@ -170,25 +203,25 @@ export function canSelectCreationPosition(recommendation: Pick<PositionRecommend
 }
 
 export interface CreationTeamFilters {
+  countryFilter?: string | "all";
   leagueFilter: LeagueTier | "all";
-  roleFilter: TeamFitRole | "all";
-  reputationFilter: number | "all";
-  trainingFilter: number | "all";
+  roleFilter?: TeamFitRole | "all";
+  reputationFilter?: number | "all";
+  trainingFilter?: number | "all";
 }
 
 export interface CreationTeamRow {
   club: Club;
   fit: TeamFitResult;
+  country: string;
   leagueName: string;
 }
 
 export interface CreationTeamDisplayRow {
   teamName: string;
+  country: string;
   leagueName: string;
-  reputationStars: string;
   squadStrengthStars: string;
-  budgetStars: string;
-  trainingStars: string;
   youthOpportunityStars: string;
   publicInfoText: string;
   roleLabel: string;
@@ -224,18 +257,13 @@ export function canSelectCreationTeam(clubId: string, playableClubIds = ALL_CLUB
 export function getCreationTeamDisplayRow(row: CreationTeamRow): CreationTeamDisplayRow {
   return {
     teamName: row.club.name,
+    country: row.country,
     leagueName: row.leagueName,
-    reputationStars: formatStars(row.fit.reputationStars),
     squadStrengthStars: formatStars(row.fit.squadStrengthStars),
-    budgetStars: formatStars(row.fit.budgetStars),
-    trainingStars: formatStars(row.fit.trainingFacilityStars),
     youthOpportunityStars: formatStars(row.fit.youthOpportunityStars),
     publicInfoText: [
-      `평판 ${formatStars(row.fit.reputationStars)}`,
       `전력 ${formatStars(row.fit.squadStrengthStars)}`,
-      `예산 ${formatStars(row.fit.budgetStars)}`,
-      `유스 기회 ${formatStars(row.fit.youthOpportunityStars)}`,
-      `훈련 시설 ${formatStars(row.fit.trainingFacilityStars)}`,
+      `유스 ${formatStars(row.fit.youthOpportunityStars)}`,
     ].join(" · "),
     roleLabel: TEAM_FIT_ROLE_LABELS[row.fit.role],
     fitLabel: getTeamFitLabel(row.fit.band),
@@ -271,16 +299,22 @@ export function getCreationTeamRows(input: {
       return {
         club,
         fit,
+        country: league.country,
         leagueName: getLeagueName(club.leagueId),
       };
     })
     .filter((row): row is CreationTeamRow => Boolean(row))
-    .filter(({ club, fit }) => {
+    .filter(({ club, country, fit }) => {
       return (
+        (!filters.countryFilter || filters.countryFilter === "all" || country === filters.countryFilter) &&
         (filters.leagueFilter === "all" || club.leagueId === filters.leagueFilter) &&
-        (filters.roleFilter === "all" || fit.role === filters.roleFilter) &&
-        (filters.reputationFilter === "all" || fit.reputationStars === filters.reputationFilter) &&
-        (filters.trainingFilter === "all" || fit.trainingFacilityStars === filters.trainingFilter)
+        (!filters.roleFilter || filters.roleFilter === "all" || fit.role === filters.roleFilter) &&
+        (!filters.reputationFilter ||
+          filters.reputationFilter === "all" ||
+          fit.reputationStars === filters.reputationFilter) &&
+        (!filters.trainingFilter ||
+          filters.trainingFilter === "all" ||
+          fit.trainingFacilityStars === filters.trainingFilter)
       );
     })
     .sort(
@@ -323,10 +357,9 @@ export function getCreationStatPanelItems(
   return [
     { label: "나이", value: `${roll.age}세` },
     { label: "OVR", value: recommendation?.overall ?? "-" },
-    { label: "왼발", value: roll.leftFoot },
-    { label: "오른발", value: roll.rightFoot },
     { label: "주발", value: getDominantFootLabel(roll.leftFoot, roll.rightFoot) },
     { label: "잠재력", value: getPotentialHint(roll.potential) },
+    { label: "유형", value: roll.archetype },
   ];
 }
 
@@ -342,6 +375,21 @@ function AttributeSummary({
   const recommendation =
     roll.recommendations.find((item) => item.position === selectedPosition) ?? roll.recommendations[0];
   const statItems = getCreationStatPanelItems(roll, selectedPosition);
+  const detailGroups: Array<{ id: string; label: string; values: Array<[string, number]> }> = [
+    {
+      id: "foot",
+      label: "발",
+      values: [
+        ["leftFoot", roll.leftFoot],
+        ["rightFoot", roll.rightFoot],
+      ],
+    },
+    ...(Object.entries(attributes) as Array<[keyof Attributes, Record<string, number>]>).map(([group, values]) => ({
+      id: group,
+      label: ATTRIBUTE_GROUP_LABELS_KO[group],
+      values: Object.entries(values),
+    })),
+  ];
 
   return (
     <aside className="data-panel creation-stat-panel">
@@ -353,12 +401,12 @@ function AttributeSummary({
       </div>
       <MetricGrid items={statItems} />
       <div className="attribute-compact-grid">
-        {(Object.entries(attributes) as Array<[keyof Attributes, Record<string, number>]>).map(([group, values]) => (
-          <section key={group}>
-            <h3>{ATTRIBUTE_GROUP_LABELS_KO[group]}</h3>
+        {detailGroups.map((group) => (
+          <section key={group.id}>
+            <h3>{group.label}</h3>
             <dl>
-              {Object.entries(values).map(([key, value]) => (
-                <div key={`${group}-${key}`}>
+              {group.values.map(([key, value]) => (
+                <div key={`${group.id}-${key}`}>
                   <dt>{ATTRIBUTE_LABELS_KO[key] ?? key}</dt>
                   <dd>{value}</dd>
                 </div>
@@ -376,10 +424,8 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
   const [input, setInput] = useState<PlayerCreationInput>(INITIAL_INPUT);
   const [rollSeed, setRollSeed] = useState(createRollSeed);
   const [errors, setErrors] = useState<string[]>([]);
-  const [leagueFilter, setLeagueFilter] = useState<LeagueTier | "all">("all");
-  const [roleFilter, setRoleFilter] = useState<TeamFitRole | "all">("all");
-  const [reputationFilter, setReputationFilter] = useState<number | "all">("all");
-  const [trainingFilter, setTrainingFilter] = useState<number | "all">("all");
+  const [countryFilter, setCountryFilter] = useState<string>(DEFAULT_LEAGUE?.country ?? ALL_COUNTRIES[0] ?? "대한민국");
+  const [leagueFilter, setLeagueFilter] = useState<LeagueTier>(DEFAULT_CLUB?.leagueId ?? "div1");
   const [teamPage, setTeamPage] = useState(0);
   const roll = useMemo(() => generatePlayerRoll(rollSeed), [rollSeed]);
   const [selectedPosition, setSelectedPosition] = useState<Position>(roll.recommendations[0].position);
@@ -389,6 +435,10 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
   const selectedClub = ALL_CLUBS.find((club) => club.id === input.clubId) ?? DEFAULT_CLUB;
   const currentStep = CREATION_STEPS[stepIndex];
   const positionOptions = useMemo(() => getCreationPositionOptions(roll), [roll]);
+  const countryLeagues = useMemo(
+    () => ALL_LEAGUES.filter((league) => league.country === countryFilter),
+    [countryFilter],
+  );
 
   const teamRows = useMemo(() => {
     return getCreationTeamRows({
@@ -397,13 +447,11 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
       playerOverall: selectedRecommendation.overall,
       selectedPosition,
       filters: {
+        countryFilter,
         leagueFilter,
-        roleFilter,
-        reputationFilter,
-        trainingFilter,
       },
     });
-  }, [leagueFilter, reputationFilter, roleFilter, selectedPosition, selectedRecommendation.overall, trainingFilter]);
+  }, [countryFilter, leagueFilter, selectedPosition, selectedRecommendation.overall]);
 
   const teamPageCount = Math.max(1, Math.ceil(teamRows.length / CREATION_TEAM_PAGE_SIZE));
   const visibleTeamRows = teamRows.slice(
@@ -417,6 +465,32 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
   ) => {
     setInput((currentInput) => ({ ...currentInput, [key]: value }));
     setErrors([]);
+  };
+
+  const selectFirstClubInLeague = (leagueId: LeagueTier) => {
+    const firstClub = ALL_CLUBS.find((club) => club.leagueId === leagueId);
+
+    if (firstClub) {
+      updateInput("clubId", firstClub.id);
+    }
+  };
+
+  const changeCountry = (country: string) => {
+    const firstLeague = ALL_LEAGUES.find((league) => league.country === country);
+
+    setCountryFilter(country);
+    setLeagueFilter(firstLeague?.id ?? leagueFilter);
+    setTeamPage(0);
+
+    if (firstLeague) {
+      selectFirstClubInLeague(firstLeague.id);
+    }
+  };
+
+  const changeLeague = (leagueId: LeagueTier) => {
+    setLeagueFilter(leagueId);
+    setTeamPage(0);
+    selectFirstClubInLeague(leagueId);
   };
 
   const reroll = () => {
@@ -535,22 +609,15 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
             )}
           </section>
 
-          <AttributeSummary
-            roll={roll}
-            attributes={roll.attributes}
-            selectedPosition={selectedRecommendation.position}
-          />
-        </div>
+          <section className="data-panel creation-step-panel">
+            <header className="panel-title-row">
+              <h2>{currentStep.label}</h2>
+              <span>
+                {stepIndex + 1} / {CREATION_STEPS.length}
+              </span>
+            </header>
 
-        <section className="data-panel creation-step-panel">
-          <header className="panel-title-row">
-            <h2>{currentStep.label}</h2>
-            <span>
-              {stepIndex + 1} / {CREATION_STEPS.length}
-            </span>
-          </header>
-
-          <div className="creation-step-content">
+            <div className="creation-step-content">
           {errors.length > 0 ? (
             <div className="error-list" role="alert">
               {errors.map((error) => (
@@ -560,21 +627,7 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
           ) : null}
 
           {currentStep.id === "identity" ? (
-            <div className="roll-summary">
-              <MetricGrid
-                items={[
-                  { label: "나이", value: `${roll.age}세` },
-                  { label: "추천 OVR", value: selectedRecommendation.overall },
-                  { label: "추천 포지션", value: POSITION_LABELS_KO[selectedRecommendation.position] },
-                  { label: "주발", value: getDominantFootLabel(roll.leftFoot, roll.rightFoot) },
-                  { label: "잠재력", value: getPotentialHint(roll.potential) },
-                  { label: "유형", value: roll.archetype },
-                ]}
-              />
-              <p className="empty-note">
-                왼쪽 아래 능력치 패널에서 세부 능력치, 왼발, 오른발, 주발을 확인할 수 있습니다.
-              </p>
-            </div>
+            <div className="roll-summary" aria-hidden="true" />
           ) : null}
 
           {currentStep.id === "position" ? (
@@ -582,13 +635,14 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
               {positionOptions.map((recommendation) => {
                 const isSelected = selectedPosition === recommendation.position;
                 const riskNote = getPoorFitRiskNote(recommendation);
+                const relativeFitBand = getRelativePositionFitBand(recommendation, positionOptions);
 
                 return (
                   <button
                     className={[
                       "recommendation",
                       "position-card",
-                      getPositionFitBand(recommendation.fitScore),
+                      relativeFitBand,
                       isSelected ? "selected" : "",
                     ].filter(Boolean).join(" ")}
                     key={recommendation.position}
@@ -602,7 +656,7 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
                   >
                     <strong>{POSITION_LABELS_KO[recommendation.position]} · {recommendation.position}</strong>
                     <span>
-                      {getPositionFitLabel(recommendation.fitScore)} · 적합도 {recommendation.fitScore} · OVR {recommendation.overall}
+                      {getPositionFitBandLabel(relativeFitBand)} · 적합도 {recommendation.fitScore} · OVR {recommendation.overall}
                     </span>
                     <p>{recommendation.reason}</p>
                     <small>주요 매칭 {recommendation.keyStrengths.join(", ") || "-"} · 보완 {recommendation.keyWeaknesses.join(", ") || "-"}</small>
@@ -617,112 +671,92 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
             <div className="team-selection-stack">
               <div className="team-filter-grid">
                 <label>
-                  리그
+                  국가 선택
                   <select
-                    value={leagueFilter}
+                    value={countryFilter}
                     onChange={(event) => {
-                      setLeagueFilter(event.target.value as LeagueTier | "all");
-                      setTeamPage(0);
+                      changeCountry(event.target.value);
                     }}
                   >
-                    <option value="all">전체</option>
-                    {Object.keys(FICTIONAL_LEAGUES).map((leagueId) => (
-                      <option key={leagueId} value={leagueId}>
-                        {getLeagueName(leagueId as LeagueTier)}
+                    {ALL_COUNTRIES.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  예상 역할
+                  리그 선택
                   <select
-                    value={roleFilter}
+                    value={leagueFilter}
                     onChange={(event) => {
-                      setRoleFilter(event.target.value as TeamFitRole | "all");
-                      setTeamPage(0);
+                      changeLeague(event.target.value as LeagueTier);
                     }}
                   >
-                    <option value="all">전체</option>
-                    <option value="bench">{TEAM_FIT_ROLE_LABELS.bench}</option>
-                    <option value="rotation">{TEAM_FIT_ROLE_LABELS.rotation}</option>
-                    <option value="starter">{TEAM_FIT_ROLE_LABELS.starter}</option>
-                  </select>
-                </label>
-                <label>
-                  평판
-                  <select
-                    value={reputationFilter}
-                    onChange={(event) => {
-                      setReputationFilter(event.target.value === "all" ? "all" : Number(event.target.value));
-                      setTeamPage(0);
-                    }}
-                  >
-                    <option value="all">전체</option>
-                    {[1, 2, 3, 4, 5].map((stars) => (
-                      <option key={stars} value={stars}>{stars}성</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  훈련
-                  <select
-                    value={trainingFilter}
-                    onChange={(event) => {
-                      setTrainingFilter(event.target.value === "all" ? "all" : Number(event.target.value));
-                      setTeamPage(0);
-                    }}
-                  >
-                    <option value="all">전체</option>
-                    {[1, 2, 3, 4, 5].map((stars) => (
-                      <option key={stars} value={stars}>{stars}성</option>
+                    {countryLeagues.map((league) => (
+                      <option key={league.id} value={league.id}>
+                        {league.name}
+                      </option>
                     ))}
                   </select>
                 </label>
               </div>
 
-              <div className="table-scroll team-table-scroll">
-                <table className="compact-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">팀</th>
-                      <th scope="col">리그</th>
-                      <th scope="col">역할</th>
-                      <th scope="col">적합</th>
-                      <th scope="col">공개 정보</th>
-                      <th scope="col">선택</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleTeamRows.map((row) => {
-                      const { club } = row;
-                      const displayRow = getCreationTeamDisplayRow(row);
+              <div className="team-card-grid team-table-scroll">
+                {visibleTeamRows.map((row) => {
+                  const { club } = row;
+                  const displayRow = getCreationTeamDisplayRow(row);
+                  const isSelected = club.id === input.clubId;
 
-                      return (
-                        <tr className={club.id === input.clubId ? "selected-row" : ""} key={club.id}>
-                          <td>{displayRow.teamName}</td>
-                          <td>{displayRow.leagueName}</td>
-                          <td>{displayRow.roleLabel}</td>
-                          <td className={displayRow.fitColorClass}>{displayRow.fitLabel} · {displayRow.fitScore}</td>
-                          <td className="club-public-stars">{displayRow.publicInfoText}</td>
-                          <td>
-                            <button
-                              className={club.id === input.clubId ? "primary-button table-action-button" : "secondary-button table-action-button"}
-                              type="button"
-                              aria-pressed={club.id === input.clubId}
-                              onClick={() => {
-                                if (canSelectCreationTeam(club.id)) {
-                                  updateInput("clubId", club.id);
-                                }
-                              }}
-                            >
-                              선택
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                  return (
+                    <button
+                      className={[
+                        "team-selection-card",
+                        displayRow.fitColorClass,
+                        isSelected ? "selected" : "",
+                      ].filter(Boolean).join(" ")}
+                      key={club.id}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => {
+                        if (canSelectCreationTeam(club.id)) {
+                          updateInput("clubId", club.id);
+                        }
+                      }}
+                    >
+                      <header>
+                        <strong>{displayRow.teamName}</strong>
+                        <span>{displayRow.fitLabel} · {displayRow.fitScore}</span>
+                      </header>
+                      <dl>
+                        <div>
+                          <dt>국가</dt>
+                          <dd>{displayRow.country}</dd>
+                        </div>
+                        <div>
+                          <dt>리그</dt>
+                          <dd>{displayRow.leagueName}</dd>
+                        </div>
+                        <div>
+                          <dt>전력</dt>
+                          <dd>{displayRow.squadStrengthStars}</dd>
+                        </div>
+                        <div>
+                          <dt>유스</dt>
+                          <dd>{displayRow.youthOpportunityStars}</dd>
+                        </div>
+                        <div>
+                          <dt>예상 역할</dt>
+                          <dd>{displayRow.roleLabel}</dd>
+                        </div>
+                        <div>
+                          <dt>적합도</dt>
+                          <dd>{displayRow.fitLabel}</dd>
+                        </div>
+                      </dl>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="pagination-row">
@@ -751,9 +785,16 @@ export function PlayerCreationScreen({ onBack, onCreateCareer }: PlayerCreationS
               />
             </div>
           ) : null}
-          </div>
+            </div>
 
-        </section>
+          </section>
+        </div>
+
+        <AttributeSummary
+          roll={roll}
+          attributes={roll.attributes}
+          selectedPosition={selectedRecommendation.position}
+        />
 
         <div className="form-actions creation-nav-actions">
           {stepIndex === 0 ? (

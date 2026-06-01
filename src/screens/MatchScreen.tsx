@@ -22,6 +22,7 @@ interface MatchScreenProps {
   saveMessage: string | null;
   actionError: string | null;
   actionMessage: string | null;
+  onBackToDashboard?: () => void;
   onMatchAction: (action: MatchAction) => void;
   onDeleteSave: () => void;
   onSaveCareer: () => void;
@@ -48,6 +49,7 @@ export function MatchScreen({
   saveMessage,
   actionError,
   actionMessage,
+  onBackToDashboard,
   onMatchAction,
   onDeleteSave,
   onSaveCareer,
@@ -81,6 +83,11 @@ export function MatchScreen({
       title="경기"
       actions={
         <>
+          {onBackToDashboard ? (
+            <button className="secondary-button" type="button" onClick={onBackToDashboard}>
+              대시보드
+            </button>
+          ) : null}
           <button className="primary-button" type="button" onClick={onSaveCareer}>
             저장
           </button>

@@ -27,7 +27,9 @@ import {
   getCreationStatPanelItems,
   getPoorFitRiskNote,
   getPositionFitBand,
+  getPositionFitBandLabel,
   getPositionFitLabel,
+  getRelativePositionFitBand,
   getTeamFitColorClass,
 } from "../src/screens/PlayerCreationScreen";
 import { generateLeagueFixtures } from "../src/game/leagueSchedule";
@@ -203,13 +205,13 @@ describe("fixed-screen redesign helpers", () => {
     expect(statItems.map((item) => item.label)).toEqual([
       "나이",
       "OVR",
-      "왼발",
-      "오른발",
       "주발",
       "잠재력",
+      "유형",
     ]);
-    expect(statItems.find((item) => item.label === "왼발")?.value).toBe(roll.leftFoot);
-    expect(statItems.find((item) => item.label === "오른발")?.value).toBe(roll.rightFoot);
+    expect(statItems.find((item) => item.label === "유형")?.value).toBe(roll.archetype);
+    expect(source).toContain("leftFoot");
+    expect(source).toContain("rightFoot");
   });
 
   it("rerolling the creation seed changes visible stat panel values", () => {
@@ -254,6 +256,15 @@ describe("fixed-screen redesign helpers", () => {
     expect(getPositionFitBand(100)).toBe("fit-excellent");
     expect(getPositionFitLabel(38)).toBe("위험");
     expect(getPositionFitLabel(88)).toBe("최상");
+    expect(getPositionFitBandLabel("fit-good")).toBe("좋음");
+  });
+
+  it("colors position fit relative to the generated player", () => {
+    const options = getCreationPositionOptions(generatePlayerRoll("low-overall-relative-fit"));
+    const topOption = options[0];
+
+    expect(getRelativePositionFitBand(topOption, options)).toBe("fit-excellent");
+    expect(getPositionFitBandLabel(getRelativePositionFitBand(topOption, options))).toBe("최상");
   });
 
   it("allows selecting a poor-fit position and exposes its risk note", () => {
@@ -269,6 +280,7 @@ describe("fixed-screen redesign helpers", () => {
   });
 
   it("renders all playable teams as selectable fit-sorted public rows", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/screens/PlayerCreationScreen.tsx"), "utf8");
     const roll = generatePlayerRoll("creation-team-options");
     const rows = getCreationTeamRows({
       clubs: getAllClubs(),
@@ -289,6 +301,9 @@ describe("fixed-screen redesign helpers", () => {
     );
     expect(rows.every((row) => canSelectCreationTeam(row.club.id))).toBe(true);
     expect(new Set(rows.map((row) => row.club.leagueId))).toEqual(new Set(Object.keys(FICTIONAL_LEAGUES)));
+    expect(source).toContain("국가 선택");
+    expect(source).toContain("리그 선택");
+    expect(source).toContain("team-selection-card");
   });
 
   it("can select and start a career with a Division 4 team", () => {
@@ -376,25 +391,23 @@ describe("fixed-screen redesign helpers", () => {
     const displayRow = getCreationTeamDisplayRow(row);
     const publicText = [
       displayRow.teamName,
+      displayRow.country,
       displayRow.leagueName,
-      displayRow.reputationStars,
-      displayRow.trainingStars,
       displayRow.youthOpportunityStars,
       displayRow.squadStrengthStars,
-      displayRow.budgetStars,
       displayRow.publicInfoText,
       displayRow.roleLabel,
       displayRow.fitLabel,
     ].join(" ");
 
-    expect(displayRow.reputationStars).toBe(formatStars(row.fit.reputationStars));
+    expect(displayRow.country).toBe(FICTIONAL_LEAGUES[club.leagueId].country);
     expect(displayRow.squadStrengthStars).toBe(formatStars(row.fit.squadStrengthStars));
-    expect(displayRow.budgetStars).toBe(formatStars(row.fit.budgetStars));
-    expect(displayRow.trainingStars).toBe(formatStars(row.fit.trainingFacilityStars));
     expect(displayRow.youthOpportunityStars).toBe(formatStars(row.fit.youthOpportunityStars));
     expect(displayRow.publicInfoText).toContain("전력");
-    expect(displayRow.publicInfoText).toContain("예산");
-    expect(displayRow.publicInfoText).toContain("훈련 시설");
+    expect(displayRow.publicInfoText).toContain("유스");
+    expect(displayRow.publicInfoText).not.toContain("평판");
+    expect(displayRow.publicInfoText).not.toContain("예산");
+    expect(displayRow.publicInfoText).not.toContain("훈련");
     expect(publicText).not.toContain(String(club.reputation));
     expect(publicText).not.toContain(String(club.squadStrength));
     expect(publicText).not.toContain(String(club.budgetLevel));

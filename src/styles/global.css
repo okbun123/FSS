@@ -109,6 +109,10 @@ button:disabled {
   line-height: 1.05;
 }
 
+.screen-heading-copy {
+  margin-top: 8px;
+}
+
 .eyebrow {
   color: #17624f;
   font-size: 0.84rem;
@@ -306,6 +310,45 @@ button:disabled {
   overflow: hidden;
 }
 
+.top-status-strip,
+.league-zone-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-chip,
+.league-zone-legend span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid #dce4dc;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #33423b;
+  padding: 3px 8px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.status-chip strong {
+  color: #61716a;
+}
+
+.status-chip.metric-good {
+  border-color: #b9dcc9;
+  background: #eef9f2;
+  color: #17624f;
+}
+
+.status-chip.metric-warning {
+  border-color: #efc69d;
+  background: #fff7ed;
+  color: #a84616;
+}
+
 .compact-panel {
   align-content: start;
 }
@@ -319,7 +362,7 @@ button:disabled {
 
 .creation-step-layout {
   display: grid;
-  grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.28fr);
+  grid-template-columns: minmax(0, 1.28fr) minmax(320px, 0.72fr);
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 12px;
   height: 100%;
@@ -364,6 +407,10 @@ button:disabled {
   min-height: 0;
   max-height: 100%;
   overflow: hidden;
+}
+
+.creation-stat-panel .metric-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .creation-step-content {
@@ -486,7 +533,7 @@ button:disabled {
 
 .team-filter-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -509,6 +556,79 @@ button:disabled {
 
 .team-table-scroll {
   max-height: none;
+}
+
+.team-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.team-selection-card {
+  display: grid;
+  gap: 10px;
+  min-height: 176px;
+  border: 1px solid #dce4dc;
+  background: #ffffff;
+  color: #1d2522;
+  padding: 12px;
+  text-align: left;
+}
+
+.team-selection-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: start;
+}
+
+.team-selection-card strong,
+.team-selection-card span,
+.team-selection-card dd {
+  overflow-wrap: anywhere;
+}
+
+.team-selection-card span {
+  flex: 0 0 auto;
+  color: currentColor;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.team-selection-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+}
+
+.team-selection-card div {
+  display: grid;
+  gap: 2px;
+}
+
+.team-selection-card dt,
+.team-selection-card dd {
+  margin: 0;
+}
+
+.team-selection-card dt {
+  color: #61716a;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.team-selection-card dd {
+  color: #111816;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.team-selection-card.selected {
+  border-color: #111816;
+  box-shadow: inset 0 0 0 2px #111816;
 }
 
 .compact-table {
@@ -805,6 +925,20 @@ td {
   min-height: 0;
 }
 
+.app-fixed-action-area {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  border: 1px solid #d5ded6;
+  border-radius: 8px;
+  background: #f8faf6;
+  padding: 10px;
+}
+
+.app-fixed-action-area button {
+  min-width: 220px;
+}
+
 .stacked-tab,
 .career-tab-grid,
 .club-overview-grid,
@@ -869,11 +1003,92 @@ td {
 
 .league-rules-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
 }
 
-.league-rules-grid > section:last-child {
-  grid-column: 1 / -1;
+.league-standings-panel {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.league-zone-legend {
+  color: #43534c;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.league-zone-swatch,
+.league-zone-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 52px;
+  min-height: 24px;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.league-zone-swatch {
+  min-width: 18px;
+  width: 18px;
+  min-height: 18px;
+  padding: 0;
+}
+
+.zone-green {
+  background: #dcefe4;
+  color: #17624f;
+}
+
+.zone-orange {
+  background: #fff0d9;
+  color: #a84616;
+}
+
+.zone-red {
+  background: #ffe2dd;
+  color: #9a3328;
+}
+
+.zone-none {
+  background: #edf2ec;
+  color: #61716a;
+}
+
+.season-report-panel {
+  height: 100%;
+}
+
+.season-report-list {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.season-report-list article {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #dce4dc;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.season-report-list h3,
+.season-report-list p {
+  margin: 0;
+}
+
+.season-report-list h3 {
+  color: #111816;
+  font-size: 1rem;
+}
+
+.season-report-list p {
+  color: #43534c;
+  font-weight: 800;
+  line-height: 1.55;
 }
 
 .wide-panel {
@@ -1742,7 +1957,9 @@ td {
   .creation-step-tabs,
   .position-grid,
   .team-filter-grid,
+  .team-card-grid,
   .league-control-panel .metric-grid,
+  .creation-stat-panel .metric-grid,
   .player-profile-panel .metric-grid,
   .attribute-compact-grid dl {
     grid-template-columns: 1fr;

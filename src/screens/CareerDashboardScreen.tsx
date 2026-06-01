@@ -2,7 +2,6 @@ import { type ReactNode, useMemo, useState } from "react";
 import { AttributeTable } from "../components/career/AttributeTable";
 import { MetricGrid, type MetricItem } from "../components/career/MetricGrid";
 import { PlayoffBracketPanel } from "../components/career/PlayoffBracketPanel";
-import { PromotionRelegationSummary } from "../components/career/PromotionRelegationSummary";
 import { TransferNegotiationModal } from "../components/career/TransferNegotiationModal";
 import { UnifiedFeedPanel } from "../components/career/UnifiedFeedPanel";
 import { ScreenShell } from "../components/ScreenShell";
@@ -32,8 +31,8 @@ import type {
 import {
   advanceWeek,
   getCurrentClub,
-  getCurrentLeague,
   getCurrentWeekFixtures,
+  getCurrentWeekPlayerFixtures,
   getNextPlayerFixture,
   progressActiveMatch,
   startNextSeason,
@@ -102,6 +101,77 @@ export const LEAGUE_DASHBOARD_SECTIONS: Array<{ id: LeagueDashboardSection; labe
 ];
 
 const TABLE_PAGE_SIZE = 8;
+
+type LeagueZoneTone = "green" | "orange" | "red" | "none";
+
+export interface LeagueZoneDisplay {
+  label: string;
+  tone: LeagueZoneTone;
+}
+
+export interface SeasonReportSection {
+  id: string;
+  title: string;
+  body: string;
+}
+
+function getBodyStatus(career: CareerState): { label: string; tone: "default" | "good" | "warning" } {
+  if (career.injury.severity !== "healthy") {
+    return { label: "부상 관리", tone: "warning" };
+  }
+
+  const condition = career.player.condition;
+  const fatigue = career.player.fatigue;
+  const score = Math.round((condition + (100 - fatigue)) / 2);
+
+  if (score >= 78) {
+    return { label: "최상", tone: "good" };
+  }
+  if (score >= 64) {
+    return { label: "좋음", tone: "good" };
+  }
+  if (score >= 48) {
+    return { label: "보통", tone: "default" };
+  }
+
+  return { label: "관리 필요", tone: "warning" };
+}
+
+function getTeamStanding(career: CareerState): { label: string; tone: "default" | "good" | "warning" } {
+  const score = Math.round((career.fanSupport + career.player.coachTrust) / 2);
+
+  if (score >= 74) {
+    return { label: "탄탄함", tone: "good" };
+  }
+  if (score >= 58) {
+    return { label: "안정", tone: "good" };
+  }
+  if (score >= 42) {
+    return { label: "경쟁 중", tone: "default" };
+  }
+
+  return { label: "불안", tone: "warning" };
+}
+
+function getInjuryDurationText(career: CareerState): string | null {
+  if (career.injury.severity === "healthy") {
+    return null;
+  }
+
+  return `${career.injury.monthsRemaining}개월`;
+}
+
+export function getMainActionLabel(career: CareerState): string {
+  if (career.activeMatchId) {
+    return "경기창으로 돌아가기";
+  }
+
+  if (career.season.isComplete) {
+    return "다음 시즌 시작";
+  }
+
+  return getCurrentWeekPlayerFixtures(career).length > 0 ? "경기 진행" : "다음 주로 진행";
+}
 
 function formatMonth(career: CareerState): string {
   if (career.season.isComplete) {
@@ -274,13 +344,13 @@ function injuryText(player?: MatchPlayer): string {
   return player?.injured ? "부상" : "-";
 }
 
-function getLeagueZoneLabel(career: CareerState, leagueId: LeagueTier, row: LeagueTableRow): string {
+export function getLeagueZoneDisplay(career: CareerState, leagueId: LeagueTier, row: LeagueTableRow): LeagueZoneDisplay {
   const league = career.leagues[leagueId];
   const totalClubs = career.season.tables[leagueId].length;
   const rules = league.ruleSet;
 
   if (rules.directPromotionSlots > 0 && row.position <= rules.directPromotionSlots) {
-    return "승격";
+    return { label: "승격", tone: "green" };
   }
 
   if (
@@ -289,11 +359,11 @@ function getLeagueZoneLabel(career: CareerState, leagueId: LeagueTier, row: Leag
     row.position >= rules.promotionPlayoffConfig.entrantPositionStart &&
     row.position <= rules.promotionPlayoffConfig.entrantPositionEnd
   ) {
-    return "승격 PO";
+    return { label: "승격 PO", tone: "orange" };
   }
 
   if (rules.directRelegationSlots > 0 && row.position > totalClubs - rules.directRelegationSlots) {
-    return "강등";
+    return { label: "강등", tone: "red" };
   }
 
   if (
@@ -301,10 +371,14 @@ function getLeagueZoneLabel(career: CareerState, leagueId: LeagueTier, row: Leag
       (positionFromBottom) => row.position === totalClubs - positionFromBottom + 1,
     )
   ) {
-    return "강등 PO";
+    return { label: "강등 PO", tone: "orange" };
   }
 
-  return "-";
+  return { label: "-", tone: "none" };
+}
+
+function getLeagueZoneLabel(career: CareerState, leagueId: LeagueTier, row: LeagueTableRow): string {
+  return getLeagueZoneDisplay(career, leagueId, row).label;
 }
 
 export function getCareerRecentResultRows(career: CareerState): Array<Array<string | number>> {
@@ -470,17 +544,35 @@ function getLeagueStandingsDisplayRows(
   leagueId: LeagueTier,
   onOpenTeam: OpenTeamHandler,
 ): DataTableRow[] {
-  return career.season.tables[leagueId].map((row) => [
-    row.position,
-    renderTeamName(career, row.clubId, onOpenTeam, row.clubName),
-    row.played,
-    row.points,
-    row.wins,
-    row.draws,
-    row.losses,
-    row.goalDifference,
-    getLeagueZoneLabel(career, leagueId, row),
-  ]);
+  return career.season.tables[leagueId].map((row) => {
+    const zone = getLeagueZoneDisplay(career, leagueId, row);
+
+    return [
+      row.position,
+      renderTeamName(career, row.clubId, onOpenTeam, row.clubName),
+      row.played,
+      row.points,
+      row.wins,
+      row.draws,
+      row.losses,
+      row.goalDifference,
+      <LeagueZoneBadge zone={zone} />,
+    ];
+  });
+}
+
+function LeagueZoneBadge({ zone }: { zone: LeagueZoneDisplay }) {
+  return <span className={`league-zone-badge zone-${zone.tone}`}>{zone.label}</span>;
+}
+
+function LeagueZoneLegend() {
+  return (
+    <div className="league-zone-legend" aria-label="승강 구역 범례">
+      <span><span className="league-zone-swatch zone-green" />승격권</span>
+      <span><span className="league-zone-swatch zone-orange" />플레이오프권</span>
+      <span><span className="league-zone-swatch zone-red" />강등권</span>
+    </div>
+  );
 }
 
 function getMajorClubEvolutionRows(
@@ -694,12 +786,32 @@ function PanelList({
   );
 }
 
+function HeaderStatusStrip({ career }: { career: CareerState }) {
+  const bodyStatus = getBodyStatus(career);
+  const teamStanding = getTeamStanding(career);
+  const injuryDuration = getInjuryDurationText(career);
+
+  return (
+    <div className="top-status-strip">
+      <span className={`status-chip metric-${bodyStatus.tone}`}>
+        <strong>몸상태</strong> {bodyStatus.label}
+      </span>
+      <span className={`status-chip metric-${teamStanding.tone}`}>
+        <strong>입지</strong> {teamStanding.label}
+      </span>
+      {injuryDuration ? (
+        <span className="status-chip metric-warning">
+          <strong>부상 기간</strong> {injuryDuration}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function MainTab({
   career,
   selectedChoiceId,
   onSelectChoice,
-  onAdvanceWeek,
-  onStartNextSeason,
   onNegotiateTransfer,
   onAcceptTransfer,
   onRejectTransfer,
@@ -709,8 +821,6 @@ function MainTab({
   career: CareerState;
   selectedChoiceId: string | null;
   onSelectChoice: (choiceId: string) => void;
-  onAdvanceWeek: () => void;
-  onStartNextSeason: () => void;
   onNegotiateTransfer: (offerId: string) => void;
   onAcceptTransfer: (offerId: string) => void;
   onRejectTransfer: (offerId: string) => void;
@@ -735,22 +845,11 @@ function MainTab({
               { label: "다음 경기", value: formatFixtureLink(career, nextFixture, onOpenTeam) },
               { label: "이번 주 경기", value: `${currentWeekFixtures.length}경기` },
               { label: "폼", value: career.player.form, tone: career.player.form >= 65 ? "good" : "default" },
-              { label: "컨디션", value: career.player.condition, tone: career.player.condition >= 75 ? "good" : "default" },
-              { label: "피로", value: career.player.fatigue, tone: career.player.fatigue >= 70 ? "warning" : "default" },
-              { label: "감독 신뢰", value: career.player.coachTrust },
+              { label: "몸상태", value: getBodyStatus(career).label, tone: getBodyStatus(career).tone },
+              { label: "입지", value: getTeamStanding(career).label, tone: getTeamStanding(career).tone },
+              { label: "역할", value: SQUAD_ROLE_LABELS[career.squadRole] },
             ]}
           />
-          <div className="quick-action-row">
-            {career.season.isComplete ? (
-              <button className="primary-button" type="button" onClick={onStartNextSeason}>
-                다음 시즌 시작
-              </button>
-            ) : (
-              <button className="primary-button" type="button" onClick={onAdvanceWeek}>
-                다음 주로 진행
-              </button>
-            )}
-          </div>
         </section>
 
         {career.season.isComplete ? (
@@ -800,29 +899,19 @@ function MainTab({
 
 function PlayerTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: OpenTeamHandler }) {
   const club = getCurrentClub(career);
-  const league = getCurrentLeague(career);
   const ovr = calculateOverall(career.player);
   const profileItems: MetricItem[] = [
     { label: "선수", value: career.player.name },
     { label: "나이", value: `${career.player.age}세` },
     { label: "국적", value: career.player.nationality },
     { label: "소속팀", value: renderTeamName(career, club.id, onOpenTeam) },
-    { label: "리그", value: league.name },
     { label: "포지션", value: `${career.player.selectedPosition} · ${POSITION_LABELS[career.player.selectedPosition]}` },
     { label: "OVR", value: ovr, tone: ovr >= 70 ? "good" : "default" },
-    { label: "잠재력", value: getPotentialHint(career.player.potential), tone: career.player.potential >= 88 ? "good" : "default" },
     { label: "주발", value: getDominantFootLabel(career.player) },
-    { label: "왼발", value: career.player.leftFoot },
-    { label: "오른발", value: career.player.rightFoot },
     { label: "성격", value: PERSONALITY_LABELS[career.player.personality] },
-    { label: "폼", value: career.player.form },
-    { label: "컨디션", value: career.player.condition },
-    { label: "피로", value: career.player.fatigue, tone: career.player.fatigue >= 70 ? "warning" : "default" },
+    { label: "잠재력", value: getPotentialHint(career.player.potential), tone: career.player.potential >= 88 ? "good" : "default" },
     { label: "평판", value: career.player.reputation },
-    { label: "팬 지지", value: career.fanSupport },
-    { label: "감독 신뢰", value: career.player.coachTrust },
     { label: "시장 가치", value: `${career.player.marketValue.toLocaleString("ko-KR")}만` },
-    { label: "부상", value: career.injury.severity === "healthy" ? "건강" : career.injury.description ?? "관리 필요" },
   ];
 
   return (
@@ -863,7 +952,7 @@ function ClubTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Open
     [
       career.player.name,
       `${career.player.selectedPosition} · ${POSITION_LABELS[career.player.selectedPosition]}`,
-      calculateOverall(career.player),
+      formatInternalClubValueAsStars(calculateOverall(career.player)),
       SQUAD_ROLE_LABELS[career.squadRole],
       "등록 선수",
     ],
@@ -955,7 +1044,7 @@ function ClubTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Open
         <div className="club-squad-grid">
           <section className="data-panel fixed-panel">
             <h2>스쿼드 리스트</h2>
-            <DataTable columns={["선수/그룹", "포지션", "평가", "역할", "상태"]} rows={squadRows} />
+            <DataTable columns={["선수/그룹", "포지션", "구단 내 평가", "역할", "상태"]} rows={squadRows} />
           </section>
           <section className="data-panel fixed-panel">
             <h2>최근 결과</h2>
@@ -991,23 +1080,64 @@ function getCareerTotals(career: CareerState) {
   );
 }
 
+export function getSeasonReportSections(career: CareerState): SeasonReportSection[] {
+  const club = getCurrentClub(career);
+  const tableRow = career.season.tables[club.leagueId]?.find((row) => row.clubId === club.id);
+  const recentGrowth = career.monthlyDevelopmentLog.at(-1)?.entries ?? [];
+  const growthText =
+    recentGrowth.length > 0
+      ? recentGrowth
+          .slice(0, 3)
+          .map((entry) => `${entry.label} +${entry.amount.toFixed(2)}`)
+          .join(", ")
+      : "아직 뚜렷한 성장 리포트는 없습니다.";
+  const transferText =
+    career.transferOffers.length > 0
+      ? `${career.transferOffers.length}건의 제안이 열려 있으며, 계약은 ${career.contractYearsLeft}년 남았습니다.`
+      : `현재 이적 제안은 없고 계약은 ${career.contractYearsLeft}년 남았습니다.`;
+  const outlook =
+    career.injury.severity === "healthy"
+      ? `${getBodyStatus(career).label} 몸상태와 ${getTeamStanding(career).label} 입지를 바탕으로 다음 시즌 경쟁을 준비할 수 있습니다.`
+      : `${career.injury.monthsRemaining}개월 회복 관리를 우선하면서 다음 시즌 출전 리듬을 되찾아야 합니다.`;
+
+  return [
+    {
+      id: "overview",
+      title: "시즌 총평",
+      body: `${career.season.year} 시즌은 ${club.name}에서 ${formatMonth(career)}까지 진행 중입니다. 현재 역할은 ${SQUAD_ROLE_LABELS[career.squadRole]}입니다.`,
+    },
+    {
+      id: "personal",
+      title: "개인 기록",
+      body: `${career.seasonStats.appearances}경기 ${career.seasonStats.minutesPlayed}분, ${career.seasonStats.goals}골 ${career.seasonStats.assists}도움, 평균 평점 ${career.seasonStats.averageRating.toFixed(2)}를 기록했습니다.`,
+    },
+    {
+      id: "team",
+      title: "팀 성적",
+      body: tableRow
+        ? `${club.name}은 ${getLeagueName(club.leagueId)}에서 ${tableRow.position}위, 승점 ${tableRow.points}점입니다.`
+        : `${club.name}의 리그 순위 정보가 아직 없습니다.`,
+    },
+    {
+      id: "growth",
+      title: "성장 요약",
+      body: growthText,
+    },
+    {
+      id: "contract",
+      title: "이적/계약 상황",
+      body: `${transferText} 현재 시장 가치는 ${career.player.marketValue.toLocaleString("ko-KR")}만입니다.`,
+    },
+    {
+      id: "outlook",
+      title: "다음 시즌 전망",
+      body: outlook,
+    },
+  ];
+}
+
 function CareerTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: OpenTeamHandler }) {
   const [activeSection, setActiveSection] = useState<CareerDashboardSection>("season");
-  const totals = getCareerTotals(career);
-  const totalAverageRating = totals.ratingApps > 0 ? totals.ratingTotal / totals.ratingApps : 0;
-  const matchPlayers = career.playerAppearanceLogs
-    .map((log) => getPlayerFromAppearance(career, log))
-    .filter((player): player is MatchPlayer => Boolean(player));
-  const yellowCards = matchPlayers.reduce((total, player) => total + player.yellowCards, 0);
-  const redCards = matchPlayers.filter((player) => player.redCard).length;
-  const injuryRows = [
-    ...career.notices
-      .filter((notice) => notice.title.includes("부상") || notice.description.includes("부상"))
-      .map((notice) => [career.season.year, notice.title, notice.description]),
-    ...career.eventLog
-      .filter((entry) => entry.type === "injury_warning")
-      .map((entry) => [formatDate(entry.createdAt), entry.title, entry.description]),
-  ].slice(-8).reverse();
   const clubHistory = [
     ...career.careerHistory.map((entry) => ({
       id: entry.id,
@@ -1060,50 +1190,17 @@ function CareerTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Op
       />
 
       {activeSection === "season" ? (
-        <div className="career-summary-grid">
-          <section className="data-panel">
-            <h2>이번 시즌 기록</h2>
-            <MetricGrid
-              items={[
-                { label: "출전", value: `${career.seasonStats.appearances}경기` },
-                { label: "출전 시간", value: `${career.seasonStats.minutesPlayed}분` },
-                { label: "골", value: career.seasonStats.goals },
-                { label: "도움", value: career.seasonStats.assists },
-                { label: "평균 평점", value: career.seasonStats.averageRating.toFixed(2) },
-                { label: "경고", value: yellowCards },
-                { label: "퇴장", value: redCards },
-                { label: "부상 상태", value: career.injury.severity === "healthy" ? "건강" : career.injury.description ?? "관리 필요" },
-                { label: "계약", value: `${career.contractYearsLeft}년 남음` },
-                { label: "연봉", value: `${career.salary.toLocaleString("ko-KR")}만` },
-                { label: "역할", value: SQUAD_ROLE_LABELS[career.squadRole] },
-              ]}
-            />
-          </section>
-
-          <section className="data-panel">
-            <h2>커리어 합산</h2>
-            <MetricGrid
-              items={[
-                { label: "총 출전", value: `${totals.appearances}경기` },
-                { label: "총 골", value: totals.goals },
-                { label: "총 도움", value: totals.assists },
-                { label: "통산 평점", value: totalAverageRating.toFixed(2) },
-                { label: "소속 팀 수", value: new Set([...career.careerHistory.map((entry) => entry.clubId), career.player.clubId]).size },
-                { label: "완료 시즌", value: career.careerHistory.length },
-              ]}
-            />
-          </section>
-
-          <section className="data-panel fixed-panel wide-panel">
-            <h2>부상 기록</h2>
-            <PaginatedDataTable
-              columns={["시점", "상태", "내용"]}
-              rows={injuryRows}
-              emptyMessage="기록된 부상이 없습니다."
-              pageSize={5}
-            />
-          </section>
-        </div>
+        <section className="data-panel fixed-panel season-report-panel">
+          <h2>시즌 리포트</h2>
+          <div className="season-report-list">
+            {getSeasonReportSections(career).map((section) => (
+              <article key={section.id}>
+                <h3>{section.title}</h3>
+                <p>{section.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
       ) : null}
 
       {activeSection === "logs" ? (
@@ -1232,24 +1329,7 @@ function LeagueTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Op
             </select>
           </label>
         </div>
-        <MetricGrid
-          items={[
-            { label: "참가 팀", value: selectedLeague.clubs.length },
-            { label: "라운드 로빈", value: `${selectedLeague.ruleSet.roundRobinCycles}회` },
-            { label: "직행 승격", value: selectedLeague.ruleSet.directPromotionSlots },
-            {
-              label: "승격 PO",
-              value: selectedLeague.ruleSet.promotionPlayoffConfig
-                ? `${selectedLeague.ruleSet.promotionPlayoffConfig.entrantPositionStart}-${selectedLeague.ruleSet.promotionPlayoffConfig.entrantPositionEnd}위`
-                : 0,
-            },
-            { label: "직행 강등", value: selectedLeague.ruleSet.directRelegationSlots },
-            {
-              label: "강등 PO",
-              value: selectedLeague.ruleSet.relegationPlayoffConfig?.entrantPositionsFromBottom?.length ?? 0,
-            },
-          ]}
-        />
+        <LeagueZoneLegend />
       </section>
 
       <SectionTabs
@@ -1260,8 +1340,9 @@ function LeagueTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Op
       />
 
       {activeSection === "standings" ? (
-        <section className="data-panel fixed-panel">
+        <section className="data-panel fixed-panel league-standings-panel">
           <h2>{selectedLeague.name} 순위표</h2>
+          <LeagueZoneLegend />
           <LeagueTable career={career} leagueId={selectedLeagueId} onOpenTeam={onOpenTeam} />
         </section>
       ) : null}
@@ -1284,24 +1365,14 @@ function LeagueTab({ career, onOpenTeam }: { career: CareerState; onOpenTeam: Op
 
       {activeSection === "rules" ? (
         <div className="league-rules-grid">
-          <section className="data-panel fixed-panel">
-            <h2>승강 요약</h2>
-            <div className="panel-scroll">
-              <PromotionRelegationSummary career={career} onOpenTeam={onOpenTeam} />
-            </div>
+          <section className="data-panel">
+            <h2>승강 구역</h2>
+            <LeagueZoneLegend />
           </section>
 
           <section className="data-panel fixed-panel">
             <h2>플레이오프</h2>
             <PlayoffBracketPanel career={career} onOpenTeam={onOpenTeam} />
-          </section>
-
-          <section className="data-panel">
-            <h2>승강 구역</h2>
-            <p className="empty-note">
-              {career.season.promotionRelegation?.note ??
-                `${selectedLeague.name} 규정에 따라 승격, 강등, 플레이오프 구역을 순위표에 표시합니다.`}
-            </p>
           </section>
         </div>
       ) : null}
@@ -1373,6 +1444,7 @@ export function CareerDashboardScreen({
   const [actionError, setActionError] = useState<string | null>(null);
   const [negotiatingOfferId, setNegotiatingOfferId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [showMatchScreen, setShowMatchScreen] = useState(Boolean(career.activeMatchId));
   const club = useMemo(() => getCurrentClub(career), [career]);
   const negotiatingOffer = useMemo(
     () => career.transferOffers.find((offer) => offer.id === negotiatingOfferId),
@@ -1393,6 +1465,7 @@ export function CareerDashboardScreen({
             ? "시즌이 종료되었습니다."
             : `${formatDate(updatedCareer.currentDate)} 주로 이동했습니다.`,
       );
+      setShowMatchScreen(Boolean(updatedCareer.activeMatchId));
       onCareerChange(updatedCareer);
     } catch {
       setActionError("주간 진행을 처리하지 못했습니다. 저장 상태를 확인해주세요.");
@@ -1414,6 +1487,7 @@ export function CareerDashboardScreen({
             ? "시즌이 종료되었습니다."
             : `${formatDate(updatedCareer.currentDate)} 주로 이동했습니다.`,
       );
+      setShowMatchScreen(Boolean(updatedCareer.activeMatchId));
       onCareerChange(updatedCareer);
     } catch {
       setActionError("경기 진행을 처리하지 못했습니다. 저장 상태를 확인해주세요.");
@@ -1427,6 +1501,7 @@ export function CareerDashboardScreen({
       setSelectedChoiceId(null);
       setActionError(null);
       setActionMessage("새 시즌이 시작되었습니다.");
+      setShowMatchScreen(false);
       onCareerChange(updatedCareer);
     } catch {
       setActionError("아직 다음 시즌을 시작할 수 없습니다.");
@@ -1500,7 +1575,21 @@ export function CareerDashboardScreen({
     }
   };
 
-  if (career.activeMatchId) {
+  const handleMainAction = () => {
+    if (career.activeMatchId) {
+      setShowMatchScreen(true);
+      return;
+    }
+
+    if (career.season.isComplete) {
+      nextSeason();
+      return;
+    }
+
+    advance();
+  };
+
+  if (career.activeMatchId && showMatchScreen) {
     return (
       <MatchScreen
         career={career}
@@ -1509,6 +1598,10 @@ export function CareerDashboardScreen({
         saveMessage={saveMessage}
         actionError={actionError}
         actionMessage={actionMessage}
+        onBackToDashboard={() => {
+          setActiveTab("main");
+          setShowMatchScreen(false);
+        }}
         onMatchAction={progressMatch}
         onDeleteSave={onDeleteSave}
         onSaveCareer={onSaveCareer}
@@ -1524,6 +1617,7 @@ export function CareerDashboardScreen({
         </>
       }
       title={career.player.name}
+      subtitle={<HeaderStatusStrip career={career} />}
       actions={
         <>
           <button className="primary-button" type="button" onClick={onSaveCareer}>
@@ -1561,8 +1655,6 @@ export function CareerDashboardScreen({
             career={career}
             selectedChoiceId={selectedChoiceId}
             onSelectChoice={setSelectedChoiceId}
-            onAdvanceWeek={advance}
-            onStartNextSeason={nextSeason}
             onNegotiateTransfer={negotiateTransfer}
             onAcceptTransfer={acceptTransfer}
             onRejectTransfer={rejectTransfer}
@@ -1574,6 +1666,14 @@ export function CareerDashboardScreen({
         {activeTab === "club" ? <ClubTab career={career} onOpenTeam={setSelectedTeamId} /> : null}
         {activeTab === "career" ? <CareerTab career={career} onOpenTeam={setSelectedTeamId} /> : null}
         {activeTab === "league" ? <LeagueTab career={career} onOpenTeam={setSelectedTeamId} /> : null}
+
+        {activeTab === "main" ? (
+          <div className="app-fixed-action-area">
+            <button className="primary-button" type="button" onClick={handleMainAction}>
+              {getMainActionLabel(career)}
+            </button>
+          </div>
+        ) : null}
 
         <p className="saved-at">최근 저장 {savedAtLabel ?? "아직 없음"}</p>
 

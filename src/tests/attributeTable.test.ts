@@ -69,6 +69,8 @@ describe("attribute table", () => {
     });
 
     expect(rows.find((row) => row.id === "physical.speed")?.role).toBe("primary");
+    expect(rows.find((row) => row.id === "leftFoot")?.value).toBe(18);
+    expect(rows.find((row) => row.id === "rightFoot")?.value).toBe(12);
     expect(rows.find((row) => row.id === "footedness")?.role).toBe("secondary");
   });
 

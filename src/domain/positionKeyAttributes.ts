@@ -1,6 +1,6 @@
 import type { AttributeFocus, Position } from "./types";
 
-export type PositionAttributeKey = AttributeFocus | "footedness";
+export type PositionAttributeKey = AttributeFocus | "footedness" | "leftFoot" | "rightFoot";
 export type PositionKeyAttributeRole = "primary" | "secondary";
 
 export interface PositionKeyAttributeDefinition {

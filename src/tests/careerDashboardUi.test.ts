@@ -13,7 +13,10 @@ import {
   LEAGUE_DASHBOARD_SECTIONS,
   getCareerRecentResultRows,
   getClubFixtureRows,
+  getLeagueZoneDisplay,
   getLeagueStandingsRows,
+  getMainActionLabel,
+  getSeasonReportSections,
 } from "../screens/CareerDashboardScreen";
 import { advanceWeek, createNewCareer, resolveActiveMatch } from "../game/monthlyCareer";
 import { generatePlayerRoll } from "../game/playerGeneration";
@@ -142,5 +145,46 @@ describe("career dashboard UI contract", () => {
       expect(rows.length).toBe(career.leagues[leagueId].clubs.length);
       expect(rows[0]).toHaveLength(9);
     }
+  });
+
+  it("labels the main action based on weekly match state", () => {
+    const career = createCareer();
+    const opened = advanceWeek(career, {
+      selectedChoiceId: career.currentEvent?.choices[0]?.id,
+      createdAt: "2027-02-01T00:00:00.000Z",
+    });
+
+    expect(["경기 진행", "다음 주로 진행"]).toContain(getMainActionLabel(career));
+
+    if (opened.activeMatchId) {
+      expect(getMainActionLabel(opened)).toBe("경기창으로 돌아가기");
+    }
+  });
+
+  it("exposes readable season report sections", () => {
+    const career = createCareer();
+    const sections = getSeasonReportSections(career);
+
+    expect(sections.map((section) => section.title)).toEqual([
+      "시즌 총평",
+      "개인 기록",
+      "팀 성적",
+      "성장 요약",
+      "이적/계약 상황",
+      "다음 시즌 전망",
+    ]);
+    expect(sections.every((section) => section.body.length > 10)).toBe(true);
+  });
+
+  it("maps league zones to green, orange, and red display bands", () => {
+    const career = createCareer();
+    const leagueIds = [K1_LEAGUE_ID, K2_LEAGUE_ID, K3_LEAGUE_ID, K4_LEAGUE_ID] as const;
+    const tones = leagueIds.flatMap((leagueId) =>
+      career.season.tables[leagueId].map((row) => getLeagueZoneDisplay(career, leagueId, row).tone),
+    );
+
+    expect(tones).toContain("green");
+    expect(tones).toContain("orange");
+    expect(tones).toContain("red");
   });
 });

@@ -98,12 +98,26 @@ export function getAttributeTableRows({
   );
   const footednessScore = getFootednessScore(leftFoot, rightFoot);
 
-  if (typeof footednessScore !== "number") {
+  if (typeof footednessScore !== "number" || typeof leftFoot !== "number" || typeof rightFoot !== "number") {
     return rows;
   }
 
   return [
     ...rows,
+    {
+      id: "leftFoot",
+      group: "technical",
+      label: "왼발",
+      value: leftFoot,
+      role: undefined,
+    },
+    {
+      id: "rightFoot",
+      group: "technical",
+      label: "오른발",
+      value: rightFoot,
+      role: undefined,
+    },
     {
       id: "footedness",
       group: "technical",
