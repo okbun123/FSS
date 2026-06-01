@@ -1,0 +1,276 @@
+[2m오후 1:32:00[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/domesticCup.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/domesticCup.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:32:00[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/domesticCup.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/domesticCup.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:45:12[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/leagueRules.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/leagueRules.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:45:12[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/leagueRules.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/leagueRules.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:45:12[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/leagueRules.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/leagueRules.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:45:12[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/leagueRules.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/leagueRules.ts) in C:/Users/User/Documents/FS/FS/src/storage/careerStorage.ts. Does the file exist?
+[2m오후 1:50:11[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/promotionRelegation.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/promotionRelegation.ts) in C:/Users/User/Documents/FS/FS/src/components/career/PromotionRelegationSummary.tsx. Does the file exist?
+[2m오후 1:50:11[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to load url /src/domain/promotionRelegation.ts (resolved id: C:/Users/User/Documents/FS/FS/src/domain/promotionRelegation.ts) in C:/Users/User/Documents/FS/FS/src/components/career/PromotionRelegationSummary.tsx. Does the file exist?
+[2m오후 2:54:19[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\CareerDashboardScreen.tsx: Unterminated string constant. (240:25)
+
+[0m [90m 238 |[31m             [33m<[31m[33mMetricGrid[31m
+ [90m 239 |[31m               items[33m=[31m{[
+[31m[1m>[22m[31m[90m 240 |[31m                 { label[33m:[31m [32m"?꾩떆/吏??, value: club.city },[31m
+ [90m     |[31m                          [31m[1m^[22m[31m
+ [90m 241 |[31m                 { label[33m:[31m [32m"由ш렇"[31m[33m,[31m value[33m:[31m getLeagueName(club[33m.[31mleagueId) }[33m,[31m
+ [90m 242 |[31m                 { label[33m:[31m [32m"?쎌묶"[31m[33m,[31m value[33m:[31m club[33m.[31mshortName }[33m,[31m
+ [90m 243 |[31m                 { label[33m:[31m [32m"?????, value: club.primaryColor },[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/CareerDashboardScreen.tsx[39m:240:25
+[33m  238 |              <MetricGrid
+  239 |                items={[
+  240 |                  { label: "?꾩떆/吏??, value: club.city },
+      |                           ^
+  241 |                  { label: "由ш렇", value: getLeagueName(club.leagueId) },
+  242 |                  { label: "?쎌묶", value: club.shortName },[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Object.unterminated (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5681:20)
+      at readStringContents (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5423:16)
+      at TypeScriptParserMixin.readString (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6515:9)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6275:14)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.eat (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5713:12)
+      at TypeScriptParserMixin.parseObjectProperty (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11966:14)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11995:100)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9761:18)
+      at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11932:17)
+      at TypeScriptParserMixin.parseObjectLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11849:21)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11356:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseExprListItem (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12192:18)
+      at TypeScriptParserMixin.parseExprList (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12167:22)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12074:26)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9210:24)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11352:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)
+[2m오후 2:55:45[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\CareerDashboardScreen.tsx: Unterminated string constant. (917:25)
+
+[0m [90m 915 |[31m             [33m<[31m[33mMetricGrid[31m
+ [90m 916 |[31m               items[33m=[31m{[
+[31m[1m>[22m[31m[90m 917 |[31m                 { label[33m:[31m [32m"?꾩떆/吏??, value: club.city },[31m
+ [90m     |[31m                          [31m[1m^[22m[31m
+ [90m 918 |[31m                 { label[33m:[31m [32m"由ш렇"[31m[33m,[31m value[33m:[31m getLeagueName(club[33m.[31mleagueId) }[33m,[31m
+ [90m 919 |[31m                 { label[33m:[31m [32m"?쎌묶"[31m[33m,[31m value[33m:[31m club[33m.[31mshortName }[33m,[31m
+ [90m 920 |[31m                 { label[33m:[31m [32m"?????, value: club.primaryColor },[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/CareerDashboardScreen.tsx[39m:917:25
+[33m  915 |              <MetricGrid
+  916 |                items={[
+  917 |                  { label: "?꾩떆/吏??, value: club.city },
+      |                           ^
+  918 |                  { label: "由ш렇", value: getLeagueName(club.leagueId) },
+  919 |                  { label: "?쎌묶", value: club.shortName },[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Object.unterminated (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5681:20)
+      at readStringContents (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5423:16)
+      at TypeScriptParserMixin.readString (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6515:9)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6275:14)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.eat (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5713:12)
+      at TypeScriptParserMixin.parseObjectProperty (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11966:14)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11995:100)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9761:18)
+      at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11932:17)
+      at TypeScriptParserMixin.parseObjectLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11849:21)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11356:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseExprListItem (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12192:18)
+      at TypeScriptParserMixin.parseExprList (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12167:22)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12074:26)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9210:24)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11352:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)
+[2m오후 2:56:34[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\CareerDashboardScreen.tsx: Unterminated string constant. (917:25)
+
+[0m [90m 915 |[31m             [33m<[31m[33mMetricGrid[31m
+ [90m 916 |[31m               items[33m=[31m{[
+[31m[1m>[22m[31m[90m 917 |[31m                 { label[33m:[31m [32m"?꾩떆/吏??, value: club.city },[31m
+ [90m     |[31m                          [31m[1m^[22m[31m
+ [90m 918 |[31m                 { label[33m:[31m [32m"由ш렇"[31m[33m,[31m value[33m:[31m getLeagueName(club[33m.[31mleagueId) }[33m,[31m
+ [90m 919 |[31m                 { label[33m:[31m [32m"?쎌묶"[31m[33m,[31m value[33m:[31m club[33m.[31mshortName }[33m,[31m
+ [90m 920 |[31m                 { label[33m:[31m [32m"?????, value: club.primaryColor },[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/CareerDashboardScreen.tsx[39m:917:25
+[33m  915 |              <MetricGrid
+  916 |                items={[
+  917 |                  { label: "?꾩떆/吏??, value: club.city },
+      |                           ^
+  918 |                  { label: "由ш렇", value: getLeagueName(club.leagueId) },
+  919 |                  { label: "?쎌묶", value: club.shortName },[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Object.unterminated (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5681:20)
+      at readStringContents (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5423:16)
+      at TypeScriptParserMixin.readString (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6515:9)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6275:14)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.eat (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5713:12)
+      at TypeScriptParserMixin.parseObjectProperty (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11966:14)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11995:100)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9761:18)
+      at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11932:17)
+      at TypeScriptParserMixin.parseObjectLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11849:21)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11356:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseExprListItem (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12192:18)
+      at TypeScriptParserMixin.parseExprList (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12167:22)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12074:26)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9210:24)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11352:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)
+[2m오후 2:57:40[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\CareerDashboardScreen.tsx: Unterminated string constant. (917:25)
+
+[0m [90m 915 |[31m             [33m<[31m[33mMetricGrid[31m
+ [90m 916 |[31m               items[33m=[31m{[
+[31m[1m>[22m[31m[90m 917 |[31m                 { label[33m:[31m [32m"?꾩떆/吏??, value: club.city },[31m
+ [90m     |[31m                          [31m[1m^[22m[31m
+ [90m 918 |[31m                 { label[33m:[31m [32m"由ш렇"[31m[33m,[31m value[33m:[31m getLeagueName(club[33m.[31mleagueId) }[33m,[31m
+ [90m 919 |[31m                 { label[33m:[31m [32m"?쎌묶"[31m[33m,[31m value[33m:[31m club[33m.[31mshortName }[33m,[31m
+ [90m 920 |[31m                 { label[33m:[31m [32m"?????, value: club.primaryColor },[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/CareerDashboardScreen.tsx[39m:917:25
+[33m  915 |              <MetricGrid
+  916 |                items={[
+  917 |                  { label: "?꾩떆/吏??, value: club.city },
+      |                           ^
+  918 |                  { label: "由ш렇", value: getLeagueName(club.leagueId) },
+  919 |                  { label: "?쎌묶", value: club.shortName },[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at Object.unterminated (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5681:20)
+      at readStringContents (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5423:16)
+      at TypeScriptParserMixin.readString (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6515:9)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6275:14)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.eat (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:5713:12)
+      at TypeScriptParserMixin.parseObjectProperty (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11966:14)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11995:100)
+      at TypeScriptParserMixin.parseObjPropValue (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9761:18)
+      at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11932:17)
+      at TypeScriptParserMixin.parseObjectLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11849:21)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11356:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseExprListItem (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12192:18)
+      at TypeScriptParserMixin.parseExprList (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12167:22)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12074:26)
+      at TypeScriptParserMixin.parseArrayLike (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9210:24)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11352:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)

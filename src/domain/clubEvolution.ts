@@ -5,6 +5,7 @@ import {
   type ClubCapsConfig,
   type LeagueMovement,
 } from "./clubCaps";
+import { getCupResultImpactScore } from "./domesticCup";
 import type {
   Club,
   ClubEvolutionCappedChange,
@@ -132,6 +133,11 @@ function getMovement(
 function competitionScore(result?: string): number {
   if (!result) {
     return 0;
+  }
+
+  const domesticCupScore = getCupResultImpactScore(result);
+  if (domesticCupScore !== 0) {
+    return domesticCupScore;
   }
 
   const normalized = result.toLowerCase();

@@ -3,6 +3,7 @@ import {
   createFictionalCompetitions,
   getClubsById,
   getClubById,
+  getClubName,
   getLeagueName,
 } from "../data/fictionalLeagues";
 import type {
@@ -53,6 +54,7 @@ import {
 import {
   createInitialDomesticCupFixtures,
   ensureCupWinner,
+  getCupResultImpactScore,
   getCupResultLabel,
   isDomesticCupFixture,
   progressDomesticCupFixtures,
@@ -62,6 +64,7 @@ import { applySeasonRollover } from "../domain/seasonRollover";
 import { applyClubSeasonEvolution } from "../domain/clubEvolution";
 import { createInitialNegotiation } from "../domain/negotiation";
 import { calculateTeamFit } from "../domain/teamFit";
+import { DEFAULT_K4_K5_MODE, resolveK4K5Mode } from "../domain/k4K5Mode";
 
 export interface CreateMonthlyCareerInput {
   name: string;
@@ -302,6 +305,7 @@ function withPromotionRelegationProgress(career: CareerState): CareerState {
     tables,
     fixtures: career.fixtures,
     currentStatus: career.season.promotionRelegation,
+    k4K5Mode: resolveK4K5Mode(career.k4K5Mode, career.leagueMode),
     leagueMode: career.leagueMode ?? "gameplay",
   });
   const fixtures = progress.fixtures;
@@ -710,6 +714,10 @@ function getFixtureOutcome(fixture: Fixture, clubId: string): RecentResult["outc
     return undefined;
   }
 
+  if (fixture.result.winnerClubId) {
+    return fixture.result.winnerClubId === clubId ? "win" : "loss";
+  }
+
   const goalsFor = fixture.homeClubId === clubId ? fixture.result.homeGoals : fixture.result.awayGoals;
   const goalsAgainst = fixture.homeClubId === clubId ? fixture.result.awayGoals : fixture.result.homeGoals;
 
@@ -783,7 +791,6 @@ function simulateCurrentMonth(career: CareerState): MonthSimulationResult {
   const playerFixtures = playedFixtures.filter(
     (fixture) =>
       monthFixtureIds.has(fixture.id) &&
-      fixture.leagueId === playerClub.leagueId &&
       (fixture.homeClubId === playerClub.id || fixture.awayClubId === playerClub.id),
   );
   const appearanceFixtures = playerFixtures.filter((fixture) => fixture.result?.playerAppeared);
@@ -901,8 +908,8 @@ function openMatchForFixture(career: CareerState, fixture: Fixture): CareerState
     career.matches[matchId] ??
     createMatchForFixture({
       fixture: inProgressFixture,
-      homeClubName: career.clubs[inProgressFixture.homeClubId]?.name ?? getClubById(inProgressFixture.homeClubId)?.name,
-      awayClubName: career.clubs[inProgressFixture.awayClubId]?.name ?? getClubById(inProgressFixture.awayClubId)?.name,
+      homeClubName: career.clubs[inProgressFixture.homeClubId]?.name ?? getClubName(inProgressFixture.homeClubId),
+      awayClubName: career.clubs[inProgressFixture.awayClubId]?.name ?? getClubName(inProgressFixture.awayClubId),
       player: career.player,
       isKnockout,
       aggregateScore,
@@ -1159,6 +1166,7 @@ function completeSeason(career: CareerState): CareerState {
         tables,
         fixtures: career.season.fixtures,
         currentStatus: career.season.promotionRelegation,
+        k4K5Mode: resolveK4K5Mode(career.k4K5Mode, career.leagueMode),
         leagueMode: career.leagueMode ?? "gameplay",
       }).status;
   const club = getCareerClub(career);
@@ -1172,7 +1180,9 @@ function completeSeason(career: CareerState): CareerState {
     ]),
   ) as Record<string, string | undefined>;
   const playerCupResult = cupResults[club.id];
-  const seasonSummary = `${career.season.year} 시즌이 종료되었습니다. ${club.name}은 ${leaguePosition}위로 마쳤습니다.`;
+  const cupSummary = playerCupResult ? ` 컵 성적은 ${playerCupResult}입니다.` : "";
+  const seasonSummary = `${career.season.year} 시즌이 종료되었습니다. ${club.name}은 ${leaguePosition}위로 마쳤습니다.${cupSummary}`;
+  const cupFanSupportDelta = Math.round(getCupResultImpactScore(playerCupResult) * 1.2);
   const historyEntry: CareerHistoryEntry = {
     id: `season-${career.season.number}-history`,
     seasonNumber: career.season.number,
@@ -1185,7 +1195,7 @@ function completeSeason(career: CareerState): CareerState {
     assists: career.seasonStats.assists,
     averageRating: career.seasonStats.averageRating,
     leaguePosition,
-    achievement: playerCupResult === "우승" ? "컵 대회 우승" : achievement,
+    achievement: playerCupResult === "우승" ? "전국 FA컵 우승" : achievement,
   };
   const evolution = applyClubSeasonEvolution({
     leagues: career.leagues,
@@ -1227,6 +1237,7 @@ function completeSeason(career: CareerState): CareerState {
       isComplete: true,
       promotionRelegation,
     },
+    fanSupport: clamp(career.fanSupport + cupFanSupportDelta),
     careerHistory: [...career.careerHistory, historyEntry].slice(-16),
     notices: [
       ...career.notices,
@@ -1234,7 +1245,7 @@ function completeSeason(career: CareerState): CareerState {
         id: `season-${career.season.number}-complete`,
         month: career.season.currentMonth,
         title: "시즌 종료",
-        description: `${career.season.year}시즌이 종료되었습니다. ${club.name}은 ${leaguePosition}위로 마쳤습니다.`,
+        description: seasonSummary,
         tone: "info" as const,
       },
     ].slice(-20),
@@ -1264,10 +1275,11 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
   const weekTurns = createWeekTurns(season.fixtures);
   const currentDate = weekTurns[0]?.startDate ?? getSeasonStartDate(season.year);
   const careerWithoutEvent: CareerState = {
-    saveVersion: 4,
+    saveVersion: 5,
     currentDate,
     currentWeekStartDate: currentDate,
     player,
+    currentClubId: club.id,
     leagues: FICTIONAL_LEAGUES,
     competitions: createFictionalCompetitions(season.number, season.fixtures),
     clubs: getClubsById(),
@@ -1314,6 +1326,7 @@ export function createNewCareer(input: CreateMonthlyCareerInput): CareerState {
     monthlyDevelopmentLog: [],
     archivedNonPlayableClubs: [],
     playerContractStatus: "contracted",
+    k4K5Mode: DEFAULT_K4_K5_MODE,
     leagueMode: "gameplay",
   };
 
@@ -1422,39 +1435,35 @@ export function advanceMonth(career: CareerState, input: AdvanceMonthInput = {})
     assists: careerAfterLoggedEvent.seasonStats.assists + simulated.statsDelta.assists,
     averageRating: combineAverageRating(careerAfterLoggedEvent.seasonStats, simulated.statsDelta),
   };
-  const tables = createTables(careerAfterLoggedEvent.leagues, simulated.fixtures);
   const formChange = simulated.averageRatingFromMonth >= 7 ? 4 : simulated.averageRatingFromMonth > 0 ? 1 : -2;
   const coachTrustChange = simulated.statsDelta.appearances > 0 ? (simulated.averageRatingFromMonth >= 7 ? 3 : 1) : -1;
   const fatigueChange = Math.round(simulated.playingTimeShare * 12) - Math.round(club.trainingFacilities.medicalSupport / 24);
   const conditionChange = simulated.playingTimeShare > 0.75 ? -4 : 2;
   const transferOffer = createTransferOfferForCareer(careerAfterLoggedEvent);
-  const afterMonth: CareerState = {
-    ...careerAfterLoggedEvent,
-    fixtures: simulated.fixtures,
-    season: {
-      ...careerAfterLoggedEvent.season,
-      fixtures: simulated.fixtures,
-      tables,
+  const afterMonth: CareerState = withFixtures(
+    {
+      ...careerAfterLoggedEvent,
+      seasonStats: stats,
+      form: clamp(careerAfterLoggedEvent.form + formChange),
+      coachTrust: clamp(careerAfterLoggedEvent.coachTrust + coachTrustChange),
+      reputation: clamp(careerAfterLoggedEvent.reputation + simulated.statsDelta.goals * 2 + simulated.statsDelta.assists + (simulated.averageRatingFromMonth >= 7 ? 2 : 0)),
+      fatigue: clamp(careerAfterLoggedEvent.fatigue + fatigueChange),
+      condition: clamp(careerAfterLoggedEvent.condition + conditionChange),
+      transferOffers: transferOffer
+        ? [...careerAfterLoggedEvent.transferOffers, transferOffer].slice(-8)
+        : careerAfterLoggedEvent.transferOffers,
+      playerAppearanceLogs: [
+        ...careerAfterLoggedEvent.playerAppearanceLogs,
+        ...simulated.appearanceLogs,
+      ].slice(-APPEARANCE_LOG_LIMIT),
+      recentResults: [
+        ...simulated.recentResults,
+        ...careerAfterLoggedEvent.recentResults,
+      ].slice(0, RECENT_RESULT_LIMIT),
+      notices: [...careerAfterLoggedEvent.notices, ...simulated.notices].slice(-20),
     },
-    seasonStats: stats,
-    form: clamp(careerAfterLoggedEvent.form + formChange),
-    coachTrust: clamp(careerAfterLoggedEvent.coachTrust + coachTrustChange),
-    reputation: clamp(careerAfterLoggedEvent.reputation + simulated.statsDelta.goals * 2 + simulated.statsDelta.assists + (simulated.averageRatingFromMonth >= 7 ? 2 : 0)),
-    fatigue: clamp(careerAfterLoggedEvent.fatigue + fatigueChange),
-    condition: clamp(careerAfterLoggedEvent.condition + conditionChange),
-    transferOffers: transferOffer
-      ? [...careerAfterLoggedEvent.transferOffers, transferOffer].slice(-8)
-      : careerAfterLoggedEvent.transferOffers,
-    playerAppearanceLogs: [
-      ...careerAfterLoggedEvent.playerAppearanceLogs,
-      ...simulated.appearanceLogs,
-    ].slice(-APPEARANCE_LOG_LIMIT),
-    recentResults: [
-      ...simulated.recentResults,
-      ...careerAfterLoggedEvent.recentResults,
-    ].slice(0, RECENT_RESULT_LIMIT),
-    notices: [...careerAfterLoggedEvent.notices, ...simulated.notices].slice(-20),
-  };
+    simulated.fixtures,
+  );
   const afterInjury = updateInjury(afterMonth, eventRisk, club.trainingFacilities.medicalSupport);
   const afterGrowth = applyMonthlyGrowth(afterInjury, club, {
     month: career.season.currentMonth,
@@ -1556,6 +1565,7 @@ export function startNextSeason(career: CareerState): CareerState {
     promotionRelegation: career.season.promotionRelegation,
     nextSeasonStartYear: career.season.year + 1,
     archivedNonPlayableClubs: career.archivedNonPlayableClubs,
+    k4K5Mode: resolveK4K5Mode(career.k4K5Mode, career.leagueMode),
     leagueMode: career.leagueMode ?? "gameplay",
   });
   const nextSeason = createSeason(rolled.leagues, career.season.number + 1, career.season.year + 1);
@@ -1565,6 +1575,32 @@ export function startNextSeason(career: CareerState): CareerState {
   const freeAgentOffers = playerBecameFreeAgent
     ? createFreeAgentOffers(career, rolled.clubs, rolled.leagues)
     : [];
+  const currentClub = getCareerClub(career);
+  const currentLeague = career.leagues[currentClub.leagueId];
+  const currentLeaguePosition = getClubLeaguePosition(
+    career.season.tables[currentClub.leagueId] ?? [],
+    currentClub.id,
+  );
+  const careerHistory = playerBecameFreeAgent && !career.careerHistory.some(
+    (entry) => entry.seasonNumber === career.season.number && entry.clubId === currentClub.id,
+  )
+    ? [
+        ...career.careerHistory,
+        {
+          id: `season-${career.season.number}-history`,
+          seasonNumber: career.season.number,
+          year: career.season.year,
+          clubId: currentClub.id,
+          clubName: currentClub.name,
+          leagueName: currentLeague?.name ?? getLeagueName(currentClub.leagueId),
+          appearances: career.seasonStats.appearances,
+          goals: career.seasonStats.goals,
+          assists: career.seasonStats.assists,
+          averageRating: career.seasonStats.averageRating,
+          leaguePosition: currentLeaguePosition,
+        },
+      ].slice(-16)
+    : career.careerHistory;
   const nextCareer: CareerState = {
     ...career,
     currentDate,
@@ -1574,6 +1610,7 @@ export function startNextSeason(career: CareerState): CareerState {
       ...career.player,
       age: career.player.age + 1,
     },
+    currentClubId: playerBecameFreeAgent ? null : career.currentClubId ?? career.player.clubId,
     leagues: rolled.leagues,
     competitions: createFictionalCompetitions(nextSeason.number, nextSeason.fixtures),
     clubs: rolled.clubs,
@@ -1587,6 +1624,7 @@ export function startNextSeason(career: CareerState): CareerState {
     contractYearsLeft: Math.max(1, career.contractYearsLeft - 1),
     injury: { severity: "healthy", monthsRemaining: 0 },
     seasonStats: emptySeasonStats(),
+    careerHistory,
     transferOffers: freeAgentOffers,
     recentResults: [],
     monthlyDevelopmentLog: [],
@@ -1607,7 +1645,7 @@ export function startNextSeason(career: CareerState): CareerState {
             seasonNumber: nextSeason.number,
             month: 1,
             type: "transfer_offer" as const,
-            title: "자유계약 전환",
+            title: "자유계약 신분 전환",
             description: "소속팀이 비활성 리그로 강등되어 자유계약 신분이 되었습니다.",
             createdAt: new Date().toISOString(),
           }]
@@ -1625,7 +1663,7 @@ export function startNextSeason(career: CareerState): CareerState {
         ? [{
             id: `season-${nextSeason.number}-free-agent-relegation`,
             month: 1,
-            title: "자유계약 전환",
+            title: "자유계약 신분 전환",
             description: "소속팀이 비활성 리그로 강등되어 자유계약 신분이 되었습니다.",
             tone: "warning" as const,
           }]
@@ -1634,6 +1672,7 @@ export function startNextSeason(career: CareerState): CareerState {
     currentEvent: undefined,
     archivedNonPlayableClubs: rolled.archivedNonPlayableClubs,
     playerContractStatus: playerBecameFreeAgent ? "freeAgent" : "contracted",
+    k4K5Mode: resolveK4K5Mode(career.k4K5Mode, career.leagueMode),
     leagueMode: career.leagueMode ?? "gameplay",
   };
 

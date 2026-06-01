@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { getMatchPlayerStatusLabel } from "../../domain/matchEvents";
 import type { MatchLineup } from "../../domain/types";
+import { MatchPlayerRow } from "./MatchPlayerRow";
 
 export function BenchPanel({ title, lineup }: { title: ReactNode; lineup: MatchLineup }) {
   return (
@@ -11,14 +11,7 @@ export function BenchPanel({ title, lineup }: { title: ReactNode; lineup: MatchL
       </div>
       <ol className="match-player-list compact">
         {lineup.substitutes.map((player) => (
-          <li className={player.isUserPlayer ? "match-player-row user-player" : "match-player-row"} key={player.playerId}>
-            <span className="player-number">{player.squadNumber ?? "-"}</span>
-            <span>
-              <strong>{player.name}</strong>
-              <small>{player.position}</small>
-            </span>
-            <span className="player-status">{getMatchPlayerStatusLabel(player)}</span>
-          </li>
+          <MatchPlayerRow key={player.playerId} player={player} />
         ))}
       </ol>
     </section>

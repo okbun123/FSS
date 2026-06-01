@@ -9,6 +9,7 @@ import { PenaltyShootoutPanel } from "../components/match/PenaltyShootoutPanel";
 import { ScreenShell } from "../components/ScreenShell";
 import { TeamDetailModal } from "../components/TeamDetailModal";
 import { TeamNameLink } from "../components/TeamNameLink";
+import { getClubName } from "../data/fictionalLeagues";
 import { getPausedMatchEvent } from "../domain/matchEvents";
 import { getVisibleMatchLogEvents } from "../domain/matchLog";
 import type { MatchAction } from "../domain/matchStateMachine";
@@ -67,11 +68,12 @@ export function MatchScreen({
     );
   }
 
-  const homeName = career.clubs[match.homeClubId]?.name ?? match.homeClubId;
-  const awayName = career.clubs[match.awayClubId]?.name ?? match.awayClubId;
+  const homeName = career.clubs[match.homeClubId]?.name ?? getClubName(match.homeClubId);
+  const awayName = career.clubs[match.awayClubId]?.name ?? getClubName(match.awayClubId);
   const competitionName = career.competitions[match.competitionId]?.name ?? match.competitionId;
   const pausedEvent = getPausedMatchEvent(match);
   const visibleEvents = getVisibleMatchLogEvents(match.events, career.player.id);
+  const hasPenaltyShootout = Boolean(match.state.shootout);
 
   return (
     <ScreenShell
@@ -132,10 +134,10 @@ export function MatchScreen({
             />
           </div>
 
-          <div className="match-center-column">
+          <div className={hasPenaltyShootout ? "match-center-column has-penalty" : "match-center-column"}>
             <MatchEventCard event={pausedEvent} />
             <MatchControls match={match} onAction={onMatchAction} />
-            <PenaltyShootoutPanel match={match} />
+            {hasPenaltyShootout ? <PenaltyShootoutPanel match={match} /> : null}
             <MatchTimeline events={visibleEvents} />
             <p className="saved-at">최근 저장: {savedAtLabel ?? "아직 없음"}</p>
           </div>

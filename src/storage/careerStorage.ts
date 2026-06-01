@@ -1,11 +1,13 @@
 import { deriveDominantFoot } from "../domain/player";
 import {
   FICTIONAL_LEAGUES,
+  LEGACY_LEAGUE_ID_MAP,
+  LEAGUE_IDS,
   createFictionalCompetitions,
   getClubById,
   getClubsById,
 } from "../data/fictionalLeagues";
-import { getLeagueRuleSetsForSeason } from "../domain/leagueRules";
+import { getLeagueRuleSetsForSeason } from "../domain/leagueRuleSet";
 import type {
   CareerState,
   ContractTerms,
@@ -22,9 +24,10 @@ import { calculatePositionRecommendations } from "../game/positionRecommendation
 import { createUnifiedFeedForCareer } from "../domain/feed";
 import { createInitialDomesticCupFixtures } from "../domain/domesticCup";
 import { calculateLeagueTable } from "../game/leagueTable";
+import { DEFAULT_K4_K5_MODE, resolveK4K5Mode } from "../domain/k4K5Mode";
 
 export const CAREER_SAVE_KEY = "football-career-sim.career-state";
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 5;
 export const INCOMPATIBLE_SAVE_MESSAGE =
   "이전 저장 데이터는 새 리그/경기 시스템과 호환되지 않아 초기화가 필요합니다.";
 
@@ -101,12 +104,24 @@ function getFixtureDate(year: number, round: number): string {
   return addDays(new Date(getDefaultLeagueSeasonStartDate(year)), (round - 1) * 7).toISOString();
 }
 
+function normalizeLeagueId(leagueId: unknown): LeagueTier {
+  if (typeof leagueId === "string" && leagueId in FICTIONAL_LEAGUES) {
+    return leagueId as LeagueTier;
+  }
+
+  return typeof leagueId === "string"
+    ? LEGACY_LEAGUE_ID_MAP[leagueId] ?? LEAGUE_IDS[0]
+    : LEAGUE_IDS[0];
+}
+
 function normalizeFixture(fixture: Fixture, seasonYear: number): Fixture {
   const date = fixture.date ?? getFixtureDate(seasonYear, fixture.round);
-  const league = FICTIONAL_LEAGUES[fixture.leagueId];
+  const leagueId = normalizeLeagueId(fixture.leagueId);
+  const league = FICTIONAL_LEAGUES[leagueId];
 
   return {
     ...fixture,
+    leagueId,
     competitionId: fixture.competitionId ?? league.competitionId,
     date,
     weekNumber: fixture.weekNumber ?? fixture.round,
@@ -137,6 +152,7 @@ function normalizeTransferOffer(offer: TransferOffer, seasonYear: number): Trans
     ...offer,
     salary: currentTerms.salary,
     squadRole: currentTerms.squadRole,
+    leagueId: normalizeLeagueId(offer.leagueId),
     createdAt,
     expiresAt: offer.expiresAt ?? getMonthStartDate(seasonYear, Math.min(offer.month + 1, 12)),
     contractTerms: currentTerms,
@@ -335,13 +351,25 @@ function normalizeCareerState(careerState: CareerState): CareerState {
     ]),
   );
   const ruleSets = getLeagueRuleSetsForSeason(seasonYear);
-  const clubs = {
-    ...getClubsById(),
-    ...(careerState.clubs ?? {}),
-  };
-  const leagueIds = Object.keys(FICTIONAL_LEAGUES) as LeagueTier[];
+  const clubs = Object.fromEntries(
+    Object.entries({
+      ...getClubsById(),
+      ...(careerState.clubs ?? {}),
+    }).map(([clubId, club]) => {
+      const leagueId = normalizeLeagueId(club.leagueId);
+
+      return [
+        clubId,
+        {
+          ...club,
+          leagueId,
+          tier: leagueId,
+        },
+      ];
+    }),
+  ) as CareerState["clubs"];
   const leagues = Object.fromEntries(
-    leagueIds.map((leagueId) => [
+    LEAGUE_IDS.map((leagueId) => [
       leagueId,
       {
         ...(careerState.leagues?.[leagueId] ?? FICTIONAL_LEAGUES[leagueId]),
@@ -376,17 +404,23 @@ function normalizeCareerState(careerState: CareerState): CareerState {
     activeMatchId: careerState.activeMatchId,
     player,
     leagues,
-    competitions:
-      shouldRegenerateSeason || !careerState.competitions
-        ? createFictionalCompetitions(seasonNumber, fixtures)
-        : careerState.competitions,
+    competitions: createFictionalCompetitions(seasonNumber, fixtures),
     clubs,
     fixtures,
     weekTurns,
     matches,
     season,
-    archivedNonPlayableClubs: careerState.archivedNonPlayableClubs ?? [],
+    archivedNonPlayableClubs: (careerState.archivedNonPlayableClubs ?? []).map((club) => ({
+      ...club,
+      lastPoolResult: club.lastPoolResult ?? "이전 시즌 5부 풀",
+    })),
     playerContractStatus: careerState.playerContractStatus ?? "contracted",
+    currentClubId: careerState.currentClubId === undefined
+      ? careerState.playerContractStatus === "freeAgent"
+        ? null
+        : careerState.player.clubId
+      : careerState.currentClubId,
+    k4K5Mode: resolveK4K5Mode(careerState.k4K5Mode, careerState.leagueMode) ?? DEFAULT_K4_K5_MODE,
     leagueMode: careerState.leagueMode ?? "gameplay",
     form,
     condition,
@@ -426,7 +460,7 @@ function parseSaveFile(value: unknown): CareerSaveLoadResult {
     };
   }
 
-  if (![2, 3, CURRENT_SAVE_VERSION].includes(value.saveVersion)) {
+  if (![2, 3, 4, CURRENT_SAVE_VERSION].includes(value.saveVersion)) {
     return {
       status: "unsupportedVersion",
       foundVersion: value.saveVersion,

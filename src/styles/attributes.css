@@ -2,7 +2,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
+  min-height: 0;
   min-width: 0;
+  overflow: auto;
 }
 
 .attribute-card {

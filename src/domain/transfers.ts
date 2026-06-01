@@ -259,6 +259,7 @@ export function acceptTransferOffer(
       ...career.player,
       clubId: offer.clubId,
     },
+    currentClubId: offer.clubId,
     playerContractStatus: "contracted",
     reputation: nextReputation,
     fanSupport: clamp((career.fanSupport ?? 50) + fanSupportDelta, 10, 95),

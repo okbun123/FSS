@@ -6,18 +6,31 @@ import type {
   League,
   LeagueTier,
 } from "../domain/types";
-import { getLeagueRuleSet } from "../domain/leagueRules";
+import { getLeagueRuleSet } from "../domain/leagueRuleSet";
+import { NON_PLAYABLE_D5_CLUBS } from "./nonPlayableClubs";
+import {
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
+  LEGACY_LEAGUE_ID_MAP,
+  LEAGUE_IDS,
+} from "../domain/leagueIds";
 
-export const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
-export const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
-export const K3_LEAGUE_ID = "k3_fictional" satisfies LeagueTier;
-export const K4_LEAGUE_ID = "k4_fictional" satisfies LeagueTier;
+export {
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
+  LEGACY_LEAGUE_ID_MAP,
+  LEAGUE_IDS,
+} from "../domain/leagueIds";
 export const K1_COMPETITION_ID = "competition-k1-fictional";
 export const K2_COMPETITION_ID = "competition-k2-fictional";
 export const K3_COMPETITION_ID = "competition-k3-fictional";
 export const K4_COMPETITION_ID = "competition-k4-fictional";
 export const DOMESTIC_CUP_COMPETITION_ID = "competition-korea-challenge-cup";
-export const DOMESTIC_CUP_NAME = "코리아 챌린지컵";
+export const DOMESTIC_CUP_NAME = "전국 FA컵";
 
 export const K1_RULE_SET = getLeagueRuleSet(K1_LEAGUE_ID, 2027);
 export const K2_RULE_SET = getLeagueRuleSet(K2_LEAGUE_ID, 2027);
@@ -635,7 +648,7 @@ const K4_CLUB_INPUTS = [
   ["geumsan-herbs", "금산 허브스", "허브스", "금산", 33, 36, 21, 84],
   ["haman-ironfield", "함안 아이언필드", "아이언", "함안", 34, 37, 22, 75],
   ["jincheon-beacons", "진천 비컨스", "비컨스", "진천", 36, 39, 25, 78],
-  ["sejong-roads", "세종 로드스", "로드스", "세종", 38, 41, 27, 82],
+  ["sejong-roads", "세종 로드스", "로드스", "세종", 41, 42, 27, 82],
   ["jungnang-metro", "중랑 메트로", "메트로", "중랑", 37, 40, 26, 79],
   ["pyeongchang-peak", "평창 피크", "피크", "평창", 32, 35, 20, 86],
   ["gijang-coast", "기장 코스트", "코스트", "기장", 35, 37, 22, 81],
@@ -712,8 +725,13 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     country: "대한민국",
     tier: K1_LEAGUE_ID,
     level: 1,
+    inspiration: "K1-inspired",
     competitionId: K1_COMPETITION_ID,
     ruleSet: K1_RULE_SET,
+    reputationRange: { min: 64, max: 86 },
+    squadStrengthRange: { min: 64, max: 80 },
+    budgetRange: { min: 48, max: 90 },
+    trainingFacilityRange: { min: 69, max: 85 },
     seasonStartMonth: 1,
     seasonEndMonth: 12,
     clubs: K1_CLUBS,
@@ -724,8 +742,13 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     country: "대한민국",
     tier: K2_LEAGUE_ID,
     level: 2,
+    inspiration: "K2-inspired",
     competitionId: K2_COMPETITION_ID,
     ruleSet: K2_RULE_SET,
+    reputationRange: { min: 50, max: 67 },
+    squadStrengthRange: { min: 52, max: 65 },
+    budgetRange: { min: 30, max: 62 },
+    trainingFacilityRange: { min: 58, max: 68 },
     seasonStartMonth: 1,
     seasonEndMonth: 12,
     clubs: K2_CLUBS,
@@ -736,20 +759,30 @@ export const FICTIONAL_LEAGUES: Record<LeagueTier, League> = {
     country: "대한민국",
     tier: K3_LEAGUE_ID,
     level: 3,
+    inspiration: "K3-inspired",
     competitionId: K3_COMPETITION_ID,
     ruleSet: K3_RULE_SET,
+    reputationRange: { min: 40, max: 54 },
+    squadStrengthRange: { min: 43, max: 54 },
+    budgetRange: { min: 26, max: 42 },
+    trainingFacilityRange: { min: 52, max: 58 },
     seasonStartMonth: 1,
     seasonEndMonth: 12,
     clubs: K3_CLUBS,
   },
   [K4_LEAGUE_ID]: {
     id: K4_LEAGUE_ID,
-    name: "코리아 커뮤니티 4",
+    name: "코리아 세미프로 4",
     country: "대한민국",
     tier: K4_LEAGUE_ID,
     level: 4,
+    inspiration: "K4-inspired",
     competitionId: K4_COMPETITION_ID,
     ruleSet: K4_RULE_SET,
+    reputationRange: { min: 30, max: 42 },
+    squadStrengthRange: { min: 33, max: 42 },
+    budgetRange: { min: 18, max: 28 },
+    trainingFacilityRange: { min: 45, max: 51 },
     seasonStartMonth: 1,
     seasonEndMonth: 12,
     clubs: K4_CLUBS,
@@ -824,7 +857,7 @@ export function createFictionalCompetitions(
           type: "cup" as const,
           country: FICTIONAL_LEAGUES[K1_LEAGUE_ID].country,
           seasonNumber,
-          leagueIds: Object.keys(FICTIONAL_LEAGUES) as LeagueTier[],
+          leagueIds: [...LEAGUE_IDS],
           fixtureIds: cupFixtures.map((fixture) => fixture.id),
         },
       }
@@ -842,7 +875,7 @@ export function getClubById(clubId: string): Club | undefined {
 }
 
 export function getClubName(clubId: string): string {
-  return getClubById(clubId)?.name ?? "소속 없음";
+  return getClubById(clubId)?.name ?? NON_PLAYABLE_D5_CLUBS.find((club) => club.id === clubId)?.name ?? "소속 없음";
 }
 
 export function getLeagueName(leagueId: LeagueTier): string {

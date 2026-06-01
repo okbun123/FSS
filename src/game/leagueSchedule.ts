@@ -174,7 +174,7 @@ export function generateLeagueFixtures(
   const seasonYear = 2026 + seasonNumber;
   const seasonStartDate = new Date(options.seasonStartDate ?? getDefaultLeagueSeasonStartDate(seasonYear));
   const roundIntervalDays = options.roundIntervalDays ?? 7;
-  const weekendFixtureSlots = options.weekendFixtureSlots ?? 4;
+  const weekendFixtureSlots = options.weekendFixtureSlots ?? 5;
   const kickoffHourUtc = options.kickoffHourUtc ?? 11;
   const cycles = league.ruleSet.roundRobinCycles;
   const rounds = repeatRoundRobin(league.clubs, cycles);

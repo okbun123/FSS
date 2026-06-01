@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TeamDetailModal } from "../components/TeamDetailModal";
 import { TeamNameLink } from "../components/TeamNameLink";
 import { STARTER_CLUBS } from "../data/fictionalLeagues";
+import { formatStars, getPublicClubStars } from "../domain/clubPublicInfo";
 import {
   getRecentTeamMatches,
   getTeamDetail,
@@ -179,6 +180,39 @@ describe("team detail popup data", () => {
     });
 
     expect(textFrom(element)).toContain(career.leagues[club.leagueId].name);
+  });
+
+  it("modal shows public star ratings and hides exact internal club fields", () => {
+    const career = createCareer();
+    const club = STARTER_CLUBS[0];
+    const stars = getPublicClubStars(club);
+    const element = TeamDetailModal({
+      career,
+      clubId: club.id,
+      onClose: () => undefined,
+      onOpenTeam: () => undefined,
+    });
+    const text = textFrom(element);
+
+    expect(text).toContain("평판");
+    expect(text).toContain(formatStars(stars.reputationStars));
+    expect(text).toContain("전력");
+    expect(text).toContain(formatStars(stars.squadStrengthStars));
+    expect(text).toContain("예산");
+    expect(text).toContain(formatStars(stars.budgetStars));
+    expect(text).toContain("유스 기회");
+    expect(text).toContain(formatStars(stars.youthOpportunityStars));
+    expect(text).toContain("훈련 시설");
+    expect(text).toContain(formatStars(stars.trainingFacilityStars));
+    expect(text).not.toContain("플레이 스타일");
+    expect(text).not.toContain("이적 정책");
+    expect(text).not.toContain("평균 연령");
+    expect(text).not.toContain("선수층");
+    expect(text).not.toContain(String(club.reputation));
+    expect(text).not.toContain(String(club.squadStrength));
+    expect(text).not.toContain(String(club.budgetLevel));
+    expect(text).not.toContain(String(club.youthOpportunity));
+    expect(Object.values(club.trainingFacilities).some((value) => text.includes(String(value)))).toBe(false);
   });
 
   it("computes recent five form from played fixtures", () => {

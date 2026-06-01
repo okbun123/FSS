@@ -11,7 +11,9 @@ export type Personality =
 
 export type SquadRole = "prospect" | "rotation" | "regular" | "keyPlayer";
 
-export type LeagueTier = "k1_fictional" | "k2_fictional" | "k3_fictional" | "k4_fictional";
+export type LeagueTier = "div1" | "div2" | "div3" | "div4";
+
+export type K4K5Mode = "realistic_suspended" | "gameplay_relegation_enabled";
 
 export type IsoDateString = string;
 
@@ -272,6 +274,37 @@ export interface LeagueTransitionSpecialCase {
   bottomClubDirectRelegation: boolean;
 }
 
+export type LeagueRuleConcept =
+  | "directPromotion"
+  | "directRelegation"
+  | "promotionPlayoff"
+  | "relegationPlayoff"
+  | "licensingRequired"
+  | "promotionIntentRequired"
+  | "automaticRelegationSuspended"
+  | "nonPlayablePoolReplacement";
+
+export interface LeagueMovementRule {
+  id: string;
+  concept: LeagueRuleConcept;
+  fromLeagueId: LeagueTier;
+  toLeagueId?: LeagueTier;
+  opponentLeagueId?: LeagueTier;
+  entrantPositionStart?: number;
+  entrantPositionEnd?: number;
+  entrantPositionsFromBottom?: number[];
+  opponentPositionsFromBottom?: number[];
+  tieFormat?: PlayoffTieFormat;
+  host?: "higherDivision" | "lowerDivision" | "higherSeed";
+  licensingRequired?: boolean;
+  promotionIntentRequired?: boolean;
+  automaticRelegationSuspended?: boolean;
+  automaticRelegationSuspendedUntilTarget?: boolean;
+  nonPlayablePoolReplacement?: boolean;
+  appliesWhenK4K5Mode?: K4K5Mode;
+  targetSizeLeagueId?: LeagueTier;
+}
+
 export interface LeagueRuleSet {
   id: string;
   seasonStartYear: number;
@@ -286,6 +319,7 @@ export interface LeagueRuleSet {
   promotionPlayoffConfig?: LeaguePlayoffConfig;
   relegationPlayoffConfig?: LeaguePlayoffConfig;
   transitionSpecialCase?: LeagueTransitionSpecialCase;
+  movementRules?: LeagueMovementRule[];
   teamCountTargetByLeague: Partial<Record<LeagueTier, number>>;
 }
 
@@ -571,6 +605,12 @@ export interface NonPlayableClub extends PublicClubStars {
   region: string;
   licenseEligible: boolean;
   promotionWeight: number;
+  lastPoolResult: string;
+}
+
+export interface LeagueValueRange {
+  min: number;
+  max: number;
 }
 
 export interface League {
@@ -579,8 +619,13 @@ export interface League {
   country: string;
   tier: LeagueTier;
   level: number;
+  inspiration: string;
   competitionId: string;
   ruleSet: LeagueRuleSet;
+  reputationRange: LeagueValueRange;
+  squadStrengthRange: LeagueValueRange;
+  budgetRange: LeagueValueRange;
+  trainingFacilityRange: LeagueValueRange;
   seasonStartMonth: number;
   seasonEndMonth: number;
   clubs: Club[];
@@ -625,6 +670,16 @@ export interface SeasonMonth {
   fixtureIds: string[];
 }
 
+export interface PromotionRelegationTieRecord {
+  tieId: string;
+  fixtureIds: string[];
+  higherLeagueId: LeagueTier;
+  lowerLeagueId: LeagueTier;
+  higherClubId: string;
+  lowerClubId: string;
+  ruleId: string;
+}
+
 export interface LeagueTableRow {
   clubId: string;
   clubName: string;
@@ -654,6 +709,9 @@ export interface PromotionRelegationStatus {
   playoffFixtureIds?: string[];
   playoffResults?: PromotionRelegationPlayoffResult[];
   playoffBracket?: PlayoffBracket;
+  promotionRelegationTies?: PromotionRelegationTieRecord[];
+  lowerPyramidPlayoffsCreated?: boolean;
+  lowerPyramidResolved?: boolean;
   automaticRelegationClubId?: string;
   playoffClubId?: string;
   automaticPromotionClubId?: string;
@@ -903,5 +961,8 @@ export interface CareerState {
   monthlyDevelopmentLog: DevelopmentReport[];
   archivedNonPlayableClubs?: NonPlayableClub[];
   playerContractStatus?: "contracted" | "freeAgent";
+  currentClubId?: string | null;
+  k4K5Mode?: K4K5Mode;
+  /** @deprecated Use k4K5Mode. */
   leagueMode?: "realistic" | "gameplay";
 }

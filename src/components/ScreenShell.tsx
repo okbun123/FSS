@@ -1,17 +1,26 @@
 import type { ReactNode } from "react";
+import { AppShell } from "./AppShell";
 
 interface ScreenShellProps {
   eyebrow: ReactNode;
   title: ReactNode;
   children: ReactNode;
   actions?: ReactNode;
+  navigation?: ReactNode;
   wide?: boolean;
 }
 
-export function ScreenShell({ eyebrow, title, children, actions, wide = false }: ScreenShellProps) {
+export function ScreenShell({
+  eyebrow,
+  title,
+  children,
+  actions,
+  navigation,
+  wide = false,
+}: ScreenShellProps) {
   return (
-    <main className="app-shell">
-      <section className={wide ? "screen-panel screen-panel-wide" : "screen-panel"} aria-labelledby="screen-title">
+    <AppShell
+      header={
         <header className="screen-heading">
           <div>
             <span className="eyebrow">{eyebrow}</span>
@@ -19,8 +28,12 @@ export function ScreenShell({ eyebrow, title, children, actions, wide = false }:
           </div>
           {actions ? <div className="screen-actions">{actions}</div> : null}
         </header>
-        <div className="screen-body">{children}</div>
-      </section>
-    </main>
+      }
+      labelledBy="screen-title"
+      navigation={navigation}
+      wide={wide}
+    >
+      {children}
+    </AppShell>
   );
 }

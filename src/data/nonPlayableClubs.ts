@@ -33,6 +33,13 @@ const POOL_INPUTS = [
   ["d5-uljin-wave", "울진 웨이브", "경북"],
 ] as const;
 
+function getPoolResult(index: number): string {
+  const position = (index % 10) + 1;
+  const group = ["중부", "남부", "동부", "서부"][index % 4];
+
+  return `5부 ${group} 권역 ${position}위`;
+}
+
 export const NON_PLAYABLE_D5_CLUBS: NonPlayableClub[] = POOL_INPUTS.map(([id, name, region], index) => {
   const reputationStars = 1 + (index % 3);
   const squadStrengthStars = 1 + ((index + 1) % 3);
@@ -51,5 +58,6 @@ export const NON_PLAYABLE_D5_CLUBS: NonPlayableClub[] = POOL_INPUTS.map(([id, na
     trainingFacilityStars,
     licenseEligible: index % 4 !== 0,
     promotionWeight: 8 + reputationStars * 2 + squadStrengthStars * 3 + (index % 5),
+    lastPoolResult: getPoolResult(index),
   };
 });

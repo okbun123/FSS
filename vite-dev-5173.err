@@ -1,0 +1,134 @@
+[2m오전 2:12:24[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\PlayerCreationScreen.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (327:8)
+
+[0m [90m 325 |[31m         [33m<[31m[33m/[31m[33mnav[31m[33m>[31m
+ [90m 326 |[31m
+[31m[1m>[22m[31m[90m 327 |[31m         [33m<[31m[33mAttributeSummary[31m
+ [90m     |[31m         [31m[1m^[22m[31m
+ [90m 328 |[31m           attributes[33m=[31m{roll[33m.[31mattributes}
+ [90m 329 |[31m           leftFoot[33m=[31m{roll[33m.[31mleftFoot}
+ [90m 330 |[31m           rightFoot[33m=[31m{roll[33m.[31mrightFoot}[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/PlayerCreationScreen.tsx[39m:327:8
+[33m  325 |          </nav>
+  326 |  
+  327 |          <AttributeSummary
+      |          ^
+  328 |            attributes={roll.attributes}
+  329 |            leftFoot={roll.leftFoot}[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4754:18)
+      at TypeScriptParserMixin.jsxParseElement (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9792:18)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4644:31)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4723:36)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+[2m오전 2:12:24[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\User\Documents\FS\FS\src\screens\PlayerCreationScreen.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (327:8)
+
+[0m [90m 325 |[31m         [33m<[31m[33m/[31m[33mnav[31m[33m>[31m
+ [90m 326 |[31m
+[31m[1m>[22m[31m[90m 327 |[31m         [33m<[31m[33mAttributeSummary[31m
+ [90m     |[31m         [31m[1m^[22m[31m
+ [90m 328 |[31m           attributes[33m=[31m{roll[33m.[31mattributes}
+ [90m 329 |[31m           leftFoot[33m=[31m{roll[33m.[31mleftFoot}
+ [90m 330 |[31m           rightFoot[33m=[31m{roll[33m.[31mrightFoot}[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/User/Documents/FS/FS/src/screens/PlayerCreationScreen.tsx[39m:327:8
+[33m  325 |          </nav>
+  326 |  
+  327 |          <AttributeSummary
+      |          ^
+  328 |            attributes={roll.attributes}
+  329 |            leftFoot={roll.leftFoot}[39m
+      at constructor (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4754:18)
+      at TypeScriptParserMixin.jsxParseElement (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9792:18)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4644:31)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4723:36)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\User\Documents\FS\FS\node_modules\@babel\parser\lib\index.js:11098:23)

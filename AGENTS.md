@@ -16,6 +16,60 @@ Build the project as a static web app that can be deployed to GitHub Pages. Use 
 - Keep the UI readable and usable on desktop and mobile.
 - Do not require network access at runtime for core gameplay.
 
+## UI Rules
+
+- Page/document scrolling is forbidden.
+- `html`, `body`, and `#root` must fill the viewport.
+- The main app must use a fixed desktop app shell.
+- Use tabs, panels, pagination, modals, and compact tables instead of long pages.
+- Internal panel scrolling is allowed only for large lists, but the browser page itself must not scroll.
+- Every major screen must fit within the viewport: career dashboard, character creation, position selection, team selection, and match screen.
+
+## Match Screen Rules
+
+- The match screen top area must show home team, away team, score, time, and phase.
+- The left side must show the home lineup and bench.
+- The right side must show the away lineup and bench.
+- The center must show controls and the match log.
+- Goals must always be visible in the player-facing match log.
+- Red cards must always be visible in the player-facing match log.
+- Yellow cards must be visible only if the player is involved.
+- Substitutions must be visible only if the player is involved.
+- Injuries must be visible only if the player is involved.
+
+## Character Creation Rules
+
+- Use a step-based flow: stat roll, position selection, team selection, confirmation.
+- Stats must be shown in the lower-left area.
+- Stats must include `leftFoot` and `rightFoot`.
+- All positions must be selectable.
+- All playable teams must be selectable.
+- Use red-to-green fit coloring for positions and teams.
+- Team role projection must display only these labels: `벤치`, `로테이션`, `주전`.
+
+## Information Visibility Rules
+
+- Do not reveal exact club reputation, squad strength, budget level, youth opportunity, or training facility values in the UI.
+- Show club reputation, squad strength, budget level, youth opportunity, and training facility as 1-5 star ratings.
+- Do not display club play style, transfer policy, average age, or squad depth to the player.
+- Internal simulation may still use exact values.
+
+## Competition Rules
+
+- Add a domestic FA Cup-style knockout competition.
+- Use fictional competition names and fictional club names.
+- Add playable divisions down to Division 4.
+- Use a hidden non-playable 5th-division promotion pool for Division 4 replacements.
+
+## Promotion And Relegation Rules
+
+- Promotion and relegation rules must be data-driven through `LeagueRuleSet`.
+- Implement Korean pyramid-inspired rules.
+- K2-K3 promotion/relegation must support licensing and a playoff.
+- K3-K4 promotion/relegation must support promotion intent and eligibility.
+- K4-K5 must be configurable because real rules may suspend K4 relegation, but gameplay mode must support K4 relegation and replacement from the 5th-division pool.
+- If the player's club is relegated below playable Division 4, the player becomes a free agent.
+
 ## Game Direction
 
 - The game advances by weekly turns.
@@ -48,10 +102,12 @@ Build the project as a static web app that can be deployed to GitHub Pages. Use 
 ## Engineering Rules
 
 - `npm run test` and `npm run build` must pass before finishing.
+- Add or update tests for each changed system.
 - Add or update tests for match state machine, schedule generation, promotion/relegation, playoff results, team evolution, and transfer negotiation.
 - Add or update tests for core simulation logic when behavior changes.
-- Keep core simulation logic in pure TypeScript modules.
+- Keep business logic and core simulation logic in pure TypeScript domain modules.
 - React components should call domain functions but not contain business rules.
+- Do not put league rules directly in React components.
 - Keep simulation logic separated from React presentation where practical so it can be tested directly.
 - Prefer pure functions for career progression, match results, stat growth, transfers, contracts, injuries, and season advancement.
 - Make randomness controllable for tests, such as by using a seed or injectable random source.

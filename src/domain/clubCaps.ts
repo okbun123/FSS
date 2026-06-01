@@ -1,4 +1,10 @@
 import type { ClubEvolutionMetric, LeagueTier } from "./types";
+import {
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
+} from "./leagueIds";
 
 export interface ClubMetricCaps {
   min: number;
@@ -37,10 +43,12 @@ export const CLUB_EVOLUTION_METRICS: readonly ClubEvolutionMetric[] = [
   "squadStrength",
 ];
 
-export const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
-export const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
-export const K3_LEAGUE_ID = "k3_fictional" satisfies LeagueTier;
-export const K4_LEAGUE_ID = "k4_fictional" satisfies LeagueTier;
+export {
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
+} from "./leagueIds";
 
 export const PROMOTED_LOWER_MID_K1_CAPS: Partial<Record<ClubEvolutionMetric, number>> = {
   reputation: 68,

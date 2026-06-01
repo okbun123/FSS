@@ -3,6 +3,7 @@ import { getPublicClubStars } from "./clubPublicInfo";
 import type { Attributes, Club, League, Player, Position, PublicClubStars } from "./types";
 
 export type TeamFitRole = "bench" | "rotation" | "starter";
+export type TeamFitBand = "poor" | "weak" | "average" | "good" | "excellent";
 
 export const TEAM_FIT_ROLE_LABELS: Record<TeamFitRole, string> = {
   bench: "벤치",
@@ -21,7 +22,7 @@ export interface TeamFitResult extends PublicClubStars {
   clubId: string;
   score: number;
   role: TeamFitRole;
-  band: "poor" | "average" | "good";
+  band: TeamFitBand;
   reason: string;
 }
 
@@ -37,14 +38,46 @@ function getDepthValue(club: Club, position: Position): number {
   return club.positionDepth?.[position] ?? club.squadSummary.depth;
 }
 
-function getRole(playerOverall: number, club: Club, position: Position): TeamFitRole {
-  const positionDepth = getDepthValue(club, position);
-  const strengthGap = playerOverall - club.squadStrength;
-  const opportunityBonus = club.youthOpportunity >= 75 ? 2 : 0;
-  const depthPenalty = positionDepth >= 78 ? 4 : positionDepth >= 62 ? 2 : 0;
-  const roleScore = strengthGap + opportunityBonus - depthPenalty;
+export function getTeamFitBand(score: number): TeamFitBand {
+  const normalizedScore = clamp(score);
 
-  if (roleScore >= 2) {
+  if (normalizedScore >= 85) {
+    return "excellent";
+  }
+  if (normalizedScore >= 70) {
+    return "good";
+  }
+  if (normalizedScore >= 55) {
+    return "average";
+  }
+  if (normalizedScore >= 40) {
+    return "weak";
+  }
+  return "poor";
+}
+
+function getLeaguePressure(league: League): number {
+  return (5 - league.level) * 1.5;
+}
+
+function getYouthRoleAdjustment(club: Club, league: League): number {
+  const youthBase = club.youthOpportunity >= 84 ? 8 : club.youthOpportunity >= 74 ? 5 : club.youthOpportunity >= 64 ? 2 : 0;
+  const lowerClubBonus = league.level >= 4 ? 3 : league.level >= 3 ? 2 : league.level >= 2 ? 1 : 0;
+
+  return youthBase + lowerClubBonus;
+}
+
+function getClubPositionLevel(club: Club, league: League, position: Position): number {
+  const positionDepth = getDepthValue(club, position);
+  const rawLevel = club.squadStrength * 0.5 + positionDepth * 0.28 + club.reputation * 0.14 + getLeaguePressure(league);
+
+  return rawLevel - getYouthRoleAdjustment(club, league);
+}
+
+function getRole(playerOverall: number, club: Club, league: League, position: Position): TeamFitRole {
+  const roleScore = playerOverall - getClubPositionLevel(club, league, position);
+
+  if (roleScore >= 0) {
     return "starter";
   }
   if (roleScore >= -8) {
@@ -56,22 +89,23 @@ function getRole(playerOverall: number, club: Club, position: Position): TeamFit
 export function calculateTeamFit(input: TeamFitInput): TeamFitResult {
   const { club, league, playerOverall, selectedPosition } = input;
   const stars = getPublicClubStars(club);
-  const role = getRole(playerOverall, club, selectedPosition);
-  const leagueOpportunity = (5 - league.level) * 3;
-  const strengthFit = 100 - Math.abs(playerOverall - club.squadStrength) * 2.4;
-  const youthFit = club.youthOpportunity * 0.5;
-  const reputationFit = club.reputation * 0.18;
-  const facilityFit = average(Object.values(club.trainingFacilities)) * 0.12;
+  const role = getRole(playerOverall, club, league, selectedPosition);
+  const leagueAccessibility = league.level * 3.5;
+  const clubPositionLevel = getClubPositionLevel(club, league, selectedPosition);
+  const strengthFit = 100 - Math.abs(playerOverall - clubPositionLevel) * 3;
+  const youthFit = club.youthOpportunity * 0.26;
+  const reputationFit = club.reputation * 0.14;
+  const facilityFit = average(Object.values(club.trainingFacilities)) * 0.16;
   const depthOpportunity = 100 - getDepthValue(club, selectedPosition);
-  const roleBonus = role === "starter" ? 12 : role === "rotation" ? 6 : 0;
+  const roleBonus = role === "starter" ? 12 : role === "rotation" ? 7 : 0;
   const score = Math.round(
     clamp(
-      strengthFit * 0.42 +
+      strengthFit * 0.36 +
         youthFit +
         reputationFit +
         facilityFit +
-        depthOpportunity * 0.16 +
-        leagueOpportunity +
+        depthOpportunity * 0.12 +
+        leagueAccessibility +
         roleBonus,
       1,
       100,
@@ -83,7 +117,7 @@ export function calculateTeamFit(input: TeamFitInput): TeamFitResult {
     ...stars,
     score,
     role,
-    band: score >= 72 ? "good" : score >= 48 ? "average" : "poor",
+    band: getTeamFitBand(score),
     reason:
       role === "starter"
         ? "현재 전력 대비 즉시 출전 가능성이 높습니다."

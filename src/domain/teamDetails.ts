@@ -1,3 +1,4 @@
+import { getVisibleClubInfoItems, type PublicClubInfoItem } from "./clubPublicInfo";
 import type {
   CareerState,
   Club,
@@ -46,11 +47,7 @@ export interface TeamDetail {
   name: string;
   shortName: string;
   league: string;
-  reputation: number;
-  budgetLevel: number;
-  squadStrength: number;
-  youthOpportunity: number;
-  trainingFacilitiesSummary: string;
+  publicInfo: PublicClubInfoItem[];
   recentMatches: TeamRecentMatch[];
   lastSeasonResult: TeamLastSeasonResult;
   predictedFinish: number;
@@ -103,7 +100,11 @@ function getTeamGoals(fixture: Fixture, clubId: string): { for: number; against:
     : { for: fixture.result.awayGoals, against: fixture.result.homeGoals };
 }
 
-function getOutcome(goalsFor: number, goalsAgainst: number): TeamFormOutcome {
+function getOutcome(goalsFor: number, goalsAgainst: number, winnerClubId?: string, clubId?: string): TeamFormOutcome {
+  if (winnerClubId && clubId) {
+    return winnerClubId === clubId ? "W" : "L";
+  }
+
   if (goalsFor > goalsAgainst) {
     return "W";
   }
@@ -141,7 +142,7 @@ export function getRecentTeamMatches(
       return {
         fixtureId: fixture.id,
         date: fixture.date,
-        outcome: getOutcome(goals.for, goals.against),
+        outcome: getOutcome(goals.for, goals.against, fixture.result?.winnerClubId, clubId),
         score: `${goals.for}-${goals.against}`,
         opponentClubId,
         opponentName: opponent?.name ?? opponentClubId,
@@ -154,16 +155,6 @@ export function getRecentTeamMatches(
 function getFacilityAverage(facilities: ClubTrainingFacilities): number {
   const total = FACILITY_LABELS.reduce((sum, [key]) => sum + facilities[key], 0);
   return Math.round(total / FACILITY_LABELS.length);
-}
-
-export function summarizeTrainingFacilities(facilities: ClubTrainingFacilities): string {
-  const average = getFacilityAverage(facilities);
-  const [bestKey, bestLabel] = [...FACILITY_LABELS].sort(
-    ([leftKey], [rightKey]) => facilities[rightKey] - facilities[leftKey],
-  )[0];
-  const grade = average >= 85 ? "최상" : average >= 75 ? "우수" : average >= 65 ? "보통" : "성장형";
-
-  return `${grade} · 평균 ${average} · 강점 ${bestLabel} ${facilities[bestKey]}`;
 }
 
 function predictionScore(club: Club): number {
@@ -333,11 +324,7 @@ export function getTeamDetail(career: CareerState, clubId: string): TeamDetail |
     name: club.name,
     shortName: club.shortName,
     league: league.name,
-    reputation: club.reputation,
-    budgetLevel: club.budgetLevel,
-    squadStrength: club.squadStrength,
-    youthOpportunity: club.youthOpportunity,
-    trainingFacilitiesSummary: summarizeTrainingFacilities(club.trainingFacilities),
+    publicInfo: getVisibleClubInfoItems(club),
     recentMatches: getRecentTeamMatches(career, club.id),
     lastSeasonResult: getLastSeasonResult(career, club),
     predictedFinish: predictTeamFinish(career, club.leagueId, club.id),

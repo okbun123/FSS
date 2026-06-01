@@ -1,13 +1,8 @@
 import { NON_PLAYABLE_D5_CLUBS } from "../data/nonPlayableClubs";
-import { getLeagueRuleSetsForSeason } from "./leagueRules";
+import { getLeagueRuleSetsForSeason, getNonPlayablePoolReplacementRule } from "./leagueRuleSet";
 import { starsToInternalValue } from "./clubPublicInfo";
-import type { Club, League, LeagueTier, NonPlayableClub, PromotionRelegationStatus } from "./types";
-
-const K1_LEAGUE_ID = "k1_fictional" satisfies LeagueTier;
-const K2_LEAGUE_ID = "k2_fictional" satisfies LeagueTier;
-const K3_LEAGUE_ID = "k3_fictional" satisfies LeagueTier;
-const K4_LEAGUE_ID = "k4_fictional" satisfies LeagueTier;
-const LEAGUE_IDS = [K1_LEAGUE_ID, K2_LEAGUE_ID, K3_LEAGUE_ID, K4_LEAGUE_ID] as const satisfies readonly LeagueTier[];
+import type { Club, K4K5Mode, League, LeagueTier, NonPlayableClub, PromotionRelegationStatus } from "./types";
+import { K4_LEAGUE_ID, LEAGUE_IDS } from "./leagueIds";
 
 export interface SeasonRolloverInput {
   leagues: Record<LeagueTier, League>;
@@ -15,6 +10,8 @@ export interface SeasonRolloverInput {
   promotionRelegation?: PromotionRelegationStatus;
   nextSeasonStartYear: number;
   archivedNonPlayableClubs?: readonly NonPlayableClub[];
+  k4K5Mode?: K4K5Mode;
+  /** @deprecated Use k4K5Mode. */
   leagueMode?: "realistic" | "gameplay";
 }
 
@@ -73,6 +70,7 @@ function selectPoolClubs(input: {
   const archivedById = new Map(input.archived.map((club) => [club.id, club]));
   return [...NON_PLAYABLE_D5_CLUBS, ...input.archived]
     .filter((club, index, clubs) => clubs.findIndex((candidate) => candidate.id === club.id) === index)
+    .filter((club) => club.licenseEligible)
     .filter((club) => !input.usedClubIds.has(club.id))
     .sort(
       (left, right) =>
@@ -130,12 +128,21 @@ function poolClubToPlayableClub(poolClub: NonPlayableClub, leagueId: LeagueTier)
 export function applySeasonRollover(input: SeasonRolloverInput): SeasonRolloverResult {
   const promotedClubIds = new Set(input.promotionRelegation?.promotedClubIds ?? []);
   const relegatedClubIds = new Set(input.promotionRelegation?.relegatedClubIds ?? []);
+  const k4ReplacementRule = getNonPlayablePoolReplacementRule(
+    input.leagues[K4_LEAGUE_ID].ruleSet,
+    input.k4K5Mode,
+    input.leagueMode,
+  );
+  const k4K5ReplacementEnabled = Boolean(k4ReplacementRule);
   const nextRuleSets = getLeagueRuleSetsForSeason(input.nextSeasonStartYear);
   const order = getClubOrder(input.leagues);
   const sourceClubs = Object.keys(input.clubs).length > 0
     ? Object.values(input.clubs)
     : LEAGUE_IDS.flatMap((leagueId) => input.leagues[leagueId].clubs);
-  const archived: NonPlayableClub[] = [...(input.archivedNonPlayableClubs ?? [])];
+  const archived: NonPlayableClub[] = (input.archivedNonPlayableClubs ?? []).map((club) => ({
+    ...club,
+    lastPoolResult: club.lastPoolResult ?? "이전 시즌 5부 풀",
+  }));
   const relegatedOutClubIds: string[] = [];
   const clubs: Record<string, Club> = {};
 
@@ -146,6 +153,11 @@ export function applySeasonRollover(input: SeasonRolloverInput): SeasonRolloverR
     const relegatedLeagueId = relegatedClubIds.has(club.id)
       ? getAdjacentLeagueId(input.leagues, club.leagueId, "down")
       : undefined;
+
+    if (relegatedClubIds.has(club.id) && !relegatedLeagueId && club.leagueId === K4_LEAGUE_ID && !k4K5ReplacementEnabled) {
+      clubs[club.id] = withLeague(club, club.leagueId);
+      continue;
+    }
 
     if (relegatedClubIds.has(club.id) && !relegatedLeagueId) {
       relegatedOutClubIds.push(club.id);
@@ -160,6 +172,7 @@ export function applySeasonRollover(input: SeasonRolloverInput): SeasonRolloverR
         trainingFacilityStars: 2,
         licenseEligible: club.licenseEligible ?? false,
         promotionWeight: Math.max(4, Math.round(club.reputation / 8)),
+        lastPoolResult: `${input.nextSeasonStartYear - 1}시즌 4부 강등`,
       });
       continue;
     }
@@ -168,10 +181,15 @@ export function applySeasonRollover(input: SeasonRolloverInput): SeasonRolloverR
     clubs[club.id] = withLeague(club, nextLeagueId);
   }
 
-  const promotedPoolClubs = input.leagueMode === "realistic"
+  const k4TargetSize = nextRuleSets[K4_LEAGUE_ID].teamCountTargetByLeague[K4_LEAGUE_ID];
+  const k4PlayableClubCount = Object.values(clubs).filter((club) => club.leagueId === K4_LEAGUE_ID).length;
+  const poolPromotionCount = k4TargetSize
+    ? Math.max(relegatedOutClubIds.length, k4TargetSize - k4PlayableClubCount)
+    : relegatedOutClubIds.length;
+  const promotedPoolClubs = !k4K5ReplacementEnabled
     ? []
     : selectPoolClubs({
-        count: relegatedOutClubIds.length,
+        count: poolPromotionCount,
         usedClubIds: new Set(Object.keys(clubs)),
         archived,
       });

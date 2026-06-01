@@ -10,7 +10,7 @@ import type { Fixture, Match } from "../domain/types";
 function createFixture(overrides: Partial<Fixture> = {}): Fixture {
   return {
     id: "fixture-test-1",
-    leagueId: "k1_fictional",
+    leagueId: "div1",
     competitionId: "competition-test",
     seasonNumber: 1,
     round: 1,

@@ -1,0 +1,317 @@
+
+> football-career-sim@0.1.0 dev
+> vite --host 127.0.0.1 --port 5178
+
+Port 5178 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.3.3[39m  [2mready in [0m[1m309[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5179[22m/[39m
+[2m오후 12:34:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:34:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh (new export)
+[2m오후 12:34:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:34:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:34:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:34:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:34:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 12:40:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:40:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:40:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:40:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:40:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:40:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:40:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh (new export)
+[2m오후 12:40:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:41:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:41:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:41:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:41:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:41:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:41:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:43:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 12:45:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 12:48:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/TeamDetailModal.tsx[22m
+[2m오후 12:48:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:48:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:48:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:48:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:48:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 12:48:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 12:49:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:49:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:49:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:49:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:49:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:49:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:49:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 12:49:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:49:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 12:49:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 12:49:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:49:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 12:4[2m오후 12:49:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/sr[2m오후 12:49:38[22m [36m[1m[vite][2m오후 12:49:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:49:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:50:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:50:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:56:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 12:57:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 12:57:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:57:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:57:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 12:57:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:01:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:01:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:01:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:03:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx, /src/screens/PlayerCreationScreen.tsx, /src/components/career/TransferOfferCard.tsx[22m
+[2m오후 1:18:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:19:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:20:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/MatchScreen.tsx[22m
+[2m오후 1:33:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오후 1:33:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:35:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:35:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 1:35:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 1:40:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:53:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:51:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 2:52:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:53:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:53:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:54:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:55:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:55:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:56:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:57:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:03:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:03:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:05:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오후 3:05:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 3:06:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/TransferNegotiationModal.tsx[22m
+[2m오후 3:09:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:10:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/attributes.css[22m
+[2m오후 3:14:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:14:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:15:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 3:15:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+s incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:17:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:17:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:17:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:17:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:17:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx, /src/screens/PlayerCreationScreen.tsx, /src/components/career/TransferOfferCard.tsx[22m
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:18:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:18:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:19:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:20:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:20:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:32:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/MatchScreen.tsx[22m
+[2m오후 1:33:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오후 1:33:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:33:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:33:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:33:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:34:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:34:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:34:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:34:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:34:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:34:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:34:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:34:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:34:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:35:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:35:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:35:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:35:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 1:35:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 1:40:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:40:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:40:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx, /src/screens/MatchScreen.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx, /src/screens/MatchScreen.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:45:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:46:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:50:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:53:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/TransferOfferCard.tsx, /src/components/career/UnifiedFeedPanel.tsx, /src/components/career/PlayoffBracketPanel.tsx, /src/components/career/PromotionRelegationSummary.tsx, /src/screens/MatchScreen.tsx[22m
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:53:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:53:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:54:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/PromotionRelegationSummary.tsx, /src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:55:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx, /src/screens/CareerDashboardScreen.tsx, /src/components/career/PromotionRelegationSummary.tsx[22m
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh ("CREATION_STEPS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_TABS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 1:56:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:51:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/PlayerCreationScreen.tsx[22m
+[2m오후 2:51:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/PlayerCreationScreen.tsx[22m Could not Fast Refresh (new export)
+[2m오후 2:51:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:52:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:52:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh (new export)
+[2m오후 2:52:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:53:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:53:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_SECTIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 2:53:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:53:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:53:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_SECTIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 2:53:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:54:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:55:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:55:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_SECTIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 2:55:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 2:55:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:56:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 2:57:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:03:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:03:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/screens/CareerDashboardScreen.tsx[22m
+[2m오후 3:03:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/screens/CareerDashboardScreen.tsx[22m Could not Fast Refresh ("CAREER_DASHBOARD_SECTIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m오후 3:03:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m오후 3:05:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/UnifiedFeedPanel.tsx[22m
+[2m오후 3:05:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 3:06:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/career/TransferNegotiationModal.tsx[22m
+[2m오후 3:09:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:10:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:11:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:12:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/attributes.css[22m
+[2m오후 3:14:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:14:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m
+[2m오후 3:15:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/TeamDetailModal.tsx[22m
+[2m오후 3:15:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/global.css[22m

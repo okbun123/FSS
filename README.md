@@ -16,6 +16,12 @@ npm run build
 npm run test
 ```
 
+Manual browser check for the fixed-screen app shell:
+
+- At 1366x768, the app should fit inside the viewport.
+- At 1440x900, the app should fit inside the viewport.
+- The document body should not scroll; only fixed-height panels may scroll internally.
+
 ## GitHub Pages Deployment
 
 This repository is configured for GitHub Pages at:

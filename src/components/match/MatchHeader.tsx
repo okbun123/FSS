@@ -23,33 +23,47 @@ export function MatchHeader({
   matchDate,
   onOpenTeam,
 }: MatchHeaderProps) {
+  const phaseLabel = getMatchPhaseLabel(match.state.phase);
+
   return (
-    <section className="match-header">
-      <div className="match-meta">
-        <span>{competitionName}</span>
+    <section className="match-header" aria-label="경기 스코어보드">
+      <div className="match-broadcast-meta">
+        <strong>{competitionName}</strong>
         <span>{matchDate}</span>
-        <span>{getMatchPhaseLabel(match.state.phase)}</span>
       </div>
-      <div className="match-scoreboard" aria-label={`${homeName} ${match.state.homeGoals}, ${awayName} ${match.state.awayGoals}`}>
-        <div className="match-team-name">
+
+      <div className="match-team-name match-team-home">
+        <span>홈</span>
+        <strong>
           <TeamNameLink clubId={homeClubId} onOpenTeam={onOpenTeam}>
             {homeName}
           </TeamNameLink>
-        </div>
-        <div className="match-score">
-          <strong>{match.state.homeGoals}</strong>
-          <span>-</span>
-          <strong>{match.state.awayGoals}</strong>
-        </div>
-        <div className="match-team-name">
+        </strong>
+      </div>
+
+      <div
+        className="match-score"
+        aria-label={`${homeName} ${match.state.homeGoals}, ${awayName} ${match.state.awayGoals}, ${match.state.minute}분, ${phaseLabel}`}
+      >
+        <span className="match-minute">{match.state.minute}'</span>
+        <strong>{match.state.homeGoals}</strong>
+        <span>-</span>
+        <strong>{match.state.awayGoals}</strong>
+        <span className="match-phase">{phaseLabel}</span>
+      </div>
+
+      <div className="match-team-name match-team-away">
+        <span>원정</span>
+        <strong>
           <TeamNameLink clubId={awayClubId} onOpenTeam={onOpenTeam}>
             {awayName}
           </TeamNameLink>
-        </div>
+        </strong>
       </div>
-      <div className="match-clock">
-        <span>{match.state.minute}분</span>
-        <span>{match.state.isPaused ? "일시 정지" : "진행 가능"}</span>
+
+      <div className="match-broadcast-state">
+        <strong>{match.state.isPaused ? "일시정지" : "진행"}</strong>
+        <span>{phaseLabel}</span>
       </div>
     </section>
   );

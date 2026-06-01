@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { K1_LEAGUE_ID, K2_LEAGUE_ID, STARTER_CLUBS } from "../data/fictionalLeagues";
+import {
+  K1_LEAGUE_ID,
+  K2_LEAGUE_ID,
+  K3_LEAGUE_ID,
+  K4_LEAGUE_ID,
+  STARTER_CLUBS,
+} from "../data/fictionalLeagues";
 import {
   CAREER_DASHBOARD_TABS,
+  CAREER_DASHBOARD_SECTIONS,
+  CLUB_DASHBOARD_SECTIONS,
+  LEAGUE_DASHBOARD_SECTIONS,
   getCareerRecentResultRows,
   getClubFixtureRows,
   getLeagueStandingsRows,
@@ -61,6 +70,12 @@ describe("career dashboard UI contract", () => {
     ]);
   });
 
+  it("splits dense dashboard tabs into fixed subtab contracts", () => {
+    expect(CLUB_DASHBOARD_SECTIONS.map((tab) => tab.id)).toEqual(["overview", "schedule", "squad"]);
+    expect(CAREER_DASHBOARD_SECTIONS.map((tab) => tab.id)).toEqual(["season", "logs", "history"]);
+    expect(LEAGUE_DASHBOARD_SECTIONS.map((tab) => tab.id)).toEqual(["standings", "fixtures", "rules", "cups"]);
+  });
+
   it("supports create, weekly progress, save, and load state for the tabbed page", () => {
     const storage = new MemoryStorage();
     const career = createCareer();
@@ -116,5 +131,16 @@ describe("career dashboard UI contract", () => {
     expect(k1Rows.length).toBeGreaterThan(0);
     expect(k2Rows.length).toBeGreaterThan(0);
     expect(k1Rows.map((row) => row[1])).not.toEqual(k2Rows.map((row) => row[1]));
+  });
+
+  it("exposes standings for every playable division in the league browser helpers", () => {
+    const career = createCareer();
+
+    for (const leagueId of [K1_LEAGUE_ID, K2_LEAGUE_ID, K3_LEAGUE_ID, K4_LEAGUE_ID] as const) {
+      const rows = getLeagueStandingsRows(career, leagueId);
+
+      expect(rows.length).toBe(career.leagues[leagueId].clubs.length);
+      expect(rows[0]).toHaveLength(9);
+    }
   });
 });

@@ -395,6 +395,80 @@ export function createPromotionRelegationTie(input: {
   };
 }
 
+export function createSingleLegPromotionRelegationTie(input: {
+  seasonNumber: number;
+  leagueId: LeagueTier;
+  higherDivisionClubId: string;
+  lowerDivisionClubId: string;
+  hostClubId: string;
+  fixtures: readonly Fixture[];
+  ruleId: string;
+  name: string;
+  existingBracket?: PlayoffBracket;
+}): { fixtures: Fixture[]; bracket: PlayoffBracket } {
+  const competitionId = getPromotionRelegationCompetitionId(input.seasonNumber);
+  const bracketId = input.existingBracket?.id ?? `promotion-relegation-s${input.seasonNumber}`;
+  const sanitizedRuleId = input.ruleId.replace(/[^a-zA-Z0-9-]/g, "-");
+  const roundId = `${bracketId}-${sanitizedRuleId}`;
+  const tieId = `${roundId}-1`;
+  const baseRound = Math.max(1, ...input.fixtures.map((fixture) => fixture.round)) + 1;
+  const baseDate = getNextPlayoffDate(input.fixtures);
+  const awayClubId =
+    input.hostClubId === input.higherDivisionClubId
+      ? input.lowerDivisionClubId
+      : input.higherDivisionClubId;
+  const fixture = createSingleLegFixture({
+    seasonNumber: input.seasonNumber,
+    leagueId: input.leagueId,
+    competitionId,
+    baseRound,
+    baseDate,
+    bracketId,
+    roundId,
+    tieId,
+    stage: "promotionRelegationPlayoff",
+    homeClubId: input.hostClubId,
+    awayClubId,
+    higherSeedClubId: input.higherDivisionClubId,
+  });
+  const tie = createTie({
+    id: tieId,
+    roundId,
+    name: input.name,
+    stage: "promotionRelegationPlayoff",
+    fixtureIds: [fixture.id],
+    clubIds: [input.higherDivisionClubId, input.lowerDivisionClubId],
+    tieFormat: "singleLeg",
+    higherSeedClubId: input.higherDivisionClubId,
+  });
+
+  return {
+    fixtures: [fixture],
+    bracket: {
+      ...(input.existingBracket ?? createBracket({
+        id: bracketId,
+        competitionId,
+        seasonNumber: input.seasonNumber,
+        name: "승강 플레이오프",
+        entrantClubIds: [input.higherDivisionClubId, input.lowerDivisionClubId],
+        roundId,
+        roundName: input.name,
+        ties: [],
+      })),
+      rounds: [
+        ...(input.existingBracket?.rounds ?? []),
+        {
+          id: roundId,
+          name: input.name,
+          fixtureIds: [fixture.id],
+          status: "scheduled",
+        },
+      ],
+      ties: [...(input.existingBracket?.ties ?? []), tie],
+    },
+  };
+}
+
 export function resolveSingleLegPlayoffFixture(fixture: Fixture): PlayoffTieResolution | undefined {
   if (!fixture.result || !fixture.playoff) {
     return undefined;
@@ -416,7 +490,11 @@ export function resolveSingleLegPlayoffFixture(fixture: Fixture): PlayoffTieReso
     tieId: fixture.playoff.tieId,
     winnerClubId,
     loserClubId: winnerClubId === fixture.homeClubId ? fixture.awayClubId : fixture.homeClubId,
-    decidedBy: homeWon || awayWon ? fixture.result.decidedBy ?? "normalTime" : "higherSeed",
+    decidedBy: homeWon || awayWon
+      ? fixture.result.decidedBy ?? "normalTime"
+      : fixture.result.winnerClubId
+        ? fixture.result.decidedBy ?? "penalties"
+        : "higherSeed",
   };
 }
 
